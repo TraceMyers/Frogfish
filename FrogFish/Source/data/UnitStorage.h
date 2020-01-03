@@ -2,7 +2,11 @@
 #define UNIT_STORAGE
 
 #include "EnemyUnit.h"
-#include <list>
+#include "FrogUnit.h"
+#include "../utility/storage/EUArray.h"
+#include "../utility/storage/FUArray.h"
+#include "../utility/storage/IDArray.h"
+#include "../utility/storage/UnitBuff.h"
 #include <map>
 #include <BWAPI.h>
 #include <iostream>
@@ -10,319 +14,194 @@
 using namespace BWAPI;
 using namespace Filter;
 
-// TODO: need an enemy list for type Unknown
-
 class UnitStorage {
 
 private:
 
-    enum STORECODE {NEW_UNIT, CHANGED_TYPE, NO_CHANGE};
+    UnitBuff store_buff;
+    UnitBuff remove_buff;
 
-    std::list<BWAPI::Unit> store_buffer;
-    std::list<int> store_buffer_IDs;
-    std::list<BWAPI::Unit> remove_buffer;
-    std::list<int> remove_buffer_IDs;
+    std::map<int, FUnit> self_ID_2_funit;
+    std::map<int, EUnit> enemy_ID_2_eunit;
 
-    std::list<BWAPI::Unit> self_eggs;
-    std::list<BWAPI::Unit> self_larva;
-    std::list<BWAPI::Unit> self_workers;
-    std::list<BWAPI::Unit> self_army;
-    std::list<BWAPI::Unit> self_structures;
-    std::map<int, std::list<BWAPI::Unit> *> self_ID_to_list;
-    std::list<EnemyUnit> enemy_workers;
-    std::list<EnemyUnit> enemy_army;
-    std::list<EnemyUnit> enemy_structures;
-    std::list<EnemyUnit> *enemy_lists[3] {&enemy_workers, &enemy_army, &enemy_structures};
-    std::map<int, std::list<EnemyUnit> *> enemy_ID_to_list;   
-
-    std::list<BWAPI::Unit> self_newly_stored;
-    std::list<BWAPI::Unit> self_newly_moved;
-    std::list<BWAPI::Unit> self_newly_removed;
-    std::list<EnemyUnit> enemy_newly_stored;
-    std::list<EnemyUnit> enemy_newly_moved;
-    std::list<EnemyUnit> enemy_newly_removed;
+    FUArray self_newly_stored;
+    FUArray self_newly_removed;
+    FUArray self_newly_changed_type;
+    EUArray enemy_newly_stored;
+    EUArray enemy_newly_removed;
+    EUArray enemy_newly_changed_type;
 
     void self_store(const BWAPI::Unit u) {
-        const int u_id = u->getID();    
-        STORECODE store_code = NO_CHANGE;
-        bool id_already_stored = self_ID_to_list[u_id] != NULL;
+        FUnit f_unit;
+        int ID = u->getID();
 
-        if (id_already_stored) {
-            std::list<BWAPI::Unit> u_list = *(self_ID_to_list[u_id]);
-            u_list.remove(u);
-            self_newly_moved.push_back(u);
-            store_code = CHANGED_TYPE;
-        }
-        else {
-            store_code = NEW_UNIT;
-        }
-
-        BWAPI::UnitType u_type = u->getType();
-        switch(store_code){
-            case NEW_UNIT:
-                self_newly_stored.push_back(u);
-            case CHANGED_TYPE:
-                if (u_type.isBuilding()) {
-                    self_structures.push_back(u);
-                    self_ID_to_list[u_id] = &self_structures;
-                }
-                else if (u_type.isWorker()) {
-                    self_workers.push_back(u);
-                    self_ID_to_list[u_id] = &self_workers;
-                }
-                else if (u_type.canAttack() || u_type.isSpellcaster() || u_type.isFlyer()) {
-                    self_army.push_back(u);
-                    self_ID_to_list[u_id] = &self_army;
-                }
-                else if (u->isMorphing()) {
-                    self_eggs.push_back(u);
-                    self_ID_to_list[u_id] = &self_eggs;
-                }
-                else {
-                    self_larva.push_back(u);
-                    self_ID_to_list[u_id] = &self_larva;
-                }
+        if ((f_unit = self_ID_2_funit[ID]) == NULL) {
+            f_unit = new FrogUnit(u);
+            self_ID_2_funit[ID] = f_unit;
+            self_newly_stored.add(f_unit);
         }
     }
 
     void enemy_store(const BWAPI::Unit u) {
-        EnemyUnit *enemy_unit_ptr;
-        BWAPI::UnitType u_type = u->getType();
-        STORECODE store_code = NO_CHANGE;
-        const int u_id = u->getID();
-        bool id_already_stored = enemy_ID_to_list[u_id] != NULL;
+        EUnit e_unit;
+        int ID = u->getID();
 
-		if (id_already_stored) {
-			std::list<EnemyUnit>::iterator e_unit_it;
-			std::list<EnemyUnit>& enemy_unit_list = *(enemy_ID_to_list[u_id]);
-			for (
-				e_unit_it = enemy_unit_list.begin();
-				e_unit_it != enemy_unit_list.end();
-				++e_unit_it
-				) {
-				EnemyUnit& stored_unit = *e_unit_it;
-				if (stored_unit.getID() == u_id) {
-					if (u_type != stored_unit.getType()) {
-						store_code = CHANGED_TYPE;
-						enemy_unit_ptr = &stored_unit;
-						enemy_unit_list.remove(stored_unit);
-						enemy_newly_moved.push_back(stored_unit);
-						//stored_unit.update();
-					}
-					break;
-				}
-			}
-		}
-		else {
-			printf("new enemy unit: %s\n", u_type.getName().c_str());
-			enemy_unit_ptr = new EnemyUnit(u);
-			store_code = NEW_UNIT;
-		}
-		switch (store_code) {
-		case NEW_UNIT:
-			enemy_newly_stored.push_back(*enemy_unit_ptr);
-		case CHANGED_TYPE:
-			if (u_type.isBuilding() || u_type.isAddon()) {
-				enemy_structures.push_back(*enemy_unit_ptr);
-				enemy_ID_to_list[u_id] = &enemy_structures;
-			}
-			else if (u_type.isWorker()) {
-				enemy_workers.push_back(*enemy_unit_ptr);
-				enemy_ID_to_list[u_id] = &enemy_workers;
-			}
-			else {
-				enemy_army.push_back(*enemy_unit_ptr);
-				enemy_ID_to_list[u_id] = &enemy_army;
-			}
-		}
-	
+        if ((e_unit = enemy_ID_2_eunit[ID]) == NULL) {
+            e_unit = new EnemyUnit(u);
+            enemy_ID_2_eunit[ID] = e_unit;
+            enemy_newly_stored.add(e_unit);
+        }
     }
 
     void self_remove(const BWAPI::Unit u) {
-        register std::map<int, std::list<BWAPI::Unit> *>::iterator id_it;
-        bool unit_in_storage = false;
-        int u_id = u->getID();
+        FUnit f_unit;
+        int ID = u->getID();
 
-        for (id_it = self_ID_to_list.begin(); id_it != self_ID_to_list.end(); ++id_it) {
-            if (u_id == id_it->first) {
-                unit_in_storage = true;
-                break;
-            }            
-        }
-        if (unit_in_storage) {
-            (*(self_ID_to_list[u_id])).remove(u);
-            self_ID_to_list.erase(u_id);
-            self_newly_removed.push_back(u);
+        if ((f_unit = self_ID_2_funit[ID]) != NULL) {
+            printf("removing self unit %s\n", f_unit->get_name().c_str());
+            self_ID_2_funit.erase(ID);
+            self_newly_removed.add(f_unit);
         }
     }
 
     void enemy_remove(const BWAPI::Unit u) {
-        register std::map<int, std::list<EnemyUnit> *>::iterator id_it;
-        bool unit_in_storage = false;
-        int u_id = u->getID();
+        EUnit e_unit;
+        int ID = u->getID();
 
-        for (id_it = enemy_ID_to_list.begin(); id_it != enemy_ID_to_list.end(); ++id_it) {
-            if (u_id == id_it->first) {
-                unit_in_storage = true;
-                break;
-            }            
-        }
-        if (unit_in_storage) {
-            register std::list<EnemyUnit>::iterator e_unit_it;
-            register EnemyUnit *stored_eu_ptr;
-            std::list<EnemyUnit> enemy_unit_list = *(enemy_ID_to_list[u_id]);
-            for (
-                e_unit_it = enemy_unit_list.begin(); 
-                e_unit_it != enemy_unit_list.end();
-                ++e_unit_it
-            ) {
-                stored_eu_ptr = &(*e_unit_it);
-                if ((*stored_eu_ptr).getID() == u_id) {
-                    (*(enemy_ID_to_list[u_id])).remove(*stored_eu_ptr);
-                    enemy_ID_to_list.erase(u_id);
-                    enemy_newly_removed.push_back(*stored_eu_ptr);
-                    break;
-                }
-            }
+        if ((e_unit = enemy_ID_2_eunit[ID]) != NULL) {
+            printf("removing enemy unit %s\n", e_unit->get_name().c_str());
+            enemy_ID_2_eunit.erase(ID);
+            enemy_newly_removed.add(e_unit);
         }
     }
 
 public:
 
     void queue_store(const BWAPI::Unit u) {
-        register std::list<int>::iterator id_it;
-        const int u_id = u->getID();
-        bool already_buffered = false;
-
-        for (id_it = store_buffer_IDs.begin(); id_it != store_buffer_IDs.end(); ++id_it) {
-            if (*id_it == u_id) {
-                already_buffered = true;
-                break;
-            }
-        }
-        if (!already_buffered) {
-            store_buffer.push_back(u);
-            store_buffer_IDs.push_back(u_id);
+        if (!store_buff.has(u)) {
+            store_buff.add(u);
         }
     }
 
     void queue_remove(const BWAPI::Unit u) {
-        register std::list<int>::iterator id_it;
-        const int u_id = u->getID();
-        bool already_buffered = false;
-
-        for (id_it = remove_buffer_IDs.begin(); id_it != remove_buffer_IDs.end(); ++id_it) {
-            if (*id_it == u_id) {
-                already_buffered = true;
-                break;
-            }
-        }
-        if (!already_buffered) {
-            remove_buffer.push_back(u);
-            remove_buffer_IDs.push_back(u_id);
+        if (!remove_buff.has(u)) {
+            remove_buff.add(u);
         }
     }
 
     void store_queued() {
-        if (store_buffer.size() > 0) {
-            register std::list<BWAPI::Unit>::iterator unit_it;
-
-            for (unit_it = store_buffer.begin(); unit_it != store_buffer.end(); ++unit_it) {
-                const BWAPI::Unit u = *unit_it;
-				if (u->isDetected()) {
-					const BWAPI::Player owner = u->getPlayer();
-					if (owner == Broodwar->self()) {
-						self_store(u);
-					}
-					else if (owner == Broodwar->enemy()) {
-						enemy_store(u);
-					}
-                }
+        register BWAPI::Unit u;
+        for (register int i = 0; i < store_buff.length(); i++) {
+            u = store_buff[i];
+            if (u->getPlayer() == Broodwar->self()) {
+                self_store(u);
             }
-            store_buffer.clear();
-            store_buffer_IDs.clear();
+            else if (u->getPlayer() == Broodwar->enemy()) {
+                enemy_store(u);
+            }
         }
     }
 
     void remove_queued() {
-        if (remove_buffer.size() > 0) {
-            register std::list<BWAPI::Unit>::iterator unit_it;
-
-            for (unit_it = remove_buffer.begin(); unit_it != remove_buffer.end(); ++unit_it) {
-                const BWAPI::Unit u = *unit_it;
-                const BWAPI::Player owner = u->getPlayer();
-                if (owner == Broodwar->self()) {
-                    self_remove(u);
-                }
-                else if (owner == Broodwar->enemy()) {
-                    enemy_remove(u);
-                }
+        register BWAPI::Unit u;
+        for (register int i = 0; i < remove_buff.length(); i++) {
+            u = remove_buff[i];
+            if (u->getPlayer() == Broodwar->self()) {
+                self_remove(u);
             }
-            remove_buffer.clear();
-            remove_buffer_IDs.clear();
+            else if (u->getPlayer() == Broodwar->enemy()) {
+                enemy_remove(u);
+            }
         }
     }
 
     void clear_newly_assigned() {
         self_newly_stored.clear();
+        for (register int i = 0; i < self_newly_removed.length(); i++) {
+            delete self_newly_removed[i];
+        }
         self_newly_removed.clear();
-        self_newly_moved.clear();
+        self_newly_changed_type.clear();
+
         enemy_newly_stored.clear();
-        register std::list<EnemyUnit>::iterator e_unit_it;
-        for (
-            e_unit_it = enemy_newly_removed.begin();
-            e_unit_it != enemy_newly_removed.end();
-            ++e_unit_it
-        ) {
-            delete &(*e_unit_it);
+        for (register int i = 0; i < enemy_newly_removed.length(); i++) {
+            delete enemy_newly_removed[i];
         }
         enemy_newly_removed.clear();
-        enemy_newly_moved.clear();
+        enemy_newly_changed_type.clear();
     }
 
-    void update_enemy_units() {
-        register std::list<EnemyUnit>::iterator unit_it;
-        for (int i = 0; i < 3; i++) {
-            std::list<EnemyUnit> e_list = (*(enemy_lists[i]));
-            printf("%d size: %lu\n", i, e_list.size());
-            for (unit_it = e_list.begin(); unit_it != e_list.end(); ++unit_it) {
-                EnemyUnit enemy_unit = *unit_it;
-                BWAPI::Unit bw_unit = enemy_unit.getUnitPtr();
-                BWAPI::UnitType u_type = bw_unit->getType();
-                //printf("checking unit of type %s\n", u_type.getName().c_str());
-                if (bw_unit->isVisible() && bw_unit->exists()) {
-                    printf("visible unit: %s\n", enemy_unit.getType().getName().c_str());
-                    //enemy_unit.update();
-                }
+    void update_self_units() {
+        register std::map<int, FUnit>::iterator fu_it;
+        register FUnit f_unit;
+        for (fu_it = self_ID_2_funit.begin(); fu_it != self_ID_2_funit.end(); ++fu_it) {
+            f_unit = fu_it->second;
+            if (f_unit->get_type() != f_unit->bwapi_u()->getType()) {
+                f_unit->update();
+                self_newly_changed_type.add(f_unit);
             }
         }
     }
 
-    std::list<BWAPI::Unit>& get_self_newly_stored() {return self_newly_stored;}
+    void update_enemy_units() {
+        register std::map<int, EUnit>::iterator eu_it;
+        register EUnit e_unit;
+        register BWAPI::Unit u;
+        for (eu_it = enemy_ID_2_eunit.begin(); eu_it != enemy_ID_2_eunit.end(); ++eu_it) {
+            e_unit = eu_it->second;
+            u = e_unit->bwapi_u();
+            if (u->isVisible()) {
+                if (e_unit->get_type() != u->getType()) {
+                    enemy_newly_changed_type.add(e_unit);
+                }
+                e_unit->update();
+            }
+        }
+    }
 
-    std::list<BWAPI::Unit>& get_self_newly_removed() {return self_newly_removed;}
+    const std::map<int, FUnit> &self_units() {
+        return self_ID_2_funit;
+    }
 
-    std::list<EnemyUnit>& get_enemy_newly_stored() {return enemy_newly_stored;}
+    const std::map<int, EUnit> &enemy_units() {
+        return enemy_ID_2_eunit;
+    }
 
-    std::list<EnemyUnit>& get_enemy_newly_removed() {return enemy_newly_removed;}
+    FUArray get_self_newly_stored() {return self_newly_stored;}
 
-    std::list<BWAPI::Unit>& get_self_eggs() {return self_eggs;}
+    FUArray get_self_newly_removed() {return self_newly_removed;}
 
-    std::list<BWAPI::Unit>& get_self_larva() {return self_larva;}
+    FUArray get_self_newly_changed_type() {return self_newly_changed_type;}
 
-    std::list<BWAPI::Unit>& get_self_workers() {return self_workers;}
+    EUArray get_enemy_newly_stored() {return enemy_newly_stored;}
 
-    std::list<BWAPI::Unit>& get_self_army() {return self_army;}
+    EUArray get_enemy_newly_removed() {return enemy_newly_removed;}
 
-    std::list<BWAPI::Unit>& get_self_structures() {return self_structures;}
+    EUArray get_enemy_newly_changed_type() {return enemy_newly_changed_type;}
 
-    std::list<EnemyUnit>& get_enemy_workers() {return enemy_workers;}
-
-    std::list<EnemyUnit>& get_enemy_army() {return enemy_army;}
-
-    std::list<EnemyUnit>& get_enemy_structures() {return enemy_structures;}
-
-    bool self_unit_is_army(int ID) {return true;}
+    void free_data() {
+        // only for use at end of program;
+        register std::map<int, FUnit>::iterator fu_it;
+        register FUnit f_unit;
+        for (fu_it = self_ID_2_funit.begin(); fu_it != self_ID_2_funit.end(); ++fu_it) {
+            f_unit = fu_it->second;
+            delete f_unit;
+        }
+        register std::map<int, EUnit>::iterator eu_it;
+        register EUnit e_unit;
+        for (eu_it = enemy_ID_2_eunit.begin(); eu_it != enemy_ID_2_eunit.end(); ++eu_it) {
+            e_unit = eu_it->second;
+            delete e_unit;
+        }
+        store_buff.free_data();
+        remove_buff.free_data();
+        self_newly_stored.free_data();
+        self_newly_removed.free_data();
+        self_newly_changed_type.free_data();
+        enemy_newly_stored.free_data();
+        enemy_newly_removed.free_data();
+        enemy_newly_changed_type.free_data();
+    }
 };
 
 #endif

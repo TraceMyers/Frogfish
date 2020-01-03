@@ -7,8 +7,6 @@ using namespace BWAPI;
 using namespace Filter;
 
 class EnemyUnit {
-// Wraps the BWAPI::Unit class in order to keep track of
-// enemy unit data when those units aren't seen. 
 
 private:
 
@@ -25,6 +23,15 @@ private:
     std::string name;
 
 public:
+
+    enum ETYPE {
+        WORKER,
+        ARMY,
+        STRUCT,
+        UNKNOWN
+    };
+
+    ETYPE e_type;
 
     EnemyUnit(const BWAPI::Unit u) {
         bwapi_unit = u;
@@ -43,31 +50,56 @@ public:
         type = bwapi_unit->getType();
         max_hp = type.maxHitPoints();
         name = type.getName();
+
+        if (type == BWAPI::UnitTypes::Unknown) {
+            e_type = UNKNOWN;
+        }
+        else if (type.isBuilding() || type.isAddon()) {
+            e_type = STRUCT;
+        }
+        else if (type.isWorker()) {
+            e_type = WORKER;
+        }
+        else {
+            e_type = ARMY;
+        }
     }
 
-    const BWAPI::Unit getUnitPtr() {return bwapi_unit;}
+    const BWAPI::Unit bwapi_u() {return bwapi_unit;}
 
-    int getID() {return ID;}
+    int get_ID() {return ID;}
 
-    int getInitialHitPoints() {return max_hp;}
+    int get_max_hp() {return max_hp;}
 
-    int getHitPoints() {return hp;}
+    int get_hp() {return hp;}
 
-    int getShields() {return shields;}
+    int get_shields() {return shields;}
 
-    int getEnergy() {return energy;}
+    int get_energy() {return energy;}
 
-    const BWAPI::Position& getPosition() {return pos;}
+    const BWAPI::Position get_pos() {return pos;}
 
-    const BWAPI::TilePosition& getTilePosition() {return tilepos;}
+    const BWAPI::TilePosition get_tilepos() {return tilepos;}
 
-    const std::vector<double>& getVelocity() {return velocity;}
+    const std::vector<double>& get_velocity() {return velocity;}
 
-    const BWAPI::UnitType& getType() {return type;}
+    const BWAPI::UnitType get_type() {return type;}
+
+    const std::string& get_name() {return name;}
+
+    bool is_unknown() {return e_type == UNKNOWN;}
+
+    bool is_struct() {return e_type == STRUCT;}
+
+    bool is_worker() {return e_type == WORKER;}
+
+    bool is_army() {return e_type == ARMY;}
 
     bool friend operator == (EnemyUnit const &e_unit1, EnemyUnit const &e_unit2) {
         return e_unit1.ID == e_unit2.ID;
     }
 };
+
+typedef class EnemyUnit *EUnit;
 
 #endif

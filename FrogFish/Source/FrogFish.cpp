@@ -37,16 +37,17 @@ void FrogFish::onStart() {
 void FrogFish::onFrame() {
     unit_storage.store_queued();
     unit_storage.remove_queued();
+    unit_storage.update_self_units();
+    unit_storage.update_enemy_units();
 
     draw_units(unit_storage);
 
     timer.on_frame_update();
     if (timer.is_stopped()) {
-        unit_storage.update_enemy_units();
         timer.restart();
     }
     
-    //print_debug_text();
+    // print_debug_text();
     unit_storage.clear_newly_assigned();
 }
 
@@ -121,4 +122,5 @@ void FrogFish::onUnitComplete(BWAPI::Unit unit) {
 
 void FrogFish::onEnd(bool isWinner) {
     FreeConsole();
+    unit_storage.free_data();
 }
