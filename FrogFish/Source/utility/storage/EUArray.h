@@ -1,5 +1,4 @@
-#ifndef EU_ARRAY
-#define EU_ARRAY
+#pragma once
 
 #include "../data/EnemyUnit.h"
 #include <string.h>
@@ -55,7 +54,7 @@ public:
         return len;
     }
 
-    EUnit operator [](int i) {
+    const EUnit operator [](int i) {
         return array[i];
     }
 
@@ -74,5 +73,3 @@ public:
         delete array;
     }
 };
-
-#endif

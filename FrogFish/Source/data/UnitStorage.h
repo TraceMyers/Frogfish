@@ -1,5 +1,4 @@
-#ifndef UNIT_STORAGE
-#define UNIT_STORAGE
+#pragma once
 
 #include "EnemyUnit.h"
 #include "FrogUnit.h"
@@ -12,7 +11,6 @@
 #include <iostream>
 
 using namespace BWAPI;
-using namespace Filter;
 
 class UnitStorage {
 
@@ -31,7 +29,7 @@ private:
     EUArray enemy_newly_removed;
     EUArray enemy_newly_changed_type;
 
-    void self_store(const BWAPI::Unit u) {
+    void self_store(const Unit u) {
         FUnit f_unit;
         int ID = u->getID();
 
@@ -42,7 +40,7 @@ private:
         }
     }
 
-    void enemy_store(const BWAPI::Unit u) {
+    void enemy_store(const Unit u) {
         EUnit e_unit;
         int ID = u->getID();
 
@@ -53,7 +51,7 @@ private:
         }
     }
 
-    void self_remove(const BWAPI::Unit u) {
+    void self_remove(const Unit u) {
         FUnit f_unit;
         int ID = u->getID();
 
@@ -64,7 +62,7 @@ private:
         }
     }
 
-    void enemy_remove(const BWAPI::Unit u) {
+    void enemy_remove(const Unit u) {
         EUnit e_unit;
         int ID = u->getID();
 
@@ -77,20 +75,20 @@ private:
 
 public:
 
-    void queue_store(const BWAPI::Unit u) {
+    void queue_store(const Unit u) {
         if (!store_buff.has(u)) {
             store_buff.add(u);
         }
     }
 
-    void queue_remove(const BWAPI::Unit u) {
+    void queue_remove(const Unit u) {
         if (!remove_buff.has(u)) {
             remove_buff.add(u);
         }
     }
 
     void store_queued() {
-        register BWAPI::Unit u;
+        register Unit u;
         for (register int i = 0; i < store_buff.length(); i++) {
             u = store_buff[i];
             if (u->getPlayer() == Broodwar->self()) {
@@ -103,7 +101,7 @@ public:
     }
 
     void remove_queued() {
-        register BWAPI::Unit u;
+        register Unit u;
         for (register int i = 0; i < remove_buff.length(); i++) {
             u = remove_buff[i];
             if (u->getPlayer() == Broodwar->self()) {
@@ -146,7 +144,7 @@ public:
     void update_enemy_units() {
         register std::map<int, EUnit>::iterator eu_it;
         register EUnit e_unit;
-        register BWAPI::Unit u;
+        register Unit u;
         for (eu_it = enemy_ID_2_eunit.begin(); eu_it != enemy_ID_2_eunit.end(); ++eu_it) {
             e_unit = eu_it->second;
             u = e_unit->bwapi_u();
@@ -180,7 +178,7 @@ public:
     EUArray get_enemy_newly_changed_type() {return enemy_newly_changed_type;}
 
     void free_data() {
-        // only for use at end of program;
+        // called only by FrogFish::onEnd()
         register std::map<int, FUnit>::iterator fu_it;
         register FUnit f_unit;
         for (fu_it = self_ID_2_funit.begin(); fu_it != self_ID_2_funit.end(); ++fu_it) {
@@ -203,5 +201,3 @@ public:
         enemy_newly_changed_type.free_data();
     }
 };
-
-#endif

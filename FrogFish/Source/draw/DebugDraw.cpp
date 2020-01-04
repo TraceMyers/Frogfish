@@ -9,7 +9,6 @@
 #include <list>
 
 using namespace BWAPI;
-using namespace Filter;
 
 std::list<std::string *> out_buff;
 
@@ -37,7 +36,7 @@ void draw_units(UnitStorage &unit_storage) {
     register std::map<int, FUnit>::const_iterator self_it;
     register FUnit f_unit;
     FrogUnit::FTYPE f_type;
-    BWAPI::Position pos;
+    Position pos;
 
     for (self_it = self_units.begin(); self_it != self_units.end(); ++self_it) {
         f_unit = self_it->second;

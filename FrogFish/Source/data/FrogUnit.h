@@ -1,17 +1,15 @@
-#ifndef FROG_UNIT
-#define FROG_UNIT
+#pragma once
 
 #include <BWAPI.h>
 
 using namespace BWAPI;
-using namespace Filter;
 
 class FrogUnit {
 
 private:
 
-    BWAPI::Unit bwapi_unit;
-    BWAPI::UnitType type;
+    Unit bwapi_unit;
+    UnitType type;
     std::vector<double> velocity {0.0, 0.0};
 
 public:
@@ -26,7 +24,7 @@ public:
 
     FTYPE f_type;
 
-    FrogUnit(const BWAPI::Unit u) {
+    FrogUnit(const Unit u) {
         bwapi_unit = u;
         update();
     }
@@ -55,7 +53,7 @@ public:
         }
     }
 
-    const BWAPI::Unit bwapi_u() {return bwapi_unit;}
+    const Unit bwapi_u() {return bwapi_unit;}
 
     int get_ID() {return bwapi_unit->getID();}
 
@@ -65,9 +63,9 @@ public:
 
     int get_energy() {return bwapi_unit->getEnergy();}
 
-    const BWAPI::Position get_pos() {return bwapi_unit->getPosition();}
+    const Position get_pos() {return bwapi_unit->getPosition();}
 
-    const BWAPI::TilePosition get_tilepos() {return bwapi_unit->getTilePosition();}
+    const TilePosition get_tilepos() {return bwapi_unit->getTilePosition();}
 
     const std::vector<double>& get_velocity() {
         velocity[0] = bwapi_unit->getVelocityX();
@@ -75,7 +73,7 @@ public:
         return velocity;
     }
 
-    const BWAPI::UnitType get_type() {return type;}
+    const UnitType get_type() {return type;}
 
     const std::string& get_name() {return type.getName();}
 
@@ -91,5 +89,3 @@ public:
 };
 
 typedef class FrogUnit *FUnit;
-
-#endif

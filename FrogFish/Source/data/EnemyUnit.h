@@ -1,25 +1,23 @@
-#ifndef ENEMY_UNIT
-#define ENEMY_UNIT
+#pragma once
 
 #include <BWAPI.h>
 
 using namespace BWAPI;
-using namespace Filter;
 
 class EnemyUnit {
 
 private:
 
-    BWAPI::Unit bwapi_unit;
+    Unit bwapi_unit;
     int ID;
     int max_hp;
     int hp;
     int shields;
     int energy;
-    BWAPI::Position pos;
-    BWAPI::TilePosition tilepos;
+    Position pos;
+    TilePosition tilepos;
     std::vector<double> velocity {0.0, 0.0};
-    BWAPI::UnitType type;
+    UnitType type;
     std::string name;
 
 public:
@@ -33,7 +31,7 @@ public:
 
     ETYPE e_type;
 
-    EnemyUnit(const BWAPI::Unit u) {
+    EnemyUnit(const Unit u) {
         bwapi_unit = u;
         ID = u->getID();
         update();
@@ -51,7 +49,7 @@ public:
         max_hp = type.maxHitPoints();
         name = type.getName();
 
-        if (type == BWAPI::UnitTypes::Unknown) {
+        if (type == UnitTypes::Unknown) {
             e_type = UNKNOWN;
         }
         else if (type.isBuilding() || type.isAddon()) {
@@ -65,7 +63,7 @@ public:
         }
     }
 
-    const BWAPI::Unit bwapi_u() {return bwapi_unit;}
+    const Unit bwapi_u() {return bwapi_unit;}
 
     int get_ID() {return ID;}
 
@@ -77,13 +75,13 @@ public:
 
     int get_energy() {return energy;}
 
-    const BWAPI::Position get_pos() {return pos;}
+    const Position get_pos() {return pos;}
 
-    const BWAPI::TilePosition get_tilepos() {return tilepos;}
+    const TilePosition get_tilepos() {return tilepos;}
 
     const std::vector<double>& get_velocity() {return velocity;}
 
-    const BWAPI::UnitType get_type() {return type;}
+    const UnitType get_type() {return type;}
 
     const std::string& get_name() {return name;}
 
@@ -101,5 +99,3 @@ public:
 };
 
 typedef class EnemyUnit *EUnit;
-
-#endif

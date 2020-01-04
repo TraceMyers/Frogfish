@@ -1,5 +1,4 @@
-#ifndef FU_ARRAY
-#define FU_ARRAY
+#pragma once
 
 #include "../data/FrogUnit.h"
 #include <string.h>
@@ -55,7 +54,7 @@ public:
         return len;
     }
 
-    FUnit operator [](int i) {
+    const FUnit operator [](int i) {
         return array[i];
     }
 
@@ -74,5 +73,3 @@ public:
         delete array;
     }
 };
-
-#endif

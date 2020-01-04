@@ -3,8 +3,10 @@ Release/
 Chaoslauncher/
 documentation/
 ExampleClients/
-MPQDraft/
 Starcraft/
 .vs/
+MPQDraft/
+shitcheck-cppcheck-build-dir
 LICENSE.txt
 README.txt
+shitcheck.cppcheck

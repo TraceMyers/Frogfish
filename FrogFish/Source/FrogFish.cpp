@@ -3,6 +3,7 @@
 #include "data/UnitStorage.h"
 #include "utility/BWTimer.h"
 #include <BWAPI.h>
+#include <BWEM/bwem.h>
 #include <iostream>
 #include <string>
 #include <set>
@@ -11,6 +12,8 @@
 
 using namespace BWAPI;
 using namespace Filter;
+
+namespace {auto & the_map = BWEM::Map::Instance();}
 
 UnitStorage unit_storage;
 BWTimer timer;
@@ -26,15 +29,29 @@ void FrogFish::onStart() {
     AllocConsole();
     freopen_s(&pFile, "CONOUT$", "w", stdout);
 
-    for (BWAPI::Unit u : Broodwar->self()->getUnits()) {
+    for (Unit u : Broodwar->self()->getUnits()) {
         if (u->getType().isWorker()) {
             u->gather(u->getClosestUnit(IsMineralField));
         }
     }
-    timer.start(5, 0, false);
+
+    try {
+        Broodwar << "Map init..." << std::endl;
+        the_map.Initialize();
+        bool starting_locs_ok = the_map.FindBasesForStartingLocations();
+        assert(starting_locs_ok);
+        printf("Base ct: %d\n", the_map.BaseCount());
+    }
+    catch (const std::exception e) {
+        Broodwar << "EXCEPTION: " << e.what() << std::endl;
+    }
 }
 
 void FrogFish::onFrame() {
+	if (Broodwar->isReplay() || Broodwar->isPaused() || !Broodwar->self()) {
+		return;
+	}
+
     unit_storage.store_queued();
     unit_storage.remove_queued();
     unit_storage.update_self_units();
@@ -55,15 +72,15 @@ void FrogFish::onSendText(std::string text) {
     Broodwar->sendText("%s", text.c_str());
 }
 
-void FrogFish::onReceiveText(BWAPI::Player player, std::string text) {
+void FrogFish::onReceiveText(Player player, std::string text) {
     Broodwar << player->getName() << " said \"" << text << "\"" << std::endl;
 }
 
-void FrogFish::onPlayerLeft(BWAPI::Player player) {
+void FrogFish::onPlayerLeft(Player player) {
     Broodwar->sendText("Goodbye %s!", player->getName().c_str());
 }
 
-void FrogFish::onNukeDetect(BWAPI::Position target) {
+void FrogFish::onNukeDetect(Position target) {
     if (target) {
         Broodwar << "Nuclear Launch Detected at " << target << std::endl;
     }
@@ -72,23 +89,23 @@ void FrogFish::onNukeDetect(BWAPI::Position target) {
     }
 }
 
-void FrogFish::onUnitDiscover(BWAPI::Unit unit) {
+void FrogFish::onUnitDiscover(Unit unit) {
     unit_storage.queue_store(unit);
 }
 
-void FrogFish::onUnitEvade(BWAPI::Unit unit) {
+void FrogFish::onUnitEvade(Unit unit) {
     // pass
 }
 
-void FrogFish::onUnitShow(BWAPI::Unit unit) {
+void FrogFish::onUnitShow(Unit unit) {
     // pass
 }
 
-void FrogFish::onUnitHide(BWAPI::Unit unit) {
+void FrogFish::onUnitHide(Unit unit) {
     // pass
 }
 
-void FrogFish::onUnitCreate(BWAPI::Unit unit) {
+void FrogFish::onUnitCreate(Unit unit) {
     /*
     if (unit->getPlayer() == Broodwar->self()) {
         // send new self unit to on-screen debug buffer
@@ -100,15 +117,15 @@ void FrogFish::onUnitCreate(BWAPI::Unit unit) {
     unit_storage.queue_store(unit);
 }
 
-void FrogFish::onUnitDestroy(BWAPI::Unit unit) {
+void FrogFish::onUnitDestroy(Unit unit) {
     unit_storage.queue_remove(unit);
 }
 
-void FrogFish::onUnitMorph(BWAPI::Unit unit) {
+void FrogFish::onUnitMorph(Unit unit) {
     unit_storage.queue_store(unit);
 }
 
-void FrogFish::onUnitRenegade(BWAPI::Unit unit) {
+void FrogFish::onUnitRenegade(Unit unit) {
     // pass
 }
 
@@ -116,7 +133,7 @@ void FrogFish::onSaveGame(std::string gameName) {
     // pass
 }
 
-void FrogFish::onUnitComplete(BWAPI::Unit unit) {
+void FrogFish::onUnitComplete(Unit unit) {
     // broadcast for structure usage
 }
 

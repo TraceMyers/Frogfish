@@ -41,6 +41,9 @@
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkIncremental>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IncludePath>$(IncludePath)</IncludePath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
@@ -87,6 +90,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <ImportLibrary>$(IntDir)$(TargetName).lib</ImportLibrary>
       <TargetMachine>MachineX86</TargetMachine>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -95,12 +99,48 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\include\BWEM\area.cpp" />
+    <ClCompile Include="..\include\BWEM\base.cpp" />
+    <ClCompile Include="..\include\BWEM\bwapiExt.cpp" />
+    <ClCompile Include="..\include\BWEM\bwem.cpp" />
+    <ClCompile Include="..\include\BWEM\cp.cpp" />
+    <ClCompile Include="..\include\BWEM\examples.cpp" />
+    <ClCompile Include="..\include\BWEM\exampleWall.cpp" />
+    <ClCompile Include="..\include\BWEM\graph.cpp" />
+    <ClCompile Include="..\include\BWEM\gridMap.cpp" />
+    <ClCompile Include="..\include\BWEM\map.cpp" />
+    <ClCompile Include="..\include\BWEM\mapDrawer.cpp" />
+    <ClCompile Include="..\include\BWEM\mapImpl.cpp" />
+    <ClCompile Include="..\include\BWEM\mapPrinter.cpp" />
+    <ClCompile Include="..\include\BWEM\neutral.cpp" />
+    <ClCompile Include="..\include\BWEM\tiles.cpp" />
+    <ClCompile Include="..\include\BWEM\utils.cpp" />
+    <ClCompile Include="..\include\BWEM\winutils.cpp" />
     <ClCompile Include="Source\Dll.cpp" />
     <ClCompile Include="Source\draw\DebugDraw.cpp" />
     <ClCompile Include="Source\FrogFish.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\include\BWEM\area.h" />
+    <ClInclude Include="..\include\BWEM\base.h" />
+    <ClInclude Include="..\include\BWEM\bwapiExt.h" />
+    <ClInclude Include="..\include\BWEM\bwem.h" />
+    <ClInclude Include="..\include\BWEM\cp.h" />
+    <ClInclude Include="..\include\BWEM\defs.h" />
+    <ClInclude Include="..\include\BWEM\examples.h" />
+    <ClInclude Include="..\include\BWEM\exampleWall.h" />
+    <ClInclude Include="..\include\BWEM\graph.h" />
+    <ClInclude Include="..\include\BWEM\gridMap.h" />
+    <ClInclude Include="..\include\BWEM\map.h" />
+    <ClInclude Include="..\include\BWEM\mapDrawer.h" />
+    <ClInclude Include="..\include\BWEM\mapImpl.h" />
+    <ClInclude Include="..\include\BWEM\mapPrinter.h" />
+    <ClInclude Include="..\include\BWEM\neutral.h" />
+    <ClInclude Include="..\include\BWEM\tiles.h" />
+    <ClInclude Include="..\include\BWEM\utils.h" />
+    <ClInclude Include="..\include\BWEM\winutils.h" />
     <ClInclude Include="Source\data\UnitStorage.h" />
+    <ClInclude Include="Source\FrogFish.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

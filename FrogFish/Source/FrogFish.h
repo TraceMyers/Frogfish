@@ -1,27 +1,30 @@
 #pragma once
-#include <BWAPI.h>
 
+#include <BWAPI.h>
+#include <Windows.h>
 // Remember not to use "Broodwar" in any global class constructor!
 
-class FrogFish : public BWAPI::AIModule {
+using namespace BWAPI;
+
+class FrogFish : public AIModule {
 public:
   // Virtual functions for callbacks, leave these as they are.
   virtual void onStart();
   virtual void onEnd(bool isWinner);
   virtual void onFrame();
   virtual void onSendText(std::string text);
-  virtual void onReceiveText(BWAPI::Player player, std::string text);
-  virtual void onPlayerLeft(BWAPI::Player player);
-  virtual void onNukeDetect(BWAPI::Position target);
-  virtual void onUnitDiscover(BWAPI::Unit unit);
-  virtual void onUnitEvade(BWAPI::Unit unit);
-  virtual void onUnitShow(BWAPI::Unit unit);
-  virtual void onUnitHide(BWAPI::Unit unit);
-  virtual void onUnitCreate(BWAPI::Unit unit);
-  virtual void onUnitDestroy(BWAPI::Unit unit);
-  virtual void onUnitMorph(BWAPI::Unit unit);
-  virtual void onUnitRenegade(BWAPI::Unit unit);
+  virtual void onReceiveText(Player player, std::string text);
+  virtual void onPlayerLeft(Player player);
+  virtual void onNukeDetect(Position target);
+  virtual void onUnitDiscover(Unit unit);
+  virtual void onUnitEvade(Unit unit);
+  virtual void onUnitShow(Unit unit);
+  virtual void onUnitHide(Unit unit);
+  virtual void onUnitCreate(Unit unit);
+  virtual void onUnitDestroy(Unit unit);
+  virtual void onUnitMorph(Unit unit);
+  virtual void onUnitRenegade(Unit unit);
   virtual void onSaveGame(std::string gameName);
-  virtual void onUnitComplete(BWAPI::Unit unit);
+  virtual void onUnitComplete(Unit unit);
   // Everything below this line is safe to modify.
 };

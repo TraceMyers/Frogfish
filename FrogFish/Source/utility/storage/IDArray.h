@@ -1,5 +1,4 @@
-#ifndef ID_ARRAY
-#define ID_ARRAY
+#pragma once
 
 #include <string.h>
 
@@ -66,5 +65,3 @@ public:
         delete array;
     }
 };
-
-#endif
