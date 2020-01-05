@@ -28,7 +28,12 @@ void enemy_assign_structures(
     const EUArray &enemy_units,
     const EBArray &enemy_bases
 );
-
+void enemy_assign_structures_zerg_morph(
+    BWEM::Map &the_map, 
+    BaseStorage &base_storage,
+    const EUArray &enemy_units,
+    const EBArray &enemy_bases
+);
 void unassign_self_structures(const FBArray &self_bases, const FUArray &self_units);
 void unassign_self_structures_conditionless(
     const FBArray &self_bases, 

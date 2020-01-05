@@ -57,10 +57,9 @@
     </ClCompile>
     <ClCompile Include="Source\datamgmt\BaseOwnership.cpp" />
     <ClCompile Include="Source\datamgmt\BaseStructures.cpp" />
+    <ClCompile Include="Source\datamgmt\EnemyUnits.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Source\data\UnitStorage.h" />
-    <ClInclude Include="Source\FrogFish.h" />
     <ClInclude Include="..\include\BWEM\area.h">
       <Filter>BWEM</Filter>
     </ClInclude>
@@ -115,10 +114,70 @@
     <ClInclude Include="..\include\BWEM\winutils.h">
       <Filter>BWEM</Filter>
     </ClInclude>
+    <ClInclude Include="Source\FrogFish.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\data\UnitStorage.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\datamgmt\BaseOwnership.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\datamgmt\BaseStructures.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\datamgmt\EnemyUnits.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\data\BaseStorage.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\data\EnemyBase.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\data\EnemyUnit.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\data\FrogBase.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\data\FrogUnit.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\utility\BWTimer.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\utility\storage\BWEMBArray.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\utility\storage\EBArray.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\utility\storage\EUArray.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\utility\storage\FBArray.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\utility\storage\FUArray.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\utility\storage\IDArray.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\utility\storage\UnitBuff.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\draw\DebugDraw.h">
+      <Filter>headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="BWEM">
       <UniqueIdentifier>{3536c0cc-a733-41a5-928b-0811971a180e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="headers">
+      <UniqueIdentifier>{af541815-0e90-4165-b794-6a9fa4f090f5}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

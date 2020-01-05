@@ -118,6 +118,7 @@
     <ClCompile Include="..\include\BWEM\winutils.cpp" />
     <ClCompile Include="Source\datamgmt\BaseOwnership.cpp" />
     <ClCompile Include="Source\datamgmt\BaseStructures.cpp" />
+    <ClCompile Include="Source\datamgmt\EnemyUnits.cpp" />
     <ClCompile Include="Source\Dll.cpp" />
     <ClCompile Include="Source\draw\DebugDraw.cpp" />
     <ClCompile Include="Source\FrogFish.cpp" />
@@ -141,8 +142,25 @@
     <ClInclude Include="..\include\BWEM\tiles.h" />
     <ClInclude Include="..\include\BWEM\utils.h" />
     <ClInclude Include="..\include\BWEM\winutils.h" />
+    <ClInclude Include="Source\datamgmt\BaseOwnership.h" />
+    <ClInclude Include="Source\datamgmt\BaseStructures.h" />
+    <ClInclude Include="Source\datamgmt\EnemyUnits.h" />
+    <ClInclude Include="Source\data\BaseStorage.h" />
+    <ClInclude Include="Source\data\EnemyBase.h" />
+    <ClInclude Include="Source\data\EnemyUnit.h" />
+    <ClInclude Include="Source\data\FrogBase.h" />
+    <ClInclude Include="Source\data\FrogUnit.h" />
     <ClInclude Include="Source\data\UnitStorage.h" />
+    <ClInclude Include="Source\draw\DebugDraw.h" />
     <ClInclude Include="Source\FrogFish.h" />
+    <ClInclude Include="Source\utility\BWTimer.h" />
+    <ClInclude Include="Source\utility\storage\BWEMBArray.h" />
+    <ClInclude Include="Source\utility\storage\EBArray.h" />
+    <ClInclude Include="Source\utility\storage\EUArray.h" />
+    <ClInclude Include="Source\utility\storage\FBArray.h" />
+    <ClInclude Include="Source\utility\storage\FUArray.h" />
+    <ClInclude Include="Source\utility\storage\IDArray.h" />
+    <ClInclude Include="Source\utility\storage\UnitBuff.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

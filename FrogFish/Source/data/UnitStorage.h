@@ -46,6 +46,11 @@ private:
         int ID = u->getID();
 
         if ((e_unit = enemy_ID_2_eunit[ID]) == NULL) {
+            printf(
+                "storing enemy unit %s, id %d\n", 
+                u->getType().getName().c_str(),
+                u->getID()
+            );
             e_unit = new EnemyUnit(u);
             enemy_ID_2_eunit[ID] = e_unit;
             enemy_newly_stored.add(e_unit);
@@ -57,7 +62,7 @@ private:
         int ID = u->getID();
 
         if ((f_unit = self_ID_2_funit[ID]) != NULL) {
-            printf("removing self unit %s\n", f_unit->get_name().c_str());
+            //printf("removing self unit %s\n", f_unit->get_name().c_str());
             self_ID_2_funit.erase(ID);
             self_newly_removed.add(f_unit);
         }
@@ -71,7 +76,11 @@ private:
         int ID = u->getID();
 
         if ((e_unit = enemy_ID_2_eunit[ID]) != NULL) {
-            printf("removing enemy unit %s\n", e_unit->get_name().c_str());
+            printf(
+                "removing enemy unit %s, id %d\n", 
+                e_unit->get_name().c_str(),
+                e_unit->get_ID()
+            );
             enemy_ID_2_eunit.erase(ID);
             enemy_newly_removed.add(e_unit);
         }
@@ -112,6 +121,7 @@ public:
                 enemy_store(u);
             }
         }
+        store_buff.clear();
     }
 
     void remove_queued() {
@@ -125,6 +135,7 @@ public:
                 enemy_remove(u);
             }
         }
+        remove_buff.clear();
     }
 
     void clear_newly_assigned() {
@@ -163,14 +174,37 @@ public:
         for (eu_it = enemy_ID_2_eunit.begin(); eu_it != enemy_ID_2_eunit.end(); ++eu_it) {
             e_unit = eu_it->second;
             u = e_unit->bwapi_u();
+            if (e_unit->did_just_become_struct()) {
+                e_unit->set_just_became_struct(false);
+            }
             if (u->isVisible()) {
-                if (e_unit->get_type() != u->getType()) {
-                    enemy_newly_changed_type.add(e_unit);
+                if (!u->exists()) {
+                    enemy_remove(u);
                 }
-                if (e_unit->get_pos() != u->getPosition()) {
+                else if (e_unit->get_type() != u->getType()) {
+                    if (u->getType() == BWAPI::UnitTypes::Resource_Vespene_Geyser) {
+                        enemy_remove(u);
+                    }
+                    else {
+                        enemy_newly_changed_type.add(e_unit);
+                        if (e_unit->e_type != e_unit->STRUCT && u->getType().isBuilding()) {
+                            e_unit->set_just_became_struct(true);
+                        }
+                    }
+                }
+                else if (e_unit->get_pos() != u->getPosition()) {
                     enemy_newly_changed_pos.add(e_unit);
                 }
                 e_unit->update();
+            }
+            else if (e_unit->is_missing() && !(e_unit->did_unit_storage_notice_missing())) {
+                e_unit->set_unit_storage_noticed_missing(true);
+                if (e_unit->is_struct()) {
+                    enemy_remove(e_unit->bwapi_u());
+                }
+                else {
+                    enemy_newly_changed_pos.add(e_unit);
+                }
             }
         }
     }

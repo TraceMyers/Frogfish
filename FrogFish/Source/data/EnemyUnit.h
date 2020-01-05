@@ -19,6 +19,9 @@ private:
     std::vector<double> velocity {0.0, 0.0};
     UnitType type;
     std::string name;
+    bool missing;
+    bool unit_storage_noticed_missing;
+    bool just_became_struct = false;
 
 public:
 
@@ -48,6 +51,8 @@ public:
         type = bwapi_unit->getType();
         max_hp = type.maxHitPoints();
         name = type.getName();
+        missing = false;
+        unit_storage_noticed_missing = false;
 
         if (type == UnitTypes::Unknown) {
             e_type = UNKNOWN;
@@ -84,6 +89,18 @@ public:
     const UnitType get_type() {return type;}
 
     const std::string& get_name() {return name;}
+
+    void set_missing(bool value) {missing = value;}
+
+    bool is_missing() {return missing;}
+
+    void set_unit_storage_noticed_missing(bool value) {unit_storage_noticed_missing = value;}
+
+    bool did_unit_storage_notice_missing() {return unit_storage_noticed_missing;}
+
+    void set_just_became_struct(bool value) {just_became_struct = value;}
+
+    bool did_just_become_struct() {return just_became_struct;}
 
     bool is_unknown() {return e_type == UNKNOWN;}
 
