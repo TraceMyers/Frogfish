@@ -32,14 +32,15 @@ public:
         }
     }
 
-    void remove(int ID) {
+    bool remove(int ID) {
         for (register int i = 0; i < len; i++) {
             if ((array[i])->get_ID() == ID) {
                 array[i] = array[len - 1];
                 len--;
-                break;
+                return true;
             }    
         }
+        return false;
     }
 
     void clear() {

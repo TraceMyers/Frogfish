@@ -5,6 +5,7 @@
 #include "utility/BWTimer.h"
 #include "data/EnemyBase.h"
 #include "datamgmt/BaseOwnership.h"
+#include "datamgmt/BaseStructures.h"
 #include <BWAPI.h>
 #include <iostream>
 #include <string>
@@ -34,7 +35,15 @@ void FrogFish::onFrame() {
 	}
 
     unit_storage.update();
+
     assign_new_bases(the_map, base_storage, unit_storage);
+    assign_structures_to_bases(the_map, base_storage, unit_storage);
+    // tested against zerg: doesn't unassign some zerg buildings
+    // probably not the problem, but consider seeing a structure in one base:
+    // drone cancels, same drone/structure appears in another (need to look for moved)
+    unassign_base_structures(the_map, base_storage, unit_storage);
+    unassign_bases(base_storage);
+
     draw_units(unit_storage);
     draw_map(the_map);
     draw_base_info(base_storage);

@@ -39,6 +39,12 @@ public:
 
     bool has_resource_depot() {return resource_depot != NULL;}
 
+    const FUArray &get_structures() {return structures;}
+
+    const FUArray &get_workers() {return workers;}
+
+    const FUnit get_resource_depot() {return resource_depot;}
+
     // only called when freeing this instance
     const BWEM::Base *free_data() {
         workers.free_data();

@@ -10,6 +10,7 @@ void assign_new_bases(
     BaseStorage &base_storage, 
     UnitStorage &unit_storage
 );
+void unassign_bases(BaseStorage &base_storage);
 
 // internal
 void self_assign_new_bases(

@@ -27,16 +27,23 @@ void assign_new_bases(
     UnitStorage &unit_storage
 ) {
     const BWEMBArray &neutral_bases = base_storage.get_neutral_bases();
+
     const FUArray &new_self_units = unit_storage.get_self_newly_stored();
-    const FUArray &changed_type_self_units = unit_storage.get_self_newly_changed_type();
     self_assign_new_bases(the_map, base_storage, new_self_units, neutral_bases);
+    const FUArray &changed_type_self_units = unit_storage.get_self_newly_changed_type();
     self_assign_new_bases(the_map, base_storage, changed_type_self_units, neutral_bases);
+
+    const BWAPI::Race &enemy_race = Broodwar->enemy()->getRace();
     const EUArray &new_enemy_units = unit_storage.get_enemy_newly_stored();
-    const EUArray &changed_type_enemy_units = unit_storage.get_enemy_newly_changed_type();
-    const EUArray &changed_pos_enemy_units = unit_storage.get_enemy_newly_changed_pos();
     enemy_assign_new_bases(the_map, base_storage, new_enemy_units, neutral_bases);
-    enemy_assign_new_bases(the_map, base_storage, changed_type_enemy_units, neutral_bases);
-    enemy_assign_new_bases(the_map, base_storage, changed_pos_enemy_units, neutral_bases);
+    if (enemy_race == BWAPI::Races::Zerg) {
+        const EUArray &changed_type_enemy_units = unit_storage.get_enemy_newly_changed_type();
+        enemy_assign_new_bases(the_map, base_storage, changed_type_enemy_units, neutral_bases);
+    }
+    else if (enemy_race == BWAPI::Races::Terran) {
+        const EUArray &changed_pos_enemy_units = unit_storage.get_enemy_newly_changed_pos();
+        enemy_assign_new_bases(the_map, base_storage, changed_pos_enemy_units, neutral_bases);
+    }
 }
 
 void self_assign_new_bases(
@@ -66,7 +73,7 @@ void self_assign_new_bases(
                         base_storage.add_self_base(self_new_base);
                     }
                     else if (potential_new_base_ct > 1) {
-                        std::vector<float> distances;
+                        std::vector<double> distances;
                         const Position &struct_pos = f_unit->get_pos();
                         for (auto &base : potential_new_bases) {
                             const Position &base_pos = base->Center();
@@ -112,7 +119,7 @@ void enemy_assign_new_bases(
                         base_storage.add_enemy_base(enemy_new_base);
                     }
                     else if (potential_new_base_ct > 1) {
-                        std::vector<float> distances;
+                        std::vector<double> distances;
                         const Position &struct_pos = e_unit->get_pos();
                         for (auto &base : potential_new_bases) {
                             const Position &base_pos = base->Center();

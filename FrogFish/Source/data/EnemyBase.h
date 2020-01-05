@@ -39,6 +39,12 @@ public:
 
     bool has_resource_depot() {return resource_depot != NULL;}
 
+    const EUArray &get_structures() {return structures;}
+
+    const EUArray &get_workers() {return workers;}
+
+    const EUnit get_resource_depot() {return resource_depot;}
+
     // only called when freeing this instance
     const BWEM::Base *free_data() {
         workers.free_data();

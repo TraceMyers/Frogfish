@@ -103,11 +103,21 @@ void draw_base_info(BaseStorage &base_storage) {
         const FBase f_base = self_bases[i];
         const Position &center = f_base->get_center();
         Broodwar->drawTextMap(Position(center.x + 10, center.y - 62), "Frog Base!");
+        Broodwar->drawTextMap(
+            Position(center.x + 10, center.y - 52), 
+            "structures: %d",
+            f_base->get_structure_ct()
+        );
     }
     const EBArray &enemy_bases = base_storage.get_enemy_bases();
     for (register int i = 0; i < enemy_bases.length(); i++) {
         const EBase e_base = enemy_bases[i];
         const Position &center = e_base->get_center();
         Broodwar->drawTextMap(Position(center.x + 10, center.y - 62), "Enemy Base!");
+        Broodwar->drawTextMap(
+            Position(center.x + 10, center.y - 52), 
+            "structures: %d",
+            e_base->get_structure_ct()
+        );
     }
 }
