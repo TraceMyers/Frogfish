@@ -21,19 +21,25 @@ void init_base_storage(BWEM::Map &the_map, BaseStorage &base_storage) {
 
 // *must* be called after UnitStorage::update()
 // and before UnitStorage::clear_newly_assigned()
-void self_assign_new_bases(
+void assign_new_bases(
     BWEM::Map &the_map, 
     BaseStorage &base_storage, 
     UnitStorage &unit_storage
 ) {
-    const FUArray &new_self_units = unit_storage.get_self_newly_stored();
-    const FUArray &changed_self_units = unit_storage.get_self_newly_changed_type();
     const BWEMBArray &neutral_bases = base_storage.get_neutral_bases();
-    self_assign_new_bases_iter(the_map, base_storage, new_self_units, neutral_bases);
-    self_assign_new_bases_iter(the_map, base_storage, changed_self_units, neutral_bases);
+    const FUArray &new_self_units = unit_storage.get_self_newly_stored();
+    const FUArray &changed_type_self_units = unit_storage.get_self_newly_changed_type();
+    self_assign_new_bases(the_map, base_storage, new_self_units, neutral_bases);
+    self_assign_new_bases(the_map, base_storage, changed_type_self_units, neutral_bases);
+    const EUArray &new_enemy_units = unit_storage.get_enemy_newly_stored();
+    const EUArray &changed_type_enemy_units = unit_storage.get_enemy_newly_changed_type();
+    const EUArray &changed_pos_enemy_units = unit_storage.get_enemy_newly_changed_pos();
+    enemy_assign_new_bases(the_map, base_storage, new_enemy_units, neutral_bases);
+    enemy_assign_new_bases(the_map, base_storage, changed_type_enemy_units, neutral_bases);
+    enemy_assign_new_bases(the_map, base_storage, changed_pos_enemy_units, neutral_bases);
 }
 
-void self_assign_new_bases_iter(
+void self_assign_new_bases(
     BWEM::Map &the_map, 
     BaseStorage &base_storage, 
     const FUArray &self_units,
@@ -55,7 +61,6 @@ void self_assign_new_bases_iter(
                         }
                     }
                     int potential_new_base_ct = potential_new_bases.size();
-
                     if (potential_new_base_ct == 1) {
                         const BWEM::Base *self_new_base = potential_new_bases[0];
                         base_storage.add_self_base(self_new_base);
@@ -77,5 +82,79 @@ void self_assign_new_bases_iter(
                 }
             }
         }
+    }
+}
+
+void enemy_assign_new_bases(
+    BWEM::Map &the_map, 
+    BaseStorage &base_storage, 
+    const EUArray &enemy_units,
+    const BWEMBArray &neutral_bases
+) {
+    for (register int i = 0; i < enemy_units.length(); i++) {
+        EUnit e_unit = enemy_units[i];
+        if (e_unit->is_struct()) {
+            const TilePosition &structure_tilepos = e_unit->get_tilepos();
+            if (the_map.Valid(structure_tilepos)) {
+                const BWEM::Area *structure_area = the_map.GetArea(structure_tilepos);
+                if (structure_area != nullptr) {
+                    const std::vector<BWEM::Base> &area_bases = structure_area->Bases();
+                    std::vector<const BWEM::Base *> potential_new_bases;
+                    for (auto &base : area_bases) {
+                        int neutral_base_i = neutral_bases.find(&base);
+                        if (neutral_base_i != -1) {
+                            potential_new_bases.push_back(&base);
+                        }
+                    }
+                    int potential_new_base_ct = potential_new_bases.size();
+                    if (potential_new_base_ct == 1) {
+                        const BWEM::Base *enemy_new_base = potential_new_bases[0];
+                        base_storage.add_enemy_base(enemy_new_base);
+                    }
+                    else if (potential_new_base_ct > 1) {
+                        std::vector<float> distances;
+                        const Position &struct_pos = e_unit->get_pos();
+                        for (auto &base : potential_new_bases) {
+                            const Position &base_pos = base->Center();
+                            distances.push_back(
+                                struct_pos.getApproxDistance(base_pos)
+                            );
+                        }
+                        auto min_dist = std::min_element(distances.begin(), distances.end());
+                        int base_i = std::distance(distances.begin(), min_dist);
+                        const BWEM::Base *enemy_new_base = potential_new_bases[base_i];
+                        base_storage.add_enemy_base(enemy_new_base);
+                    }
+                }
+            }
+        }
+    }
+}
+
+// must either call before assign_new_bases()
+// or call after both assign_new_bases() and
+// the function that adds structures to bases
+void unassign_bases(BaseStorage &base_storage) {
+    const FBArray &self_bases = base_storage.get_self_bases();
+    std::vector<FBase> remove_self_bases;
+    for (int i = 0; i < self_bases.length(); i++) {
+        const FBase f_base = self_bases[i];
+        if (f_base->get_structure_ct() == 0) {
+            remove_self_bases.push_back(f_base);
+        }
+    }
+    for (auto &f_base : remove_self_bases) {
+        base_storage.remove_self_base(f_base);
+    }
+    const EBArray &enemy_bases = base_storage.get_enemy_bases();
+    std::vector<EBase> remove_enemy_bases;
+    for (int i = 0; i < enemy_bases.length(); i++) {
+        const EBase e_base = enemy_bases[i];
+        if (e_base->get_structure_ct() == 0) {
+            remove_enemy_bases.push_back(e_base);
+        }
+    }
+    for (auto &e_base : remove_enemy_bases) {
+        base_storage.remove_enemy_base(e_base);
     }
 }

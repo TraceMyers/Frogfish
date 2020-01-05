@@ -34,13 +34,13 @@ void FrogFish::onFrame() {
 	}
 
     unit_storage.update();
-    self_assign_new_bases(the_map, base_storage, unit_storage);
+    assign_new_bases(the_map, base_storage, unit_storage);
     draw_units(unit_storage);
     draw_map(the_map);
     draw_base_info(base_storage);
 
-    unit_storage.clear_newly_assigned();
     // print_debug_text();
+    unit_storage.clear_newly_assigned();
 }
 
 void FrogFish::onSendText(std::string text) {

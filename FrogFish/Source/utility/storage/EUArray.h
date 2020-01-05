@@ -46,15 +46,15 @@ public:
         len = 0;
     }
 
-    int length() {
+    int length() const {
         return len;
     }
 
-    const EUnit operator [](int i) {
+    const EUnit operator [] (int i) const {
         return array[i];
     }
 
-    EUnit find(int ID) {
+    EUnit find(int ID) const {
         for (register int i = 0; i < len; i++) {
             if ((array[i])->get_ID() == ID) {
                 return array[i];

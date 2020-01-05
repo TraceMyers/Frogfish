@@ -9,3 +9,10 @@ Unit grouping algorithm
 - can do this in multiple passes, and can create multiple groups at once
 - both useful for detecting enemy groups and potentially for own units
     - are my units that are supposed to be in a group not close enough together?
+
+
+-------------------
+Concaving algorithm
+-------------------
+- use enemy group center of mass as center of a large circle to
+    try to place units around before & while attacking

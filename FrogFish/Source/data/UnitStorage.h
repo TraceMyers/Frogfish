@@ -28,6 +28,7 @@ private:
     EUArray enemy_newly_stored;
     EUArray enemy_newly_removed;
     EUArray enemy_newly_changed_type;
+    EUArray enemy_newly_changed_pos;
 
     void self_store(const Unit u) {
         FUnit f_unit;
@@ -140,6 +141,7 @@ public:
         }
         enemy_newly_removed.clear();
         enemy_newly_changed_type.clear();
+        enemy_newly_changed_pos.clear();
     }
 
     void update_self_units() {
@@ -164,6 +166,9 @@ public:
             if (u->isVisible()) {
                 if (e_unit->get_type() != u->getType()) {
                     enemy_newly_changed_type.add(e_unit);
+                }
+                if (e_unit->get_pos() != u->getPosition()) {
+                    enemy_newly_changed_pos.add(e_unit);
                 }
                 e_unit->update();
             }
@@ -190,6 +195,8 @@ public:
 
     const EUArray &get_enemy_newly_changed_type() {return enemy_newly_changed_type;}
 
+    const EUArray &get_enemy_newly_changed_pos() {return enemy_newly_changed_pos;}
+
     void free_data() {
         // called only by FrogFish::onEnd()
         register std::map<int, FUnit>::iterator fu_it;
@@ -212,5 +219,6 @@ public:
         enemy_newly_stored.free_data();
         enemy_newly_removed.free_data();
         enemy_newly_changed_type.free_data();
+        enemy_newly_changed_pos.free_data();
     }
 };

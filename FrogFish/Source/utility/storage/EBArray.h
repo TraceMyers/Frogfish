@@ -55,15 +55,15 @@ public:
         return rm_e_base;
     }
 
-    int length() {
+    int length() const {
         return len;
     }
 
-    const EBase operator [](int i) {
+    const EBase operator [] (int i) const {
         return array[i];
     }
 
-    int find(EBase e_base) {
+    int find(EBase e_base) const {
         for (register int i = 0; i < len; i++) {
             if (array[i] == e_base) {
                 return i;
