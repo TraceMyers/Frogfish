@@ -1,0 +1,25 @@
+-------------
+UnitStorage.h
+-------------
+>> FUnit
+>> EUnit
+-- UnitBuff
+    >> BWAPI::Unit[]
+-- EUArray
+    >> EUnit[]
+-- FUArray
+    >> FUnit[]
+-- IDArray
+    >> int[]
+
+-------------
+BaseStorage.h
+-------------
+>> FBase
+>> EBase
+-- FBArray
+    >> FBase[]
+-- EBArray
+    >> EBase[]
+-- BWEMBArray
+    >> BWEM::Base *[]

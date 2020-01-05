@@ -1,0 +1,11 @@
+-----------------------
+Unit grouping algorithm
+-----------------------
+- Start with one unit
+- Is another unit close enough for the two to be in a group?
+- If so, make a group; calculate center of mass; increase 'close enough' value
+    - For each unit, ask whether they're close enough to center of mass
+    - if so, add the unit and recaculculate center of mass
+- can do this in multiple passes, and can create multiple groups at once
+- both useful for detecting enemy groups and potentially for own units
+    - are my units that are supposed to be in a group not close enough together?

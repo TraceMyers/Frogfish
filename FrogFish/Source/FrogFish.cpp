@@ -1,21 +1,20 @@
 #include "FrogFish.h"
 #include "draw/DebugDraw.h"
 #include "data/UnitStorage.h"
+#include "data/BaseStorage.h"
 #include "utility/BWTimer.h"
+#include "data/EnemyBase.h"
+#include "datamgmt/BaseOwnership.h"
 #include <BWAPI.h>
-#include <BWEM/bwem.h>
 #include <iostream>
 #include <string>
 #include <set>
-#include <windows.h>
-#include <stdio.h>
 
 using namespace BWAPI;
 using namespace Filter;
 
-namespace {auto & the_map = BWEM::Map::Instance();}
-
 UnitStorage unit_storage;
+BaseStorage base_storage;
 BWTimer timer;
 
 void FrogFish::onStart() {
@@ -23,28 +22,10 @@ void FrogFish::onStart() {
     Broodwar->enableFlag(Flag::UserInput);
     Broodwar->setLocalSpeed(21);
     Broodwar->setCommandOptimizationLevel(2);
-
-    // init debug output console
-    FILE *pFile = nullptr;
-    AllocConsole();
-    freopen_s(&pFile, "CONOUT$", "w", stdout);
-
-    for (Unit u : Broodwar->self()->getUnits()) {
-        if (u->getType().isWorker()) {
-            u->gather(u->getClosestUnit(IsMineralField));
-        }
-    }
-
-    try {
-        Broodwar << "Map init..." << std::endl;
-        the_map.Initialize();
-        bool starting_locs_ok = the_map.FindBasesForStartingLocations();
-        assert(starting_locs_ok);
-        printf("Base ct: %d\n", the_map.BaseCount());
-    }
-    catch (const std::exception e) {
-        Broodwar << "EXCEPTION: " << e.what() << std::endl;
-    }
+    onStart_alloc_debug_console();
+    onStart_send_workers_to_mine();
+    onStart_init_bwem();
+    init_base_storage(the_map, base_storage);
 }
 
 void FrogFish::onFrame() {
@@ -52,20 +33,14 @@ void FrogFish::onFrame() {
 		return;
 	}
 
-    unit_storage.store_queued();
-    unit_storage.remove_queued();
-    unit_storage.update_self_units();
-    unit_storage.update_enemy_units();
-
+    unit_storage.update();
+    self_assign_new_bases(the_map, base_storage, unit_storage);
     draw_units(unit_storage);
+    draw_map(the_map);
+    draw_base_info(base_storage);
 
-    timer.on_frame_update();
-    if (timer.is_stopped()) {
-        timer.restart();
-    }
-    
-    // print_debug_text();
     unit_storage.clear_newly_assigned();
+    // print_debug_text();
 }
 
 void FrogFish::onSendText(std::string text) {
@@ -106,14 +81,6 @@ void FrogFish::onUnitHide(Unit unit) {
 }
 
 void FrogFish::onUnitCreate(Unit unit) {
-    /*
-    if (unit->getPlayer() == Broodwar->self()) {
-        // send new self unit to on-screen debug buffer
-        std::string *str_ptr = new std::string("new: ");
-        (*str_ptr).append(unit->getType().getName().c_str());
-        append_debug_text(str_ptr);
-    }
-    */
     unit_storage.queue_store(unit);
 }
 
@@ -140,4 +107,5 @@ void FrogFish::onUnitComplete(Unit unit) {
 void FrogFish::onEnd(bool isWinner) {
     FreeConsole();
     unit_storage.free_data();
+    base_storage.free_data();
 }

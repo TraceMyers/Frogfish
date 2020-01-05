@@ -60,6 +60,9 @@ private:
             self_ID_2_funit.erase(ID);
             self_newly_removed.add(f_unit);
         }
+        else {
+            printf("UnitStorage.self_remove() : tried to remove unit that isn't in storage\n");
+        }
     }
 
     void enemy_remove(const Unit u) {
@@ -71,9 +74,19 @@ private:
             enemy_ID_2_eunit.erase(ID);
             enemy_newly_removed.add(e_unit);
         }
+        else {
+            printf("UnitStorage.enemy_remove() : tried to remove unit that isn't in storage\n");
+        }
     }
 
 public:
+
+    void update() {
+        store_queued();
+        remove_queued();
+        update_self_units();
+        update_enemy_units();
+    }
 
     void queue_store(const Unit u) {
         if (!store_buff.has(u)) {
@@ -165,17 +178,17 @@ public:
         return enemy_ID_2_eunit;
     }
 
-    FUArray get_self_newly_stored() {return self_newly_stored;}
+    const FUArray &get_self_newly_stored() {return self_newly_stored;}
 
-    FUArray get_self_newly_removed() {return self_newly_removed;}
+    const FUArray &get_self_newly_removed() {return self_newly_removed;}
 
-    FUArray get_self_newly_changed_type() {return self_newly_changed_type;}
+    const FUArray &get_self_newly_changed_type() {return self_newly_changed_type;}
 
-    EUArray get_enemy_newly_stored() {return enemy_newly_stored;}
+    const EUArray &get_enemy_newly_stored() {return enemy_newly_stored;}
 
-    EUArray get_enemy_newly_removed() {return enemy_newly_removed;}
+    const EUArray &get_enemy_newly_removed() {return enemy_newly_removed;}
 
-    EUArray get_enemy_newly_changed_type() {return enemy_newly_changed_type;}
+    const EUArray &get_enemy_newly_changed_type() {return enemy_newly_changed_type;}
 
     void free_data() {
         // called only by FrogFish::onEnd()

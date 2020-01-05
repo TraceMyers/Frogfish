@@ -3,7 +3,7 @@
 #include <string.h>
 #include <BWAPI.h>
 
-#define UNITBUFF_INIT_LEN 30
+#define UNITBUFF_INIT_SIZE 30
 #define UNITBUFF_RESIZE_CONST 20
 
 using namespace BWAPI;
@@ -12,13 +12,14 @@ class UnitBuff {
 
 private:
 
-    Unit *array = new Unit[UNITBUFF_INIT_LEN];
-    int size = UNITBUFF_INIT_LEN;
+    Unit *array = new Unit[UNITBUFF_INIT_SIZE];
+    int size = UNITBUFF_INIT_SIZE;
     int len ;
 
     void resize() {
         Unit *temp = new Unit[size + UNITBUFF_RESIZE_CONST];
         memcpy(temp, array, sizeof(Unit) * size);
+        delete array;
         array = temp;
         size += UNITBUFF_RESIZE_CONST;
     }

@@ -2,20 +2,21 @@
 
 #include <string.h>
 
-#define IDARRAY_INIT_LEN 800
+#define IDARRAY_INIT_SIZE 800
 #define IDARRAY_RESIZE_CONST 100
 
 class IDArray {
 
 private:
 
-    int *array = new int[IDARRAY_INIT_LEN];
-    int size = IDARRAY_INIT_LEN;
+    int *array = new int[IDARRAY_INIT_SIZE];
+    int size = IDARRAY_INIT_SIZE;
     int len = 0;
 
     void resize() {
         int *temp = new int[size + IDARRAY_RESIZE_CONST];
         memcpy(temp, array, sizeof(int) * size);
+        delete array;
         array = temp;
         size += IDARRAY_RESIZE_CONST;
     }
@@ -31,15 +32,10 @@ public:
     }
 
     void remove(int ID) {
-        const register int last_val_i = len - 1;
         for (register int i = 0; i < len; i++) {
             if (array[i] == ID) {
-                if (i != last_val_i) {
-                    array[i] = array[last_val_i];
-                }
-                if (len > 0) {
-                    len--;
-                }
+                array[i] = array[len - 1];
+                len--;
                 break;
             }    
         }
@@ -50,7 +46,6 @@ public:
     }
 
     bool has(int ID) {
-        const register int last_val_i = len - 1;
         for (register int i = 0; i < len; i++) {
             if (array[i] == ID) {
                 return true;

@@ -1,5 +1,4 @@
-#ifndef TIMER
-#define TIMER
+#pragma once
 
 class BWTimer {
 
@@ -61,5 +60,3 @@ public:
         started = true;
     }
 };
-
-#endif

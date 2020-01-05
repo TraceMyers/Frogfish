@@ -63,19 +63,19 @@ public:
 
     int get_energy() {return bwapi_unit->getEnergy();}
 
-    const Position get_pos() {return bwapi_unit->getPosition();}
+    const Position &get_pos() {return bwapi_unit->getPosition();}
 
-    const TilePosition get_tilepos() {return bwapi_unit->getTilePosition();}
+    const TilePosition &get_tilepos() {return bwapi_unit->getTilePosition();}
 
-    const std::vector<double>& get_velocity() {
+    const std::vector<double> &get_velocity() {
         velocity[0] = bwapi_unit->getVelocityX();
         velocity[1] = bwapi_unit->getVelocityY();
         return velocity;
     }
 
-    const UnitType get_type() {return type;}
+    const UnitType &get_type() {return type;}
 
-    const std::string& get_name() {return type.getName();}
+    const std::string &get_name() {return type.getName();}
 
     bool is_struct() {return f_type == STRUCT;}
 

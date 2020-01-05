@@ -3,9 +3,10 @@
 #include "../data/EnemyUnit.h"
 #include "../data/FrogUnit.h"
 #include "../data/EnemyUnit.h"
+#include "../data/BaseStorage.h"
+#include "../data/FrogBase.h"
 #include <BWAPI.h>
 #include <iostream>
-#include <string>
 #include <list>
 
 using namespace BWAPI;
@@ -83,5 +84,24 @@ void draw_units(UnitStorage &unit_storage) {
             default:
                 Broodwar->drawTextMap(pos, "unknown");
         }
+    }
+}
+
+void draw_map(BWEM::Map &the_map) {
+    try {
+        BWEM::utils::gridMapExample(the_map);
+        BWEM::utils::drawMap(the_map);
+    }
+    catch (const std::exception & e) {
+        Broodwar << "EXCEPTION: " << e.what() << std::endl;
+    }
+}
+
+void draw_base_info(BaseStorage &base_storage) {
+    const FBArray &self_bases = base_storage.get_self_bases();
+    for (register int i = 0; i < self_bases.length(); i++) {
+        const FBase f_base = self_bases[i];
+        const Position &center = f_base->get_center();
+        Broodwar->drawTextMap(Position(center.x, center.y - 55), "Frog Base!");
     }
 }
