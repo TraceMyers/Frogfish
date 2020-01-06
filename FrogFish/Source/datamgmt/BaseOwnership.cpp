@@ -6,6 +6,8 @@
 
 using namespace BWAPI;
 
+// TODO: template refactor
+
 void init_base_storage(BWEM::Map &the_map, BaseStorage &base_storage) {
     const std::vector<BWEM::Area> &areas = the_map.Areas();
     int i = 0;

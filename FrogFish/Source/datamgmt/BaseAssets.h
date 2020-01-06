@@ -4,17 +4,32 @@
 #include "../data/UnitStorage.h"
 #include "../data/BaseStorage.h"
 
-void assign_structures_to_bases(
+void assign_base_assets(
     BWEM::Map &the_map, 
     BaseStorage &base_storage,
     UnitStorage &unit_storage
 );
-void unassign_base_structures(
-        BWEM::Map &the_map, 
-        BaseStorage &base_storage, 
-        UnitStorage &unit_storage
+void unassign_base_assets(
+    BWEM::Map &the_map, 
+    BaseStorage &base_storage, 
+    UnitStorage &unit_storage
 );
 
+template <class UnitArrayT, class BaseArrayT>
+void assign_assets(
+    BWEM::Map &the_map, 
+    BaseStorage &base_storage,
+    const UnitArrayT &units,
+    const BaseArrayT &bases
+);
+template <class UnitArrayT, class BaseArrayT, class UnitT>
+void assign_structure(
+    BWEM::Map &the_map, 
+    BaseStorage &base_storage,
+    const UnitArrayT &units,
+    const BaseArrayT &bases,
+    const UnitT &unit
+);
 // internal
 void self_assign_structures(
     BWEM::Map &the_map, 

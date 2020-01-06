@@ -20,7 +20,6 @@ private:
     UnitType type;
     std::string name;
     bool missing;
-    bool unit_storage_noticed_missing;
     bool just_became_struct = false;
 
 public:
@@ -52,7 +51,7 @@ public:
         max_hp = type.maxHitPoints();
         name = type.getName();
         missing = false;
-        unit_storage_noticed_missing = false;
+        just_became_struct = false;
 
         if (type == UnitTypes::Unknown) {
             e_type = UNKNOWN;
@@ -93,10 +92,6 @@ public:
     void set_missing(bool value) {missing = value;}
 
     bool is_missing() {return missing;}
-
-    void set_unit_storage_noticed_missing(bool value) {unit_storage_noticed_missing = value;}
-
-    bool did_unit_storage_notice_missing() {return unit_storage_noticed_missing;}
 
     void set_just_became_struct(bool value) {just_became_struct = value;}
 

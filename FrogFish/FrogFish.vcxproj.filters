@@ -56,8 +56,7 @@
       <Filter>BWEM</Filter>
     </ClCompile>
     <ClCompile Include="Source\datamgmt\BaseOwnership.cpp" />
-    <ClCompile Include="Source\datamgmt\BaseStructures.cpp" />
-    <ClCompile Include="Source\datamgmt\EnemyUnits.cpp" />
+    <ClCompile Include="Source\datamgmt\BaseAssets.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\BWEM\area.h">
@@ -123,12 +122,6 @@
     <ClInclude Include="Source\datamgmt\BaseOwnership.h">
       <Filter>headers</Filter>
     </ClInclude>
-    <ClInclude Include="Source\datamgmt\BaseStructures.h">
-      <Filter>headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\datamgmt\EnemyUnits.h">
-      <Filter>headers</Filter>
-    </ClInclude>
     <ClInclude Include="Source\data\BaseStorage.h">
       <Filter>headers</Filter>
     </ClInclude>
@@ -169,6 +162,9 @@
       <Filter>headers</Filter>
     </ClInclude>
     <ClInclude Include="Source\draw\DebugDraw.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\datamgmt\BaseAssets.h">
       <Filter>headers</Filter>
     </ClInclude>
   </ItemGroup>

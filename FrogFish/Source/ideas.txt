@@ -16,3 +16,11 @@ Concaving algorithm
 -------------------
 - use enemy group center of mass as center of a large circle to
     try to place units around before & while attacking
+
+
+------------------
+Remove Stale Units
+------------------
+- A queue which always has an open slot to the back container to store newly missing units
+- containers move toward front of queue over time.
+- when container reaches the front, units are forgotten.

@@ -6,6 +6,7 @@
 #include "../utility/storage/FUArray.h"
 #include "../utility/storage/IDArray.h"
 #include "../utility/storage/UnitBuff.h"
+#include "../utility/storage/FArray.h"
 #include <map>
 #include <BWAPI.h>
 #include <iostream>
@@ -174,18 +175,13 @@ public:
         for (eu_it = enemy_ID_2_eunit.begin(); eu_it != enemy_ID_2_eunit.end(); ++eu_it) {
             e_unit = eu_it->second;
             u = e_unit->bwapi_u();
-            if (e_unit->did_just_become_struct()) {
-                e_unit->set_just_became_struct(false);
-            }
             if (u->isVisible()) {
-                if (!u->exists()) {
-                    enemy_remove(u);
-                }
-                else if (e_unit->get_type() != u->getType()) {
+                if (e_unit->get_type() != u->getType()) {
                     if (u->getType() == BWAPI::UnitTypes::Resource_Vespene_Geyser) {
                         enemy_remove(u);
                     }
                     else {
+                        e_unit->update();
                         enemy_newly_changed_type.add(e_unit);
                         if (e_unit->e_type != e_unit->STRUCT && u->getType().isBuilding()) {
                             e_unit->set_just_became_struct(true);
@@ -194,17 +190,24 @@ public:
                 }
                 else if (e_unit->get_pos() != u->getPosition()) {
                     enemy_newly_changed_pos.add(e_unit);
+                    e_unit->update();
                 }
-                e_unit->update();
+                else {
+                    e_unit->update();
+                }
             }
-            else if (e_unit->is_missing() && !(e_unit->did_unit_storage_notice_missing())) {
-                e_unit->set_unit_storage_noticed_missing(true);
+            else if (
+                !(e_unit->is_missing()) 
+                && !(e_unit->bwapi_u()->isVisible())
+                && (Broodwar->isVisible(e_unit->get_tilepos()))
+            ) {
                 if (e_unit->is_struct()) {
                     enemy_remove(e_unit->bwapi_u());
                 }
                 else {
                     enemy_newly_changed_pos.add(e_unit);
                 }
+                e_unit->set_missing(true);
             }
         }
     }

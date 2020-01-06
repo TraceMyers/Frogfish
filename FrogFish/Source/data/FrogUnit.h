@@ -86,6 +86,9 @@ public:
     bool is_larva() {return f_type == LARVA;}
 
     bool is_egg() {return f_type == EGG;}
+
+    // template reasons
+    bool did_just_become_struct() {return false;}
 };
 
 typedef class FrogUnit *FUnit;
