@@ -11,6 +11,7 @@
 #include <string>
 #include <set>
 #include <chrono>
+#include <vector>
 
 using namespace BWAPI;
 using namespace Filter;
@@ -28,17 +29,14 @@ void FrogFish::onStart() {
     onStart_send_workers_to_mine();
     onStart_init_bwem();
     init_base_storage(the_map, base_storage);
-    //timer.start(20, 0, false);
+    timer.start(10, 0, false);
 }
 
 void FrogFish::onFrame() {
 	if (Broodwar->isReplay() || Broodwar->isPaused() || !Broodwar->self()) {
 		return;
 	}
-    /*
     timer.on_frame_update();
-    auto start_time = std::chrono::high_resolution_clock::now();
-    */
 
     unit_storage.update();
 
@@ -52,14 +50,11 @@ void FrogFish::onFrame() {
 
     unit_storage.clear_newly_assigned();
 
-    /*
-    auto end_time = std::chrono::high_resolution_clock::now();
     if (timer.is_stopped()) {
-        auto time = end_time - start_time;
-        std::cout << "one frame: " << time/std::chrono::milliseconds(1) << " ms." << std::endl;
+        const std::vector<FBase> &bases = base_storage.get_self_bases();
+        printf("self base ct = %d\n", bases.size());
         timer.restart();
     }
-    */
 }
 
 void FrogFish::onSendText(std::string text) {

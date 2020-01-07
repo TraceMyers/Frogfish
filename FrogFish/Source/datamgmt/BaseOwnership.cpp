@@ -75,6 +75,7 @@ void self_assign_new_bases(
                     if (potential_new_base_ct == 1) {
                         const BWEM::Base *self_new_base = potential_new_bases[0];
                         base_storage.add_self_base(self_new_base);
+                        printf("adding new self base\n");
                     }
                     else if (potential_new_base_ct > 1) {
                         std::vector<double> distances;
@@ -89,6 +90,7 @@ void self_assign_new_bases(
                         int base_i = std::distance(distances.begin(), min_dist);
                         const BWEM::Base *self_new_base = potential_new_bases[base_i];
                         base_storage.add_self_base(self_new_base);
+                        printf("adding new self base\n");
                     }
                 }
             }
@@ -122,6 +124,7 @@ void enemy_assign_new_bases(
                     if (potential_new_base_ct == 1) {
                         const BWEM::Base *enemy_new_base = potential_new_bases[0];
                         base_storage.add_enemy_base(enemy_new_base);
+                        printf("adding new enemy base\n");
                     }
                     else if (potential_new_base_ct > 1) {
                         std::vector<double> distances;
@@ -136,6 +139,7 @@ void enemy_assign_new_bases(
                         int base_i = std::distance(distances.begin(), min_dist);
                         const BWEM::Base *enemy_new_base = potential_new_bases[base_i];
                         base_storage.add_enemy_base(enemy_new_base);
+                        printf("adding new enemy base\n");
                     }
                 }
             }

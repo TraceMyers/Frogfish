@@ -98,9 +98,8 @@ void draw_map(BWEM::Map &the_map) {
 }
 
 void draw_base_info(BaseStorage &base_storage) {
-/*
-    const FBArray &self_bases = base_storage.get_self_bases();
-    for (register int i = 0; i < self_bases.length(); i++) {
+    const std::vector<FBase> &self_bases = base_storage.get_self_bases();
+    for (unsigned int i = 0; i < self_bases.size(); i++) {
         const FBase f_base = self_bases[i];
         const Position &center = f_base->get_center();
         Broodwar->drawTextMap(Position(center.x + 10, center.y - 62), "Frog Base!");
@@ -110,8 +109,8 @@ void draw_base_info(BaseStorage &base_storage) {
             f_base->get_structure_ct()
         );
     }
-    const EBArray &enemy_bases = base_storage.get_enemy_bases();
-    for (register int i = 0; i < enemy_bases.length(); i++) {
+    const std::vector<EBase> &enemy_bases = base_storage.get_enemy_bases();
+    for (register int i = 0; i < enemy_bases.size(); i++) {
         const EBase e_base = enemy_bases[i];
         const Position &center = e_base->get_center();
         Broodwar->drawTextMap(Position(center.x + 10, center.y - 62), "Enemy Base!");
@@ -121,5 +120,4 @@ void draw_base_info(BaseStorage &base_storage) {
             e_base->get_structure_ct()
         );
     }
-*/
 }

@@ -9,36 +9,41 @@ void assign_base_assets(
     BaseStorage &base_storage,
     UnitStorage &unit_storage
 );
-template <class UnitArrayT, class BaseArrayT>
+template <class UnitT, class BaseT>
 void assign_assets(
     BWEM::Map &the_map, 
     BaseStorage &base_storage,
-    const UnitArrayT &units,
-    const BaseArrayT &bases
+    const std::vector<UnitT> &units,
+    const std::vector<BaseT> &bases
 );
-template <class UnitArrayT, class BaseArrayT, class UnitT>
+template <class UnitT, class BaseT>
 void assign_structure(
     BWEM::Map &the_map, 
     BaseStorage &base_storage,
-    const UnitArrayT &units,
-    const BaseArrayT &bases,
-    const UnitT &unit
+    const std::vector<UnitT> &units,
+    const std::vector<BaseT> &bases,
+    UnitT unit
 );
 void unassign_base_assets(
     BWEM::Map &the_map, 
     BaseStorage &base_storage, 
     UnitStorage &unit_storage
 );
-template <class BaseArrayT, class UnitArrayT>
-void unassign_assets(const BaseArrayT &bases, const UnitArrayT &units);
-template <class BaseArrayT, class UnitArrayT>
-void unassign_assets_unconditional(
-    const BaseArrayT &bases, 
-    const UnitArrayT &units
+template <class UnitT, class BaseT>
+void unassign_assets(
+    const std::vector<UnitT> &units, 
+    const std::vector<BaseT> &bases
 );
-template <class BaseArrayT>
-void unassign_wrong_area_assets(BWEM::Map &the_map, const BaseArrayT &bases);
-template <class BaseT, class UnitArrayT>
-void unassign_wrong_area_structure(BWEM::Map &the_map, BaseT base, UnitArrayT group);
-template <class BaseT, class UnitArrayT>
-void unassign_wrong_area_worker(BWEM::Map &the_map, BaseT base, UnitArrayT group);
+template <class UnitT, class BaseT>
+void unassign_assets_unconditional(
+    const std::vector<UnitT> &units, 
+    const std::vector<BaseT> &bases
+);
+template <class BaseT>
+void unassign_wrong_area_assets(BWEM::Map &the_map, const std::vector<BaseT> &bases);
+template <class UnitT, class BaseT>
+void unassign_wrong_area_asset(
+    BWEM::Map &the_map, 
+    std::vector<UnitT> group,
+    BaseT base  
+);

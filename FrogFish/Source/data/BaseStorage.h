@@ -37,7 +37,9 @@ public:
     }
 
     void remove_self_base(const FBase &f_base) {
-        std::remove(self_bases.begin(), self_bases.end(), f_base);
+        std::vector<FBase>::iterator it = 
+            std::remove(self_bases.begin(), self_bases.end(), f_base);
+        self_bases.erase(it, self_bases.end());
         const BWEM::Base *b = f_base->free_data();
         neutral_bases.add(b);
         self_newly_removed.push_back(f_base);
@@ -51,7 +53,9 @@ public:
     }
 
     void remove_enemy_base(const EBase &e_base) {
-        std::remove(enemy_bases.begin(), enemy_bases.end(), e_base);
+        std::vector<EBase>::iterator it = 
+            std::remove(enemy_bases.begin(), enemy_bases.end(), e_base);
+        enemy_bases.erase(it, enemy_bases.end());
         const BWEM::Base *b = e_base->free_data();
         neutral_bases.add(b);
         enemy_newly_removed.push_back(e_base);

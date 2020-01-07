@@ -22,18 +22,26 @@ public:
 
     void add_worker(EUnit worker) {workers.push_back(worker);}
 
-    void remove_worker(EUnit worker) {std::remove(workers.begin(), workers.end(), worker);}
+    void remove_worker(EUnit worker) {
+        std::vector<EUnit>::iterator it 
+            = std::remove(workers.begin(), workers.end(), worker);
+        workers.erase(it, workers.end());
+    }
 
     void add_structure(EUnit structure) {structures.push_back(structure);}
 
     void remove_structure(EUnit structure) {
-        std::remove(structures.begin(), structures.end(), structure);
+        std::vector<EUnit>::iterator it 
+            = std::remove(structures.begin(), structures.end(), structure);
+        structures.erase(it, structures.end());
     }
 
     void add_resource_depot(EUnit _resource_depot) {resource_depots.push_back(_resource_depot);}
 
     void remove_resource_depot(EUnit _resource_depot) {
-        std::remove(resource_depots.begin(), resource_depots.end(), _resource_depot);
+        std::vector<EUnit>::iterator it 
+            = std::remove(resource_depots.begin(), resource_depots.end(), _resource_depot);
+        resource_depots.erase(it, resource_depots.end());
     }
 
     int get_worker_ct() {return workers.size();}
