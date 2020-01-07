@@ -17,7 +17,7 @@ void assign_assets(
     const std::vector<BaseT> &bases
 );
 template <class UnitT, class BaseT>
-void assign_structure(
+void assign_asset(
     BWEM::Map &the_map, 
     BaseStorage &base_storage,
     const std::vector<UnitT> &units,

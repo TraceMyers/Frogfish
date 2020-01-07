@@ -45,7 +45,7 @@ public:
 
     int get_structure_ct() {return structures.size();}
 
-    bool has_resource_depot() {return resource_depots.size() > 0;}
+    int get_resource_depot_ct() {return resource_depots.size();}
 
     const std::vector<FUnit> &get_structures() {return structures;}
 

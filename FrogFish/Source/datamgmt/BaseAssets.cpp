@@ -16,6 +16,7 @@ void assign_base_assets(
     const std::vector<FBase> &self_bases = base_storage.get_self_bases();
 
     store_type = NEW;
+    //const std::map<int, FUnit> &self_unit = unit_storage.self_units();
     const std::vector<FUnit> &new_self_units = unit_storage.get_self_newly_stored();
     assign_assets(the_map, base_storage, new_self_units, self_bases);
     store_type = CHANGE_TYPE;
@@ -45,7 +46,7 @@ void assign_assets(
     if (bases.size() > 0) {
         for (unsigned int i = 0; i < units.size(); i++) {
             auto unit = units[i];
-            if (unit->is_struct()) {
+            if (unit->is_struct() || (unit->is_worker() && store_type != CHANGE_POS)) {
                 if (store_type == CHANGE_TYPE
                     && Broodwar->enemy() == unit->bwapi_u()->getPlayer()
                     && Broodwar->enemy()->getRace() == BWAPI::Races::Zerg
@@ -53,14 +54,14 @@ void assign_assets(
                 ) {
                     ;
                 }
-                else {assign_structure(the_map, base_storage, units, bases, unit);}
+                else {assign_asset(the_map, base_storage, units, bases, unit);}
             }
         }
     }
 }
 
 template <class UnitT, class BaseT>
-void assign_structure(
+void assign_asset(
     BWEM::Map &the_map, 
     BaseStorage &base_storage,
     const std::vector<UnitT> &units,
@@ -81,9 +82,14 @@ void assign_structure(
             int potential_assign_base_ct = potential_assign_bases.size();
             if (potential_assign_base_ct == 1) {
                 auto base = potential_assign_bases[0];
-                base->add_structure(unit);
-                if (unit->get_type().isResourceDepot()) {
-                    base->add_resource_depot(unit);
+                if (unit->is_struct()) {
+                    base->add_structure(unit);
+                    if (unit->get_type().isResourceDepot()) {
+                        base->add_resource_depot(unit);
+                    }
+                }
+                else {
+                    base->add_worker(unit);
                 }
             }
             else if (potential_assign_base_ct > 1) {
@@ -98,9 +104,14 @@ void assign_structure(
                 auto min_dist = std::min_element(distances.begin(), distances.end());
                 int base_i = std::distance(distances.begin(), min_dist);
                 const auto base = potential_assign_bases[base_i];
-                base->add_structure(unit);
-                if (unit->get_type().isResourceDepot()) {
-                    base->add_resource_depot(unit);
+                if (unit->is_struct()) {
+                    base->add_structure(unit);
+                    if (unit->get_type().isResourceDepot()) {
+                        base->add_resource_depot(unit);
+                    }
+                } 
+                else {
+                    base->add_worker(unit);
                 }
             }
         }
@@ -128,6 +139,7 @@ void unassign_base_assets(
         unassign_assets(changed_type_enemy_units, enemy_bases);
     }
 
+    unassign_wrong_area_assets(the_map, self_bases);
     unassign_wrong_area_assets(the_map, enemy_bases);
 }
 

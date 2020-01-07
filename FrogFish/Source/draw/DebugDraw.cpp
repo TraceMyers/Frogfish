@@ -108,6 +108,16 @@ void draw_base_info(BaseStorage &base_storage) {
             "structures: %d",
             f_base->get_structure_ct()
         );
+        Broodwar->drawTextMap(
+            Position(center.x + 10, center.y - 42), 
+            "workers: %d",
+            f_base->get_worker_ct()
+        );
+        Broodwar->drawTextMap(
+            Position(center.x + 10, center.y - 32), 
+            "resource depots: %d",
+            f_base->get_resource_depot_ct()
+        );
     }
     const std::vector<EBase> &enemy_bases = base_storage.get_enemy_bases();
     for (register int i = 0; i < enemy_bases.size(); i++) {
@@ -118,6 +128,16 @@ void draw_base_info(BaseStorage &base_storage) {
             Position(center.x + 10, center.y - 52), 
             "structures: %d",
             e_base->get_structure_ct()
+        );
+        Broodwar->drawTextMap(
+            Position(center.x + 10, center.y - 42), 
+            "workers: %d",
+            e_base->get_worker_ct()
+        );
+        Broodwar->drawTextMap(
+            Position(center.x + 10, center.y - 32), 
+            "resource depots: %d",
+            e_base->get_resource_depot_ct()
         );
     }
 }
