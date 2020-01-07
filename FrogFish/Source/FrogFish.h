@@ -62,3 +62,4 @@ public:
     virtual void onUnitComplete(Unit unit);
     // Everything below this line is safe to modify.
 };
+

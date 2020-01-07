@@ -151,14 +151,8 @@
     <ClInclude Include="Source\data\UnitStorage.h" />
     <ClInclude Include="Source\draw\DebugDraw.h" />
     <ClInclude Include="Source\FrogFish.h" />
+    <ClInclude Include="Source\utility\BWEMBaseArray.h" />
     <ClInclude Include="Source\utility\BWTimer.h" />
-    <ClInclude Include="Source\utility\storage\BWEMBArray.h" />
-    <ClInclude Include="Source\utility\storage\EBArray.h" />
-    <ClInclude Include="Source\utility\storage\EUArray.h" />
-    <ClInclude Include="Source\utility\storage\FBArray.h" />
-    <ClInclude Include="Source\utility\storage\FUArray.h" />
-    <ClInclude Include="Source\utility\storage\IDArray.h" />
-    <ClInclude Include="Source\utility\storage\UnitBuff.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

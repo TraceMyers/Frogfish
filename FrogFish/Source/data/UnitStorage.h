@@ -2,47 +2,40 @@
 
 #include "EnemyUnit.h"
 #include "FrogUnit.h"
-#include "../utility/storage/EUArray.h"
-#include "../utility/storage/FUArray.h"
-#include "../utility/storage/IDArray.h"
-#include "../utility/storage/UnitBuff.h"
-#include "../utility/storage/FArray.h"
 #include <map>
-#include <BWAPI.h>
 #include <iostream>
-
-using namespace BWAPI;
+#include <vector>
 
 class UnitStorage {
 
 private:
 
-    UnitBuff store_buff;
-    UnitBuff remove_buff;
+    std::vector<BWAPI::Unit> store_buff;
+    std::vector<BWAPI::Unit> remove_buff;
 
     std::map<int, FUnit> self_ID_2_funit;
     std::map<int, EUnit> enemy_ID_2_eunit;
 
-    FUArray self_newly_stored;
-    FUArray self_newly_removed;
-    FUArray self_newly_changed_type;
-    EUArray enemy_newly_stored;
-    EUArray enemy_newly_removed;
-    EUArray enemy_newly_changed_type;
-    EUArray enemy_newly_changed_pos;
+    std::vector<FUnit> self_newly_stored;
+    std::vector<FUnit> self_newly_removed;
+    std::vector<FUnit> self_newly_changed_type;
+    std::vector<EUnit> enemy_newly_stored;
+    std::vector<EUnit> enemy_newly_removed;
+    std::vector<EUnit> enemy_newly_changed_type;
+    std::vector<EUnit> enemy_newly_changed_pos;
 
-    void self_store(const Unit u) {
+    void self_store(const BWAPI::Unit u) {
         FUnit f_unit;
         int ID = u->getID();
 
         if ((f_unit = self_ID_2_funit[ID]) == NULL) {
             f_unit = new FrogUnit(u);
             self_ID_2_funit[ID] = f_unit;
-            self_newly_stored.add(f_unit);
+            self_newly_stored.push_back(f_unit);
         }
     }
 
-    void enemy_store(const Unit u) {
+    void enemy_store(const BWAPI::Unit u) {
         EUnit e_unit;
         int ID = u->getID();
 
@@ -54,25 +47,25 @@ private:
             );
             e_unit = new EnemyUnit(u);
             enemy_ID_2_eunit[ID] = e_unit;
-            enemy_newly_stored.add(e_unit);
+            enemy_newly_stored.push_back(e_unit);
         }
     }
 
-    void self_remove(const Unit u) {
+    void self_remove(const BWAPI::Unit u) {
         FUnit f_unit;
         int ID = u->getID();
 
         if ((f_unit = self_ID_2_funit[ID]) != NULL) {
             //printf("removing self unit %s\n", f_unit->get_name().c_str());
             self_ID_2_funit.erase(ID);
-            self_newly_removed.add(f_unit);
+            self_newly_removed.push_back(f_unit);
         }
         else {
             printf("UnitStorage.self_remove() : tried to remove unit that isn't in storage\n");
         }
     }
 
-    void enemy_remove(const Unit u) {
+    void enemy_remove(const BWAPI::Unit u) {
         EUnit e_unit;
         int ID = u->getID();
 
@@ -83,7 +76,7 @@ private:
                 e_unit->get_ID()
             );
             enemy_ID_2_eunit.erase(ID);
-            enemy_newly_removed.add(e_unit);
+            enemy_newly_removed.push_back(e_unit);
         }
         else {
             printf("UnitStorage.enemy_remove() : tried to remove unit that isn't in storage\n");
@@ -100,20 +93,26 @@ public:
     }
 
     void queue_store(const Unit u) {
-        if (!store_buff.has(u)) {
-            store_buff.add(u);
+        std::vector<Unit>::iterator it = 
+            std::find(store_buff.begin(), store_buff.end(), u);
+        bool unit_in_buff = (it != store_buff.end());
+        if (!unit_in_buff) {
+            store_buff.push_back(u);
         }
     }
 
     void queue_remove(const Unit u) {
-        if (!remove_buff.has(u)) {
-            remove_buff.add(u);
+        std::vector<Unit>::iterator it = 
+            std::find(remove_buff.begin(), remove_buff.end(), u);
+        bool unit_in_buff = (it != remove_buff.end());
+        if (!unit_in_buff) {
+            remove_buff.push_back(u);
         }
     }
 
     void store_queued() {
-        register Unit u;
-        for (register int i = 0; i < store_buff.length(); i++) {
+        register BWAPI::Unit u;
+        for (unsigned int i = 0; i < store_buff.size(); i++) {
             u = store_buff[i];
             if (u->getPlayer() == Broodwar->self()) {
                 self_store(u);
@@ -126,8 +125,8 @@ public:
     }
 
     void remove_queued() {
-        register Unit u;
-        for (register int i = 0; i < remove_buff.length(); i++) {
+        register BWAPI::Unit u;
+        for (register int i = 0; i < remove_buff.size(); i++) {
             u = remove_buff[i];
             if (u->getPlayer() == Broodwar->self()) {
                 self_remove(u);
@@ -141,14 +140,14 @@ public:
 
     void clear_newly_assigned() {
         self_newly_stored.clear();
-        for (register int i = 0; i < self_newly_removed.length(); i++) {
+        for (register int i = 0; i < self_newly_removed.size(); i++) {
             delete self_newly_removed[i];
         }
         self_newly_removed.clear();
         self_newly_changed_type.clear();
 
         enemy_newly_stored.clear();
-        for (register int i = 0; i < enemy_newly_removed.length(); i++) {
+        for (register int i = 0; i < enemy_newly_removed.size(); i++) {
             delete enemy_newly_removed[i];
         }
         enemy_newly_removed.clear();
@@ -163,7 +162,7 @@ public:
             f_unit = fu_it->second;
             if (f_unit->get_type() != f_unit->bwapi_u()->getType()) {
                 f_unit->update();
-                self_newly_changed_type.add(f_unit);
+                self_newly_changed_type.push_back(f_unit);
             }
         }
     }
@@ -182,14 +181,14 @@ public:
                     }
                     else {
                         e_unit->update();
-                        enemy_newly_changed_type.add(e_unit);
+                        enemy_newly_changed_type.push_back(e_unit);
                         if (e_unit->e_type != e_unit->STRUCT && u->getType().isBuilding()) {
                             e_unit->set_just_became_struct(true);
                         }
                     }
                 }
                 else if (e_unit->get_pos() != u->getPosition()) {
-                    enemy_newly_changed_pos.add(e_unit);
+                    enemy_newly_changed_pos.push_back(e_unit);
                     e_unit->update();
                 }
                 else {
@@ -205,7 +204,7 @@ public:
                     enemy_remove(e_unit->bwapi_u());
                 }
                 else {
-                    enemy_newly_changed_pos.add(e_unit);
+                    enemy_newly_changed_pos.push_back(e_unit);
                 }
                 e_unit->set_missing(true);
             }
@@ -220,19 +219,19 @@ public:
         return enemy_ID_2_eunit;
     }
 
-    const FUArray &get_self_newly_stored() {return self_newly_stored;}
+    const std::vector<FUnit> &get_self_newly_stored() {return self_newly_stored;}
 
-    const FUArray &get_self_newly_removed() {return self_newly_removed;}
+    const std::vector<FUnit> &get_self_newly_removed() {return self_newly_removed;}
 
-    const FUArray &get_self_newly_changed_type() {return self_newly_changed_type;}
+    const std::vector<FUnit> &get_self_newly_changed_type() {return self_newly_changed_type;}
 
-    const EUArray &get_enemy_newly_stored() {return enemy_newly_stored;}
+    const std::vector<EUnit> &get_enemy_newly_stored() {return enemy_newly_stored;}
 
-    const EUArray &get_enemy_newly_removed() {return enemy_newly_removed;}
+    const std::vector<EUnit> &get_enemy_newly_removed() {return enemy_newly_removed;}
 
-    const EUArray &get_enemy_newly_changed_type() {return enemy_newly_changed_type;}
+    const std::vector<EUnit> &get_enemy_newly_changed_type() {return enemy_newly_changed_type;}
 
-    const EUArray &get_enemy_newly_changed_pos() {return enemy_newly_changed_pos;}
+    const std::vector<EUnit> &get_enemy_newly_changed_pos() {return enemy_newly_changed_pos;}
 
     void free_data() {
         // called only by FrogFish::onEnd()
@@ -248,14 +247,5 @@ public:
             e_unit = eu_it->second;
             delete e_unit;
         }
-        store_buff.free_data();
-        remove_buff.free_data();
-        self_newly_stored.free_data();
-        self_newly_removed.free_data();
-        self_newly_changed_type.free_data();
-        enemy_newly_stored.free_data();
-        enemy_newly_removed.free_data();
-        enemy_newly_changed_type.free_data();
-        enemy_newly_changed_pos.free_data();
     }
 };

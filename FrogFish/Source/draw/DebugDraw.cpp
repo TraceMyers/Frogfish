@@ -98,6 +98,7 @@ void draw_map(BWEM::Map &the_map) {
 }
 
 void draw_base_info(BaseStorage &base_storage) {
+/*
     const FBArray &self_bases = base_storage.get_self_bases();
     for (register int i = 0; i < self_bases.length(); i++) {
         const FBase f_base = self_bases[i];
@@ -120,4 +121,5 @@ void draw_base_info(BaseStorage &base_storage) {
             e_base->get_structure_ct()
         );
     }
+*/
 }

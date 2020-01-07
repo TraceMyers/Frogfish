@@ -1,3 +1,4 @@
+#include "../utility/BWEMBaseArray.h"
 #include "../data/BaseStorage.h"
 #include "../data/UnitStorage.h"
 #include "BaseOwnership.h"
@@ -10,15 +11,15 @@ using namespace BWAPI;
 
 void init_base_storage(BWEM::Map &the_map, BaseStorage &base_storage) {
     const std::vector<BWEM::Area> &areas = the_map.Areas();
-    int i = 0;
+    int j = 0;
     for (auto &area : areas) {
         const std::vector<BWEM::Base> &bases = area.Bases();
-        for (auto &base : bases) {
-            base_storage.add_neutral_base(&base);
-            i++;
+        for (int i = 0; i < bases.size(); ++i) {
+            base_storage.add_neutral_base(&bases[i]);
+            j++;
         }
     }
-    printf("BaseOwnership.init_base_storage(): Added %d neutral bases\n", i);
+    printf("BaseOwnership.init_base_storage(): Added %d neutral bases\n", j);
 }
 
 // *must* be called after UnitStorage::update()
@@ -28,33 +29,34 @@ void assign_new_bases(
     BaseStorage &base_storage, 
     UnitStorage &unit_storage
 ) {
-    const BWEMBArray &neutral_bases = base_storage.get_neutral_bases();
+    const BWEMBaseArray &neutral_bases = base_storage.get_neutral_bases();
 
-    const FUArray &new_self_units = unit_storage.get_self_newly_stored();
+    const std::vector<FUnit> &new_self_units = unit_storage.get_self_newly_stored();
     self_assign_new_bases(the_map, base_storage, new_self_units, neutral_bases);
-    const FUArray &changed_type_self_units = unit_storage.get_self_newly_changed_type();
+    const std::vector<FUnit> &changed_type_self_units = unit_storage.get_self_newly_changed_type();
     self_assign_new_bases(the_map, base_storage, changed_type_self_units, neutral_bases);
 
     const BWAPI::Race &enemy_race = Broodwar->enemy()->getRace();
-    const EUArray &new_enemy_units = unit_storage.get_enemy_newly_stored();
+    const std::vector<EUnit> &new_enemy_units = unit_storage.get_enemy_newly_stored();
     enemy_assign_new_bases(the_map, base_storage, new_enemy_units, neutral_bases);
     if (enemy_race == BWAPI::Races::Zerg) {
-        const EUArray &changed_type_enemy_units = unit_storage.get_enemy_newly_changed_type();
+        const std::vector<EUnit> &changed_type_enemy_units = unit_storage.get_enemy_newly_changed_type();
         enemy_assign_new_bases(the_map, base_storage, changed_type_enemy_units, neutral_bases);
     }
     else if (enemy_race == BWAPI::Races::Terran) {
-        const EUArray &changed_pos_enemy_units = unit_storage.get_enemy_newly_changed_pos();
+        const std::vector<EUnit> &changed_pos_enemy_units = unit_storage.get_enemy_newly_changed_pos();
         enemy_assign_new_bases(the_map, base_storage, changed_pos_enemy_units, neutral_bases);
     }
 }
 
+template <class UnitArrayT>
 void self_assign_new_bases(
     BWEM::Map &the_map, 
     BaseStorage &base_storage, 
-    const FUArray &self_units,
-    const BWEMBArray &neutral_bases
+    const UnitArrayT &self_units,
+    const BWEMBaseArray &neutral_bases
 ) {
-    for (register int i = 0; i < self_units.length(); i++) {
+    for (unsigned int i = 0; i < self_units.size(); ++i) {
         FUnit f_unit = self_units[i];
         if (f_unit->is_struct()) {
             const TilePosition &structure_tilepos = f_unit->get_tilepos();
@@ -94,13 +96,14 @@ void self_assign_new_bases(
     }
 }
 
+template <class UnitArrayT>
 void enemy_assign_new_bases(
     BWEM::Map &the_map, 
     BaseStorage &base_storage, 
-    const EUArray &enemy_units,
-    const BWEMBArray &neutral_bases
+    const UnitArrayT &enemy_units,
+    const BWEMBaseArray &neutral_bases
 ) {
-    for (register int i = 0; i < enemy_units.length(); i++) {
+    for (unsigned int i = 0; i < enemy_units.size(); ++i) {
         EUnit e_unit = enemy_units[i];
         if (e_unit->is_struct()) {
             const TilePosition &structure_tilepos = e_unit->get_tilepos();
@@ -144,9 +147,9 @@ void enemy_assign_new_bases(
 // or call after both assign_new_bases() and
 // the function that adds structures to bases
 void unassign_bases(BaseStorage &base_storage) {
-    const FBArray &self_bases = base_storage.get_self_bases();
+    const std::vector<FBase> &self_bases = base_storage.get_self_bases();
     std::vector<FBase> remove_self_bases;
-    for (int i = 0; i < self_bases.length(); i++) {
+    for (int i = 0; i < self_bases.size(); i++) {
         const FBase f_base = self_bases[i];
         if (f_base->get_structure_ct() == 0) {
             remove_self_bases.push_back(f_base);
@@ -155,9 +158,9 @@ void unassign_bases(BaseStorage &base_storage) {
     for (auto &f_base : remove_self_bases) {
         base_storage.remove_self_base(f_base);
     }
-    const EBArray &enemy_bases = base_storage.get_enemy_bases();
+    const std::vector<EBase> &enemy_bases = base_storage.get_enemy_bases();
     std::vector<EBase> remove_enemy_bases;
-    for (int i = 0; i < enemy_bases.length(); i++) {
+    for (int i = 0; i < enemy_bases.size(); i++) {
         const EBase e_base = enemy_bases[i];
         if (e_base->get_structure_ct() == 0) {
             remove_enemy_bases.push_back(e_base);

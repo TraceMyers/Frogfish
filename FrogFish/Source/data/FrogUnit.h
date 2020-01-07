@@ -89,6 +89,8 @@ public:
 
     // template reasons
     bool did_just_become_struct() {return false;}
+
+    bool is_missing() {return false;}
 };
 
 typedef class FrogUnit *FUnit;

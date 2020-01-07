@@ -1,6 +1,7 @@
 #pragma once
 
 #include <BWEM/bwem.h>
+#include "../utility/BWEMBaseArray.h"
 #include "../data/BaseStorage.h"
 #include "../data/UnitStorage.h"
 
@@ -10,18 +11,18 @@ void assign_new_bases(
     BaseStorage &base_storage, 
     UnitStorage &unit_storage
 );
-void unassign_bases(BaseStorage &base_storage);
-
-// internal
+template <class UnitArrayT>
 void self_assign_new_bases(
     BWEM::Map &the_map, 
     BaseStorage &base_storage, 
-    const FUArray &self_units,
-    const BWEMBArray &neutral_bases
-); 
+    const UnitArrayT &self_units,
+    const BWEMBaseArray &neutral_bases
+);
+template <class UnitArrayT>
 void enemy_assign_new_bases(
     BWEM::Map &the_map, 
     BaseStorage &base_storage, 
-    const EUArray &enemy_units,
-    const BWEMBArray &neutral_bases
+    const UnitArrayT &enemy_units,
+    const BWEMBaseArray &neutral_bases
 );
+void unassign_bases(BaseStorage &base_storage);

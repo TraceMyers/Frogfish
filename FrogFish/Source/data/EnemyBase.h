@@ -1,7 +1,6 @@
 #pragma once
 
 #include "EnemyUnit.h"
-#include "../utility/storage/EUArray.h"
 #include <BWAPI.h>
 #include <BWEM/bwem.h>
 #include <vector>
@@ -13,44 +12,44 @@ class EnemyBase {
 private:
 
     const BWEM::Base *bwem_base;
-    EUArray workers;
-    EUArray structures;
-    EUnit resource_depot = NULL;
+	std::vector<EUnit> workers;
+    std::vector<EUnit> structures;
+    std::vector<EUnit> resource_depots;
 
 public:
 
     EnemyBase(const BWEM::Base *_bwem_base) : bwem_base(_bwem_base) {}
 
-    void add_worker(EUnit worker) {workers.add(worker);}
+    void add_worker(EUnit worker) {workers.push_back(worker);}
 
-    void remove_worker(EUnit worker) {workers.remove(worker->get_ID());}
+    void remove_worker(EUnit worker) {std::remove(workers.begin(), workers.end(), worker);}
 
-    void add_structure(EUnit structure) {structures.add(structure);}
+    void add_structure(EUnit structure) {structures.push_back(structure);}
 
-    void remove_structure(EUnit structure) {structures.remove(structure->get_ID());}
+    void remove_structure(EUnit structure) {
+        std::remove(structures.begin(), structures.end(), structure);
+    }
 
-    void assign_resource_depot(EUnit _resource_depot) {resource_depot = _resource_depot;}
+    void add_resource_depot(EUnit _resource_depot) {resource_depots.push_back(_resource_depot);}
 
-    void unassign_resource_depot() {resource_depot = NULL;}
+    void remove_resource_depot(EUnit _resource_depot) {
+        std::remove(resource_depots.begin(), resource_depots.end(), _resource_depot);
+    }
 
-    int get_worker_ct() {return workers.length();}
+    int get_worker_ct() {return workers.size();}
 
-    int get_structure_ct() {return structures.length();}
+    int get_structure_ct() {return structures.size();}
 
-    bool has_resource_depot() {return resource_depot != NULL;}
+    bool has_resource_depot() {return resource_depots.size() > 0;}
 
-    const EUArray &get_structures() {return structures;}
+    const std::vector<EUnit> &get_structures() {return structures;}
 
-    const EUArray &get_workers() {return workers;}
+    const std::vector<EUnit> &get_workers() {return workers;}
 
-    const EUnit get_resource_depot() {return resource_depot;}
+    const std::vector<EUnit> &get_resource_depot() {return resource_depots;}
 
     // only called when freeing this instance
-    const BWEM::Base *free_data() {
-        workers.free_data();
-        structures.free_data();
-        return bwem_base;
-    }
+    const BWEM::Base *free_data() {return bwem_base;}
 
     // BWEM
 

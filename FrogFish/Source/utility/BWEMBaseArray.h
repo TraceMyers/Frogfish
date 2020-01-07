@@ -3,10 +3,10 @@
 #include <BWEM/bwem.h>
 #include <string.h>
 
-#define BWEMBARRAY_INIT_SIZE 15 
-#define BWEMBARRAY_RESIZE_CONST 5
+#define BWEMBARRAY_INIT_SIZE 20
+#define BWEMBARRAY_RESIZE_CONST 10 
 
-class BWEMBArray {
+class BWEMBaseArray {
 
 private:
 

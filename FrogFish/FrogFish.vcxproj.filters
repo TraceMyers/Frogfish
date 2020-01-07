@@ -140,31 +140,13 @@
     <ClInclude Include="Source\utility\BWTimer.h">
       <Filter>headers</Filter>
     </ClInclude>
-    <ClInclude Include="Source\utility\storage\BWEMBArray.h">
-      <Filter>headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\utility\storage\EBArray.h">
-      <Filter>headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\utility\storage\EUArray.h">
-      <Filter>headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\utility\storage\FBArray.h">
-      <Filter>headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\utility\storage\FUArray.h">
-      <Filter>headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\utility\storage\IDArray.h">
-      <Filter>headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\utility\storage\UnitBuff.h">
-      <Filter>headers</Filter>
-    </ClInclude>
     <ClInclude Include="Source\draw\DebugDraw.h">
       <Filter>headers</Filter>
     </ClInclude>
     <ClInclude Include="Source\datamgmt\BaseAssets.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\utility\BWEMBaseArray.h">
       <Filter>headers</Filter>
     </ClInclude>
   </ItemGroup>

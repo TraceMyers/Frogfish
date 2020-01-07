@@ -1,10 +1,10 @@
+// the problem is here
 #include "BaseAssets.h"
 #include <BWEM/bwem.h>
 #include "../data/BaseStorage.h"
 #include "../data/UnitStorage.h"
 
 // TODO: add resource depots & workers
-// TODO: full template refactor 
 enum UNIT_STORE_TYPE {NEW, CHANGE_TYPE, CHANGE_POS, REMOVED};
 UNIT_STORE_TYPE store_type;
 
@@ -13,26 +13,28 @@ void assign_base_assets(
     BaseStorage &base_storage,
     UnitStorage &unit_storage
 ) {
-    const FBArray &self_bases = base_storage.get_self_bases();
+    /*
+    const std::vector<FBase> &self_bases = base_storage.get_self_bases();
 
     store_type = NEW;
-    const FUArray &new_self_units = unit_storage.get_self_newly_stored();
+    const std::vector<FUnit> &new_self_units = unit_storage.get_self_newly_stored();
     assign_assets(the_map, base_storage, new_self_units, self_bases);
     store_type = CHANGE_TYPE;
-    const FUArray &changed_type_self_units = unit_storage.get_self_newly_changed_type();
+    const std::vector<FUnit> &changed_type_self_units = unit_storage.get_self_newly_changed_type();
     assign_assets(the_map, base_storage, changed_type_self_units, self_bases);
 
-    const EBArray &enemy_bases = base_storage.get_enemy_bases();
+    const std::vector<EBase> &enemy_bases = base_storage.get_enemy_bases();
 
     store_type = NEW;
-    const EUArray &new_enemy_units = unit_storage.get_enemy_newly_stored();
+    const std::vector<EUnit> &new_enemy_units = unit_storage.get_enemy_newly_stored();
     assign_assets(the_map, base_storage, new_enemy_units, enemy_bases);
     store_type = CHANGE_TYPE;
-    const EUArray &changed_type_enemy_units = unit_storage.get_enemy_newly_changed_type();
+    const std::vector<EUnit> &changed_type_enemy_units = unit_storage.get_enemy_newly_changed_type();
     assign_assets(the_map, base_storage, changed_type_enemy_units, enemy_bases);
     store_type = CHANGE_POS;
-    const EUArray &changed_pos_enemy_units = unit_storage.get_enemy_newly_changed_pos();
+    const std::vector<EUnit> &changed_pos_enemy_units = unit_storage.get_enemy_newly_changed_pos();
     assign_assets(the_map, base_storage, changed_pos_enemy_units, enemy_bases);
+    */
 }
 
 template <class UnitArrayT, class BaseArrayT>
@@ -42,8 +44,9 @@ void assign_assets(
     const UnitArrayT &units,
     const BaseArrayT &bases
 ) {
-    if (bases.length() > 0) {
-        for (register int i = 0; i < units.length(); i++) {
+    /*
+    if (bases.size() > 0) {
+        for (register int i = 0; i < units.size(); i++) {
             auto unit = units[i];
             if (unit->is_struct()) {
                 if (store_type == CHANGE_TYPE
@@ -51,12 +54,13 @@ void assign_assets(
                     && Broodwar->enemy()->getRace() == BWAPI::Races::Zerg
                     && unit->get_type().whatBuilds().first != BWAPI::UnitTypes::Zerg_Drone
                 ) {
-                    // do nothing
+                    ;
                 }
                 else {assign_structure(the_map, base_storage, units, bases, unit);}
             }
         }
     }
+    */
 }
 
 template <class UnitArrayT, class BaseArrayT, class UnitT>
@@ -67,12 +71,13 @@ void assign_structure(
     const BaseArrayT &bases,
     const UnitT &unit
 ) {
+    /*
     const TilePosition &structure_tilepos = unit->get_tilepos();
     if (the_map.Valid(structure_tilepos)) {
         const BWEM::Area *structure_area = the_map.GetArea(structure_tilepos);
         if (structure_area != nullptr) {
             std::vector<decltype(bases[0])> potential_assign_bases;
-            for (int i = 0; i < bases.length(); i++) {
+            for (int i = 0; i < bases.size(); i++) {
                 auto base = bases[i];
                 if (structure_area->Id() == base->get_area()->Id()) {
                     potential_assign_bases.push_back(base);
@@ -99,103 +104,111 @@ void assign_structure(
             }
         }
     }
+    */
 }
-
 
 void unassign_base_assets(
     BWEM::Map &the_map, 
     BaseStorage &base_storage, 
     UnitStorage &unit_storage
 ) {
-    const FBArray &self_bases = base_storage.get_self_bases();
-    const FUArray &removed_self_units = unit_storage.get_self_newly_removed();
-    unassign_self_structures_conditionless(self_bases, removed_self_units);
-    const FUArray &changed_type_self_units = unit_storage.get_self_newly_changed_type();
-    unassign_self_structures(self_bases, changed_type_self_units);
+    /*
+    const std::vector<FBase> &self_bases = base_storage.get_self_bases();
 
-    const BWAPI::Race &enemy_race = Broodwar->enemy()->getRace();
-    const EBArray &enemy_bases = base_storage.get_enemy_bases();
-    const EUArray &removed_enemy_units = unit_storage.get_enemy_newly_removed();
-    unassign_enemy_structures_conditionless(enemy_bases, removed_enemy_units);
-    if (enemy_race == BWAPI::Races::Zerg) {
-        const EUArray &changed_type_enemy_units = unit_storage.get_enemy_newly_changed_type();
-        unassign_enemy_structures_zerg(enemy_bases, changed_type_enemy_units);
-        const EUArray &changed_pos_enemy_units = unit_storage.get_enemy_newly_changed_pos();
-        unassign_enemy_structures_terran(the_map, enemy_bases);
+    const std::vector<FUnit> &removed_self_units = unit_storage.get_self_newly_removed();
+    unassign_assets_unconditional(self_bases, removed_self_units);
+    const std::vector<FUnit> &changed_type_self_units = unit_storage.get_self_newly_changed_type();
+    unassign_assets(self_bases, changed_type_self_units);
+
+    const std::vector<EBase> &enemy_bases = base_storage.get_enemy_bases();
+
+    const std::vector<EUnit> &removed_enemy_units = unit_storage.get_enemy_newly_removed();
+    unassign_assets_unconditional(enemy_bases, removed_enemy_units);
+    if (Broodwar->enemy()->getRace() == BWAPI::Races::Zerg) {
+        const std::vector<EUnit> &changed_type_enemy_units = unit_storage.get_enemy_newly_changed_type();
+        unassign_assets(enemy_bases, changed_type_enemy_units);
     }
-    else if (enemy_race == BWAPI::Races::Terran) {
-        const EUArray &changed_pos_enemy_units = unit_storage.get_enemy_newly_changed_pos();
-        unassign_enemy_structures_terran(the_map, enemy_bases);
-    }
+
+    unassign_wrong_area_assets(the_map, enemy_bases);
+    */
 }
 
-void unassign_self_structures(const FBArray &self_bases, const FUArray &self_units) {
-    for (register int i = 0; i < self_units.length(); i++) {
-        FUnit f_unit = self_units[i];
-        if (!f_unit->is_struct()) {
-            for (register int j = 0; j < self_bases.length(); j++) {
-                FBase f_base = self_bases[j];
-                f_base->remove_structure(f_unit);
+template <class BaseArrayT, class UnitArrayT>
+void unassign_assets(const BaseArrayT &bases, const UnitArrayT &units) {
+    /*
+    for (register int i = 0; i < units.size(); i++) {
+        auto unit = units[i];
+        if (!unit->is_struct()) {
+            for (register int j = 0; j < bases.size(); j++) {
+                auto base = bases[j];
+                base->remove_structure(unit);
+            }
+            // needs more
+        }
+        else if (unit->is_missing()) {
+            for (register int j = 0; j < bases.size(); j++) {
+                auto base = bases[j];
+                base->remove_structure(unit);
             }
         }
     }
+    */
 }
 
-void unassign_self_structures_conditionless(
-    const FBArray &self_bases, 
-    const FUArray &self_units
+template <class BaseArrayT, class UnitArrayT>
+void unassign_assets_unconditional(
+    const BaseArrayT &bases, 
+    const UnitArrayT &units
 ) {
-    for (register int i = 0; i < self_units.length(); i++) {
-        FUnit f_unit = self_units[i];
-        for (register int j = 0; j < self_bases.length(); j++) {
-            FBase f_base = self_bases[j];
-            f_base->remove_structure(f_unit);
+    /*
+    for (register int i = 0; i < units.size(); i++) {
+        auto unit = units[i];
+        for (register int j = 0; j < bases.size(); j++) {
+            auto base = bases[j];
+            base->remove_structure(unit);
+            base->remove_worker(unit);
+            base->remove_resource_depot(unit);
         }
     }
+    */
 }
 
-void unassign_enemy_structures_zerg(const EBArray &enemy_bases, const EUArray &enemy_units) {
-    for (register int i = 0; i < enemy_units.length(); i++) {
-        EUnit e_unit = enemy_units[i];
-        if (!(e_unit->is_struct())) {
-            for (register int j = 0; j < enemy_bases.length(); j++) {
-                EBase e_base = enemy_bases[j];
-                e_base->remove_structure(e_unit);
-            }
+template <class BaseArrayT>
+void unassign_wrong_area_assets(BWEM::Map &the_map, const BaseArrayT &bases) {
+    /*
+    for (register int i = 0; i < bases.size(); i++) {
+        auto base = bases[i];
+        auto &base_structs = base->get_structures();
+        unassign_wrong_area_structure(the_map, base, base_structs);
+        auto &base_workers = base->get_workers();
+        unassign_wrong_area_worker(the_map, base, base_workers);
+    }
+    */
+}
+
+template <class BaseT, class UnitArrayT>
+void unassign_wrong_area_structure(BWEM::Map &the_map, BaseT base, UnitArrayT group) {
+    /*
+    for (register int j = 0; j < group.size(); j++) {
+        auto asset = group[j];
+        const BWEM::Area *asset_area = the_map.GetArea(asset->get_tilepos());
+        if (asset_area == nullptr || asset_area->Id() != base->get_area()->Id()) {
+            base->remove_structure(asset);
+            base->remove_resource_depot(asset);
         }
     }
+    */
 }
 
-void unassign_enemy_structures_terran(BWEM::Map &the_map, const EBArray &enemy_bases) {
-    for (register int i = 0; i < enemy_bases.length(); i++) {
-        EBase e_base = enemy_bases[i];
-        const EUArray &base_structs = e_base->get_structures();
-        for (register int j = 0; j < base_structs.length(); j++) {
-            const EUnit structure = base_structs[i];
-            const BWEM::Area *struct_area = the_map.GetArea(structure->get_tilepos());
-            if (struct_area->Id() != e_base->get_area()->Id()) {
-                e_base->remove_structure(structure);
-            }
+template <class BaseT, class UnitArrayT>
+void unassign_wrong_area_worker(BWEM::Map &the_map, BaseT base, UnitArrayT group) {
+    /*
+    for (register int j = 0; j < group.size(); j++) {
+        auto asset = group[j];
+        const BWEM::Area *asset_area = the_map.GetArea(asset->get_tilepos());
+        if (asset_area == nullptr || asset_area->Id() != base->get_area()->Id()) {
+            base->remove_worker(asset);
         }
     }
+    */
 }
-
-void unassign_enemy_structures_conditionless(
-    const EBArray &enemy_bases, 
-    const EUArray &enemy_units
-) {
-    for (register int i = 0; i < enemy_units.length(); i++) {
-        EUnit e_unit = enemy_units[i];
-        for (register int j = 0; j < enemy_bases.length(); j++) {
-            EBase e_base = enemy_bases[j];
-            e_base->remove_structure(e_unit);
-        }
-    }
-}
-
-// self assign structures
-        
-// enemy assign structures
-/*
-        
-            */
