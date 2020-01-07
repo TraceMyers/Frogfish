@@ -21,6 +21,7 @@ private:
     std::string name;
     bool missing;
     bool just_became_struct = false;
+    bool lifted = false;
 
 public:
 
@@ -52,6 +53,7 @@ public:
         name = type.getName();
         missing = false;
         just_became_struct = false;
+        lifted = bwapi_unit->isLifted();
 
         if (type == UnitTypes::Unknown) {
             e_type = UNKNOWN;
@@ -96,6 +98,8 @@ public:
     void set_just_became_struct(bool value) {just_became_struct = value;}
 
     bool did_just_become_struct() {return just_became_struct;}
+
+    bool is_lifted() {return lifted;}
 
     bool is_unknown() {return e_type == UNKNOWN;}
 

@@ -87,9 +87,12 @@ public:
 
     bool is_egg() {return f_type == EGG;}
 
-    // template reasons
+    // still need?
     bool did_just_become_struct() {return false;}
 
+    // template stuff -----------
+    bool is_lifted() {return false;}
+    
     bool is_missing() {return false;}
 };
 

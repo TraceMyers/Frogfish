@@ -50,6 +50,22 @@ public:
 
     int get_resource_depot_ct() {return resource_depots.size();}
 
+    bool has_worker(EUnit worker) {
+        std::vector<EUnit>::iterator it = std::find(workers.begin(), workers.end(), worker);
+        if (it != workers.end()) {
+            return true;
+        }
+        return false;
+    }
+
+    bool has_structure(EUnit structure) {
+        std::vector<EUnit>::iterator it = std::find(structures.begin(), structures.end(), structure);
+        if (it != structures.end()) {
+            return true;
+        }
+        return false;
+    }
+
     const std::vector<EUnit> &get_structures() {return structures;}
 
     const std::vector<EUnit> &get_workers() {return workers;}

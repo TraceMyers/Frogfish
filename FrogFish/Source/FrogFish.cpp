@@ -42,7 +42,6 @@ void FrogFish::onFrame() {
 
     assign_new_bases(the_map, base_storage, unit_storage);
     assign_base_assets(the_map, base_storage, unit_storage);
-    unassign_base_assets(the_map, base_storage, unit_storage);
     unassign_bases(base_storage);
 
     draw_units(unit_storage);

@@ -10,3 +10,5 @@ shitcheck-cppcheck-build-dir
 LICENSE.txt
 README.txt
 shitcheck.cppcheck
+FrogFish/Source/txt/
+FrogFish/Source/movdll.py

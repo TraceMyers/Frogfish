@@ -47,6 +47,22 @@ public:
 
     int get_resource_depot_ct() {return resource_depots.size();}
 
+    bool has_worker(FUnit worker) {
+        std::vector<FUnit>::iterator it = std::find(workers.begin(), workers.end(), worker);
+        if (it != workers.end()) {
+            return true;
+        }
+        return false;
+    }
+
+    bool has_structure(FUnit structure) {
+        std::vector<FUnit>::iterator it = std::find(structures.begin(), structures.end(), structure);
+        if (it != structures.end()) {
+            return true;
+        }
+        return false;
+    }
+
     const std::vector<FUnit> &get_structures() {return structures;}
 
     const std::vector<FUnit> &get_workers() {return workers;}
