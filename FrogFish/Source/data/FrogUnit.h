@@ -17,27 +17,38 @@ private:
 
 public:
 
-    enum FTYPE {
+    static enum FTASKS {
+        IDLE,
+        MINE_MINERALS,
+        MINE_GAS,
+        TRANSFER_BASE,
+        MORPH_STRUCT,
+        MORPH_UNIT,
+        ATTACK,
+        SCOUT
+    };
+
+    static enum FTYPES {
         EGG,
         LARVA,
         WORKER,
         ARMY,
-        STRUCT
+        STRUCT,
+        UNASSIGNED
     };
 
-    FTYPE f_type;
+    FTYPES f_type;
+    FTASKS f_task;
 
     FrogUnit(const Unit u) : 
         bwapi_unit(u),
-        cmd_timer(new BWTimer<FrogUnit *>)
+        cmd_ready(true),
+        cmd_timer(new BWTimer<FrogUnit *>),
+        f_task(FTASKS::IDLE),
+        f_type(FTYPES::UNASSIGNED)
     {update();}
 
-    bool type_changed() {
-        return type == bwapi_unit->getType();
-    }
-
     void update() {
-        cmd_timer->on_frame_update();
         type = bwapi_unit->getType();
 
         if (type.isBuilding()) {
@@ -55,6 +66,10 @@ public:
         else {
             f_type = LARVA;
         }
+    }
+
+    void update_cmd_timer() {
+        cmd_timer->on_frame_update();
     }
 
     const Unit bwapi_u() {return bwapi_unit;}
@@ -93,10 +108,13 @@ public:
 
     bool is_ready() {return cmd_ready;}
 
+    bool type_changed() {return type == bwapi_unit->getType();}
+
     // only for use by FUnit
     static void set_ready(FrogUnit *f_unit) {f_unit->cmd_ready = true;}
 
     void set_cmd_delay(int frames) {
+        cmd_ready = false;
         static void (*func)(FrogUnit *f_unit) = &set_ready;
         cmd_timer->start(this, func, 0, frames);
     }

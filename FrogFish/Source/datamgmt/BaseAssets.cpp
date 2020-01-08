@@ -64,7 +64,6 @@ void assign_asset(
                         base->remove_worker(asset);
                     }
                     else if (!asset->is_larva() && base->has_larva(asset)) {
-                        printf("removing larva\n");
                         base->remove_larva(asset);
                     }
                 }

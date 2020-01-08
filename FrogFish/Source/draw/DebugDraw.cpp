@@ -36,7 +36,7 @@ void draw_units(UnitStorage &unit_storage) {
     const std::map<int, FUnit> &self_units = unit_storage.self_units();
     register std::map<int, FUnit>::const_iterator self_it;
     register FUnit f_unit;
-    FrogUnit::FTYPE f_type;
+    FrogUnit::FTYPES f_type;
     Position pos;
 
     for (self_it = self_units.begin(); self_it != self_units.end(); ++self_it) {
@@ -44,16 +44,16 @@ void draw_units(UnitStorage &unit_storage) {
         f_type = f_unit->f_type;
         pos = f_unit->get_pos();
         switch(f_type) {
-            case 0:
+            case FrogUnit::FTYPES::EGG:
                 Broodwar->drawTextMap(pos, "egg");
             break;
-            case 1:
+            case FrogUnit::FTYPES::LARVA:
                 Broodwar->drawTextMap(pos, "larva");
             break;
-            case 2:
+            case FrogUnit::FTYPES::WORKER:
                 Broodwar->drawTextMap(pos, "worker");
             break;
-            case 3:
+            case FrogUnit::FTYPES::ARMY:
                 Broodwar->drawTextMap(pos, "army");
             break;
             default:

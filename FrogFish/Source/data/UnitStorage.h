@@ -40,11 +40,6 @@ private:
         int ID = u->getID();
 
         if ((e_unit = enemy_ID_2_eunit[ID]) == NULL) {
-            printf(
-                "storing enemy unit %s, id %d\n", 
-                u->getType().getName().c_str(),
-                u->getID()
-            );
             e_unit = new EnemyUnit(u);
             enemy_ID_2_eunit[ID] = e_unit;
             enemy_newly_stored.push_back(e_unit);
@@ -70,11 +65,6 @@ private:
         int ID = u->getID();
 
         if ((e_unit = enemy_ID_2_eunit[ID]) != NULL) {
-            printf(
-                "removing enemy unit %s, id %d\n", 
-                e_unit->get_name().c_str(),
-                e_unit->get_ID()
-            );
             enemy_ID_2_eunit.erase(ID);
             enemy_newly_removed.push_back(e_unit);
         }
@@ -164,6 +154,7 @@ public:
                 f_unit->update();
                 self_newly_changed_type.push_back(f_unit);
             }
+            f_unit->update_cmd_timer();
         }
     }
 
