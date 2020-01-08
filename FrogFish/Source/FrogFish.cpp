@@ -1,5 +1,6 @@
 #include "FrogFish.h"
 #include "draw/DebugDraw.h"
+#include "production/MakeQueue.h"
 #include "data/UnitStorage.h"
 #include "data/BaseStorage.h"
 #include "data/EnemyBase.h"
@@ -20,25 +21,25 @@ using namespace Filter;
 
 UnitStorage unit_storage;
 BaseStorage base_storage;
+MakeQueue make_queue;
 EconStats econ_stats;
 BWTimer<void *> timer;
 
 void FrogFish::onStart() {
     Broodwar->sendText("Hello Sailor!");
     Broodwar->enableFlag(Flag::UserInput);
-    Broodwar->setLocalSpeed(12);
+    Broodwar->setLocalSpeed(24);
     Broodwar->setCommandOptimizationLevel(2);
     onStart_alloc_debug_console();
     onStart_send_workers_to_mine();
     onStart_init_bwem();
     init_base_storage(the_map, base_storage);
     econ_stats.init();
-    //timer.start(20, 0, false);
 }
 
 void FrogFish::onFrame() {
 	if (Broodwar->isReplay() || Broodwar->isPaused() || !Broodwar->self()) {return;}
-    //timer.on_frame_update();
+    timer.on_frame_update();
 
     // handle data
     unit_storage.update();
@@ -47,7 +48,7 @@ void FrogFish::onFrame() {
     unassign_bases(base_storage);
     unit_storage.clear_newly_assigned();
 
-    econ_stats.on_frame_update();    
+    //econ_stats.on_frame_update();    
 
     // draw
     draw_units(unit_storage);
@@ -58,8 +59,15 @@ void FrogFish::onFrame() {
     send_idle_workers_to_mine(base_storage);
     just_make_drones(base_storage);
 
-    /*
     if (timer.is_stopped()) {
+        std::vector<bool>priority(11);
+        std::vector<double>proportions(11);
+        proportions[MakeQueue::DRONE] = 0.25;
+        proportions[MakeQueue::ZERGLING] = 0.25;
+        proportions[MakeQueue::LURKER] = 0.5;
+        make_queue.take_order(base_storage, proportions, priority, 30);
+        make_queue.temp_print_and_clear_queue();
+        /*
         const std::vector<FBase> &self_bases = base_storage.get_self_bases();
         printf("self base ct = %d\n", self_bases.size());
         #ifndef NDEBUG
@@ -84,9 +92,9 @@ void FrogFish::onFrame() {
             );
         }
         #endif
-        timer.restart();
+        */
+        timer.start(100, 0, false);
     }
-    */
 }
 
 

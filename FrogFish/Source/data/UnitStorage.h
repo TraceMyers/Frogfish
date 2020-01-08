@@ -116,7 +116,7 @@ public:
 
     void remove_queued() {
         register BWAPI::Unit u;
-        for (register int i = 0; i < remove_buff.size(); i++) {
+        for (unsigned int i = 0; i < remove_buff.size(); i++) {
             u = remove_buff[i];
             if (u->getPlayer() == Broodwar->self()) {
                 self_remove(u);
@@ -130,14 +130,14 @@ public:
 
     void clear_newly_assigned() {
         self_newly_stored.clear();
-        for (register int i = 0; i < self_newly_removed.size(); i++) {
+        for (unsigned int i = 0; i < self_newly_removed.size(); i++) {
             delete self_newly_removed[i];
         }
         self_newly_removed.clear();
         self_newly_changed_type.clear();
 
         enemy_newly_stored.clear();
-        for (register int i = 0; i < enemy_newly_removed.size(); i++) {
+        for (unsigned int i = 0; i < enemy_newly_removed.size(); i++) {
             delete enemy_newly_removed[i];
         }
         enemy_newly_removed.clear();

@@ -13,11 +13,11 @@ private:
     UnitType type;
     std::vector<double> velocity {0.0, 0.0};
     bool cmd_ready;
-    BWTimer<FrogUnit *> *cmd_timer;
+    BWTimer<FrogUnit *> cmd_timer;
 
 public:
 
-    static enum FTASKS {
+    enum FTASKS {
         IDLE,
         MINE_MINERALS,
         MINE_GAS,
@@ -28,7 +28,7 @@ public:
         SCOUT
     };
 
-    static enum FTYPES {
+    enum FTYPES {
         EGG,
         LARVA,
         WORKER,
@@ -43,7 +43,6 @@ public:
     FrogUnit(const Unit u) : 
         bwapi_unit(u),
         cmd_ready(true),
-        cmd_timer(new BWTimer<FrogUnit *>),
         f_task(FTASKS::IDLE),
         f_type(FTYPES::UNASSIGNED)
     {update();}
@@ -69,7 +68,7 @@ public:
     }
 
     void update_cmd_timer() {
-        cmd_timer->on_frame_update();
+        cmd_timer.on_frame_update();
     }
 
     const Unit bwapi_u() {return bwapi_unit;}
@@ -84,7 +83,7 @@ public:
 
     const Position &get_pos() {return bwapi_unit->getPosition();}
 
-    const TilePosition &get_tilepos() {return bwapi_unit->getTilePosition();}
+    const TilePosition get_tilepos() {return bwapi_unit->getTilePosition();}
 
     const std::vector<double> &get_velocity() {
         velocity[0] = bwapi_unit->getVelocityX();
@@ -116,10 +115,8 @@ public:
     void set_cmd_delay(int frames) {
         cmd_ready = false;
         static void (*func)(FrogUnit *f_unit) = &set_ready;
-        cmd_timer->start(this, func, 0, frames);
+        cmd_timer.start(this, func, 0, frames);
     }
-
-    void free_data() {delete cmd_timer;}
 
     // template stuff -----------
     bool is_lifted() {return false;}

@@ -125,7 +125,7 @@ void draw_base_info(BaseStorage &base_storage) {
         );
     }
     const std::vector<EBase> &enemy_bases = base_storage.get_enemy_bases();
-    for (register int i = 0; i < enemy_bases.size(); i++) {
+    for (unsigned int i = 0; i < enemy_bases.size(); i++) {
         const EBase e_base = enemy_bases[i];
         const Position &center = e_base->get_center();
         Broodwar->drawTextMap(Position(center.x + 10, center.y - 62), "Enemy Base!");

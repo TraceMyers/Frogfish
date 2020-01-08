@@ -25,13 +25,13 @@ void assign_asset(
     const std::vector<BaseT> &bases,
     UnitT asset
 ) {
-    const TilePosition &structure_tilepos = asset->get_tilepos();
+    const TilePosition structure_tilepos = asset->get_tilepos();
     if (the_map.Valid(structure_tilepos)) {
         const BWEM::Area *asset_area = the_map.GetArea(structure_tilepos);
         if (asset_area != nullptr) {
             std::vector<BaseT> potential_assign_bases;
             for (unsigned int i = 0; i < bases.size(); i++) {
-                auto base = bases[i];
+                BaseT base = bases[i];
                 if (
                     asset_area->Id() == base->get_area()->Id()
                     && !asset->is_lifted()

@@ -14,7 +14,7 @@ void init_base_storage(BWEM::Map &the_map, BaseStorage &base_storage) {
     int j = 0;
     for (auto &area : areas) {
         const std::vector<BWEM::Base> &bases = area.Bases();
-        for (int i = 0; i < bases.size(); ++i) {
+        for (unsigned int i = 0; i < bases.size(); ++i) {
             base_storage.add_neutral_base(&bases[i]);
             j++;
         }
@@ -59,12 +59,13 @@ void self_assign_new_bases(
     for (unsigned int i = 0; i < self_units.size(); ++i) {
         FUnit f_unit = self_units[i];
         if (f_unit->is_struct()) {
-            const TilePosition &structure_tilepos = f_unit->get_tilepos();
+            const TilePosition structure_tilepos = f_unit->get_tilepos();
             if (the_map.Valid(structure_tilepos)) {
                 const BWEM::Area *structure_area = the_map.GetArea(structure_tilepos);
                 if (structure_area != nullptr) {
                     const std::vector<BWEM::Base> &area_bases = structure_area->Bases();
                     std::vector<const BWEM::Base *> potential_new_bases;
+                    //std::vector<BWEM::Base *> potential_new_bases;
                     for (auto &base : area_bases) {
                         int neutral_base_i = neutral_bases.find(&base);
                         if (neutral_base_i != -1) {
@@ -106,7 +107,7 @@ void enemy_assign_new_bases(
     for (unsigned int i = 0; i < enemy_units.size(); ++i) {
         EUnit e_unit = enemy_units[i];
         if (e_unit->is_struct()) {
-            const TilePosition &structure_tilepos = e_unit->get_tilepos();
+            const TilePosition structure_tilepos = e_unit->get_tilepos();
             if (the_map.Valid(structure_tilepos)) {
                 const BWEM::Area *structure_area = the_map.GetArea(structure_tilepos);
                 if (structure_area != nullptr) {
@@ -149,7 +150,7 @@ void enemy_assign_new_bases(
 void unassign_bases(BaseStorage &base_storage) {
     const std::vector<FBase> &self_bases = base_storage.get_self_bases();
     std::vector<FBase> remove_self_bases;
-    for (int i = 0; i < self_bases.size(); i++) {
+    for (unsigned int i = 0; i < self_bases.size(); i++) {
         const FBase f_base = self_bases[i];
         if (f_base->get_structure_ct() == 0) {
             remove_self_bases.push_back(f_base);
@@ -160,7 +161,7 @@ void unassign_bases(BaseStorage &base_storage) {
     }
     const std::vector<EBase> &enemy_bases = base_storage.get_enemy_bases();
     std::vector<EBase> remove_enemy_bases;
-    for (int i = 0; i < enemy_bases.size(); i++) {
+    for (unsigned int i = 0; i < enemy_bases.size(); i++) {
         const EBase e_base = enemy_bases[i];
         if (e_base->get_structure_ct() == 0) {
             remove_enemy_bases.push_back(e_base);

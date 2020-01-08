@@ -71,7 +71,6 @@ public:
         if (started) {
             --frames_left;
             if (frames_left <= 0) {
-                printf("timeout\n");
                 if (callback_obj_ptr != nullptr) {
                     obj_callback(callback_obj_ptr);
                 }

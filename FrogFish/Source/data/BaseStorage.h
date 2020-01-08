@@ -30,7 +30,9 @@ public:
     }
 
     void add_self_base(const BWEM::Base *b) {
-        neutral_bases.remove(b);
+        const BWEM::Base *j = neutral_bases.remove(b);
+        if (j == nullptr)
+            printf("base storage bwem base nullptr\n");
         FBase f_base = new FrogBase(b);
         self_bases.push_back(f_base);
         self_newly_stored.push_back(f_base);
