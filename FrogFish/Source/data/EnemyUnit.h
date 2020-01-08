@@ -83,11 +83,11 @@ public:
 
     const TilePosition get_tilepos() {return tilepos;}
 
-    const std::vector<double>& get_velocity() {return velocity;}
+    const std::vector<double> &get_velocity() {return velocity;}
 
     const UnitType get_type() {return type;}
 
-    const std::string& get_name() {return name;}
+    const std::string &get_name() {return name;}
 
     void set_missing(bool value) {missing = value;}
 

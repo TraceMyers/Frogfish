@@ -81,7 +81,7 @@ public:
 
     int get_energy() {return bwapi_unit->getEnergy();}
 
-    const Position &get_pos() {return bwapi_unit->getPosition();}
+    const Position get_pos() {return bwapi_unit->getPosition();}
 
     const TilePosition get_tilepos() {return bwapi_unit->getTilePosition();}
 

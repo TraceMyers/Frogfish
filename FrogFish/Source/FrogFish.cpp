@@ -62,15 +62,16 @@ void FrogFish::onFrame() {
     if (timer.is_stopped()) {
         std::vector<bool>priority(11);
         std::vector<double>proportions(11);
-        proportions[MakeQueue::DRONE] = 0.25;
-        proportions[MakeQueue::ZERGLING] = 0.25;
-        proportions[MakeQueue::LURKER] = 0.5;
-        make_queue.take_order(base_storage, proportions, priority, 30);
+        proportions[MakeQueue::DRONE] = 0.1;
+        proportions[MakeQueue::ZERGLING] = 0.2;
+        proportions[MakeQueue::LURKER] = 0.3;
+        proportions[MakeQueue::MUTALISK] = 0.3;
+        proportions[MakeQueue::GUARDIAN] = 0.1;
+        make_queue.take_order(base_storage, proportions, priority, 90);
         make_queue.temp_print_and_clear_queue();
         /*
         const std::vector<FBase> &self_bases = base_storage.get_self_bases();
         printf("self base ct = %d\n", self_bases.size());
-        #ifndef NDEBUG
         for (unsigned int i = 0; i < self_bases.size(); i++) {
             printf("\nbase %d:\n", i);
             const FBase f_base = self_bases[i];
@@ -91,7 +92,6 @@ void FrogFish::onFrame() {
                 f_base->get_larva_ct()
             );
         }
-        #endif
         */
         timer.start(100, 0, false);
     }
