@@ -1,10 +1,24 @@
-// the problem is here
 #include "BaseAssets.h"
 #include <BWEM/bwem.h>
 #include "../data/BaseStorage.h"
 #include "../data/UnitStorage.h"
 
-// TODO: add resource depots & workers
+template <class UnitT, class BaseT>
+inline void assign_asset_to_base(const UnitT asset, const BaseT base) {
+    if (asset->is_struct()) {
+        base->add_structure(asset);
+        if (asset->get_type().isResourceDepot()) {
+            base->add_resource_depot(asset);
+        }
+    }
+    else if (asset->is_worker()) {
+        base->add_worker(asset);
+    }
+    else if (asset->is_larva()) {
+        base->add_larva(asset);
+    }
+}
+
 template <class UnitT, class BaseT>
 void assign_asset(
     BWEM::Map &the_map, 
@@ -29,15 +43,17 @@ void assign_asset(
                                 base->remove_resource_depot(asset);
                             }
                         }
-                        else if (asset->is_worker() && base->has_worker(asset)) {
-                            base->remove_worker(asset);
-                        }       
                     }
                     else if (
                         (asset->is_struct() && !base->has_structure(asset)) 
                         ||
                         (asset->is_worker() && !base->has_worker(asset))
+                        ||
+                        (asset->is_larva() && !base->has_larva(asset))
                     ) {
+                        // asset->is_larva() always returns false for EUnit
+                        // because I don't care about storing larva at enemy bases
+                        // larva storage in EnemyBase just makes it work with this template
                         potential_assign_bases.push_back(base);
                     }
                     else if (!asset->is_struct() && base->has_structure(asset)) {
@@ -46,6 +62,10 @@ void assign_asset(
                     }
                     else if (!asset->is_worker() && base->has_worker(asset)) {
                         base->remove_worker(asset);
+                    }
+                    else if (!asset->is_larva() && base->has_larva(asset)) {
+                        printf("removing larva\n");
+                        base->remove_larva(asset);
                     }
                 }
                 else if (asset->is_struct() && base->has_structure(asset)) {
@@ -57,19 +77,14 @@ void assign_asset(
                 else if (asset->is_worker() && base->has_worker(asset)) {
                     base->remove_worker(asset);
                 }
+                else if (asset->is_larva() && base->has_larva(asset)) {
+                    base->remove_larva(asset);
+                }
             }
             int potential_assign_base_ct = potential_assign_bases.size();
             if (potential_assign_base_ct == 1) {
-                auto base = potential_assign_bases[0];
-                if (asset->is_struct()) {
-                    base->add_structure(asset);
-                    if (asset->get_type().isResourceDepot()) {
-                        base->add_resource_depot(asset);
-                    }
-                }
-                else if (asset->is_worker()) {
-                    base->add_worker(asset);
-                }
+                const auto base = potential_assign_bases[0];
+                assign_asset_to_base(asset, base);
             }
             else if (potential_assign_base_ct > 1) {
                 std::vector<double> distances;
@@ -83,15 +98,7 @@ void assign_asset(
                 auto min_dist = std::min_element(distances.begin(), distances.end());
                 int base_i = std::distance(distances.begin(), min_dist);
                 const auto base = potential_assign_bases[base_i];
-                if (asset->is_struct()) {
-                    base->add_structure(asset);
-                    if (asset->get_type().isResourceDepot()) {
-                        base->add_resource_depot(asset);
-                    }
-                } 
-                else if (asset->is_worker()) {
-                    base->add_worker(asset);
-                }
+                assign_asset_to_base(asset, base);
             }
         }
     }
@@ -108,7 +115,13 @@ void assign_assets(
         std::map<int, UnitT>::const_iterator unit_it;
         for (unit_it = units.begin(); unit_it != units.end(); ++unit_it) {
             auto unit = unit_it->second;
-            if (unit->is_struct() || unit->is_worker()) {
+            if (
+                unit->is_worker() 
+                || unit->is_struct() 
+                || unit->is_larva()
+                || unit->get_type() == BWAPI::UnitTypes::Zerg_Egg
+            ) {
+                // eggs are let through to unassign them from self base larva
                 assign_asset(the_map, bases, unit);
             }
         }
@@ -141,6 +154,14 @@ void remove_dead_assets(const std::vector<UnitT> &assets, const std::vector<Base
             for (BaseT base : bases) {
                 if (base->has_worker(asset)) {
                     base->remove_worker(asset);
+                    break;
+                }
+            }
+        }
+        else if (asset->is_larva()) {
+            for (BaseT base : bases) {
+                if (base->has_larva(asset)) {
+                    base->remove_larva(asset);
                     break;
                 }
             }

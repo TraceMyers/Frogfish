@@ -118,6 +118,11 @@ void draw_base_info(BaseStorage &base_storage) {
             "resource depots: %d",
             f_base->get_resource_depot_ct()
         );
+        Broodwar->drawTextMap(
+            Position(center.x + 10, center.y - 22), 
+            "larva: %d",
+            f_base->get_larva_ct()
+        );
     }
     const std::vector<EBase> &enemy_bases = base_storage.get_enemy_bases();
     for (register int i = 0; i < enemy_bases.size(); i++) {
@@ -139,5 +144,10 @@ void draw_base_info(BaseStorage &base_storage) {
             "resource depots: %d",
             e_base->get_resource_depot_ct()
         );
+        Broodwar->drawTextMap(
+            Position(center.x + 10, center.y - 22), 
+            "larva: %d",
+            e_base->get_larva_ct()
+        );    
     }
 }

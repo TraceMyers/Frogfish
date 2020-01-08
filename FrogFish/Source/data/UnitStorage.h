@@ -182,9 +182,6 @@ public:
                     else {
                         e_unit->update();
                         enemy_newly_changed_type.push_back(e_unit);
-                        if (e_unit->e_type != e_unit->STRUCT && u->getType().isBuilding()) {
-                            e_unit->set_just_became_struct(true);
-                        }
                     }
                 }
                 else if (e_unit->get_pos() != u->getPosition()) {

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <BWAPI.h>
+#include "../utility/BWTimer.h"
 
 using namespace BWAPI;
 
@@ -11,6 +12,8 @@ private:
     Unit bwapi_unit;
     UnitType type;
     std::vector<double> velocity {0.0, 0.0};
+    bool cmd_ready;
+    BWTimer<FrogUnit *> *cmd_timer;
 
 public:
 
@@ -24,16 +27,17 @@ public:
 
     FTYPE f_type;
 
-    FrogUnit(const Unit u) {
-        bwapi_unit = u;
-        update();
-    }
+    FrogUnit(const Unit u) : 
+        bwapi_unit(u),
+        cmd_timer(new BWTimer<FrogUnit *>)
+    {update();}
 
     bool type_changed() {
         return type == bwapi_unit->getType();
     }
 
     void update() {
+        cmd_timer->on_frame_update();
         type = bwapi_unit->getType();
 
         if (type.isBuilding()) {
@@ -87,8 +91,17 @@ public:
 
     bool is_egg() {return f_type == EGG;}
 
-    // still need?
-    bool did_just_become_struct() {return false;}
+    bool is_ready() {return cmd_ready;}
+
+    // only for use by FUnit
+    static void set_ready(FrogUnit *f_unit) {f_unit->cmd_ready = true;}
+
+    void set_cmd_delay(int frames) {
+        static void (*func)(FrogUnit *f_unit) = &set_ready;
+        cmd_timer->start(this, func, 0, frames);
+    }
+
+    void free_data() {delete cmd_timer;}
 
     // template stuff -----------
     bool is_lifted() {return false;}

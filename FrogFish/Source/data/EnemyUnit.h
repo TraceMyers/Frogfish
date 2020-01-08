@@ -20,7 +20,6 @@ private:
     UnitType type;
     std::string name;
     bool missing;
-    bool just_became_struct = false;
     bool lifted = false;
 
 public:
@@ -52,7 +51,6 @@ public:
         max_hp = type.maxHitPoints();
         name = type.getName();
         missing = false;
-        just_became_struct = false;
         lifted = bwapi_unit->isLifted();
 
         if (type == UnitTypes::Unknown) {
@@ -95,10 +93,6 @@ public:
 
     bool is_missing() {return missing;}
 
-    void set_just_became_struct(bool value) {just_became_struct = value;}
-
-    bool did_just_become_struct() {return just_became_struct;}
-
     bool is_lifted() {return lifted;}
 
     bool is_unknown() {return e_type == UNKNOWN;}
@@ -112,6 +106,9 @@ public:
     bool friend operator == (EnemyUnit const &e_unit1, EnemyUnit const &e_unit2) {
         return e_unit1.ID == e_unit2.ID;
     }
+
+    // template stuff
+    bool is_larva() {return false;}
 };
 
 typedef class EnemyUnit *EUnit;

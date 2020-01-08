@@ -2,7 +2,6 @@
 #include "draw/DebugDraw.h"
 #include "data/UnitStorage.h"
 #include "data/BaseStorage.h"
-#include "utility/BWTimer.h"
 #include "data/EnemyBase.h"
 #include "datamgmt/BaseOwnership.h"
 #include "datamgmt/BaseAssets.h"
@@ -12,24 +11,25 @@
 #include <set>
 #include <chrono>
 #include <vector>
+#include "utility/BWTimer.h"
 
 using namespace BWAPI;
 using namespace Filter;
 
 UnitStorage unit_storage;
 BaseStorage base_storage;
-BWTimer timer;
+BWTimer<FrogFish *> timer;
 
 void FrogFish::onStart() {
     Broodwar->sendText("Hello Sailor!");
     Broodwar->enableFlag(Flag::UserInput);
-    Broodwar->setLocalSpeed(21);
+    Broodwar->setLocalSpeed(12);
     Broodwar->setCommandOptimizationLevel(2);
     onStart_alloc_debug_console();
     onStart_send_workers_to_mine();
     onStart_init_bwem();
     init_base_storage(the_map, base_storage);
-    timer.start(10, 0, false);
+    timer.start(20, 0, false);
 }
 
 void FrogFish::onFrame() {
@@ -50,11 +50,34 @@ void FrogFish::onFrame() {
     unit_storage.clear_newly_assigned();
 
     if (timer.is_stopped()) {
-        const std::vector<FBase> &bases = base_storage.get_self_bases();
-        printf("self base ct = %d\n", bases.size());
+        const std::vector<FBase> &self_bases = base_storage.get_self_bases();
+        printf("self base ct = %d\n", self_bases.size());
+        #ifndef NDEBUG
+        for (unsigned int i = 0; i < self_bases.size(); i++) {
+            printf("\nbase %d:\n", i);
+            const FBase f_base = self_bases[i];
+            printf(
+                "structures: %d\n",
+                f_base->get_structure_ct()
+            );
+            printf(
+                "workers: %d\n",
+                f_base->get_worker_ct()
+            );
+            printf(
+                "resource depots: %d\n",
+                f_base->get_resource_depot_ct()
+            );
+            printf(
+                "larva: %d\n\n",
+                f_base->get_larva_ct()
+            );
+        }
+        #endif
         timer.restart();
     }
 }
+
 
 void FrogFish::onSendText(std::string text) {
     Broodwar->sendText("%s", text.c_str());

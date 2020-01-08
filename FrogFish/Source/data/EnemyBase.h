@@ -12,6 +12,7 @@ class EnemyBase {
 private:
 
     const BWEM::Base *bwem_base;
+    std::vector<EUnit> larva;
 	std::vector<EUnit> workers;
     std::vector<EUnit> structures;
     std::vector<EUnit> resource_depots;
@@ -19,6 +20,13 @@ private:
 public:
 
     EnemyBase(const BWEM::Base *_bwem_base) : bwem_base(_bwem_base) {}
+
+    void add_larva(EUnit _larva) {larva.push_back(_larva);}
+
+    void remove_larva(EUnit _larva) {
+        std::vector<EUnit>::iterator it = std::remove(larva.begin(), larva.end(), _larva);
+        larva.erase(it, larva.end());
+    }
 
     void add_worker(EUnit worker) {workers.push_back(worker);}
 
@@ -44,11 +52,21 @@ public:
         resource_depots.erase(it, resource_depots.end());
     }
 
+    int get_larva_ct() {return larva.size();}
+
     int get_worker_ct() {return workers.size();}
 
     int get_structure_ct() {return structures.size();}
 
     int get_resource_depot_ct() {return resource_depots.size();}
+
+    bool has_larva(EUnit _larva) {
+        std::vector<EUnit>::iterator it = std::find(larva.begin(), larva.end(), _larva);
+        if (it != larva.end()) {
+            return true;
+        }
+        return false;
+    }
 
     bool has_worker(EUnit worker) {
         std::vector<EUnit>::iterator it = std::find(workers.begin(), workers.end(), worker);
@@ -65,6 +83,8 @@ public:
         }
         return false;
     }
+
+    const std::vector<EUnit> &get_larva() {return larva;}
 
     const std::vector<EUnit> &get_structures() {return structures;}
 

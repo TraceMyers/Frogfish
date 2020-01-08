@@ -12,6 +12,7 @@ class FrogBase {
 private:
 
     const BWEM::Base *bwem_base;
+    std::vector<FUnit> larva;
     std::vector<FUnit> workers;
     std::vector<FUnit> structures;
     std::vector<FUnit> resource_depots;
@@ -19,6 +20,13 @@ private:
 public:
 
     FrogBase(const BWEM::Base *_bwem_base) : bwem_base(_bwem_base) {}
+
+    void add_larva(FUnit _larva) {larva.push_back(_larva);}
+
+    void remove_larva(FUnit _larva) {
+        std::vector<FUnit>::iterator it = std::remove(larva.begin(), larva.end(), _larva);
+        larva.erase(it, larva.end());
+    }
 
     void add_worker(FUnit worker) {workers.push_back(worker);}
 
@@ -41,11 +49,21 @@ public:
         resource_depots.erase(it, resource_depots.end());
     }
 
+    int get_larva_ct() {return larva.size();}
+
     int get_worker_ct() {return workers.size();}
 
     int get_structure_ct() {return structures.size();}
 
     int get_resource_depot_ct() {return resource_depots.size();}
+
+    bool has_larva(FUnit _larva) {
+        std::vector<FUnit>::iterator it = std::find(larva.begin(), larva.end(), _larva);
+        if (it != larva.end()) {
+            return true;
+        }
+        return false;
+    }
 
     bool has_worker(FUnit worker) {
         std::vector<FUnit>::iterator it = std::find(workers.begin(), workers.end(), worker);
@@ -63,9 +81,11 @@ public:
         return false;
     }
 
-    const std::vector<FUnit> &get_structures() {return structures;}
+    const std::vector<FUnit> &get_larva() {return larva;}
 
     const std::vector<FUnit> &get_workers() {return workers;}
+
+    const std::vector<FUnit> &get_structures() {return structures;}
 
     const std::vector<FUnit> &get_resource_depot() {return resource_depots;}
 

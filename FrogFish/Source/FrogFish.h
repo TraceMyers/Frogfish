@@ -6,6 +6,9 @@
 #include <stdio.h>
 #include <assert.h>
 
+template <class T>
+class BWTimer;
+
 namespace {auto &the_map = BWEM::Map::Instance();}
 
 using namespace BWAPI;
