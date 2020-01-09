@@ -36,7 +36,6 @@
         // larva spawn rate: 1 per 340 frames
     // overlords are given high priority at the safest bases 
 
-#define MKQ_UNIT_TYPE_CT 8
 #ifndef LARVA_SPAWN_SEC
 #define LARVA_SPAWN_SEC 14.166
 #endif
@@ -46,10 +45,13 @@ class MakeQueue {
 private:
 
     std::deque<BWAPI::UnitType> queue;
+    int queue_size;
 
 public:
 
-    BWAPI::UnitType types[MKQ_UNIT_TYPE_CT] {
+    int mkq_unit_type_ct = 8;
+
+    BWAPI::UnitType types[8] {
         BWAPI::UnitTypes::Zerg_Drone,
         BWAPI::UnitTypes::Zerg_Zergling,
         BWAPI::UnitTypes::Zerg_Hydralisk,
@@ -84,7 +86,7 @@ public:
         const std::vector<bool> &high_priority,
         int order_period
     ) {
-        assert(proportions.size() == MKQ_UNIT_TYPE_CT);
+        assert(proportions.size() == (unsigned int)mkq_unit_type_ct);
         const std::vector<FBase> &bases = base_storage.get_self_bases();
         register int larvae_ct = 0;
         register int resource_depot_ct = 0;
@@ -101,8 +103,8 @@ public:
             resource_depot_ct * order_period / LARVA_SPAWN_SEC);
         
         printf("order size: %d\n", order_size);
-        std::vector<int> unit_type_make_counts(MKQ_UNIT_TYPE_CT);
-        for (int i = 0; i < MKQ_UNIT_TYPE_CT ; ++i) {
+        std::vector<int> unit_type_make_counts(mkq_unit_type_ct);
+        for (int i = 0; i < mkq_unit_type_ct ; ++i) {
             if (proportions[i] == 0) {
                 unit_type_make_counts[i] = 0;
             }
@@ -118,7 +120,7 @@ public:
         bool still_filling_queue = true;
         while (still_filling_queue) {
             still_filling_queue = false;
-            for (int i = 0; i < MKQ_UNIT_TYPE_CT; ++i) {
+            for (int i = 0; i < mkq_unit_type_ct; ++i) {
                 const BWAPI::UnitType t = types[i];
                 if (high_priority[i]) {
                     still_filling_queue = true;
@@ -134,19 +136,26 @@ public:
                 }
             }
         }
-    }
-
-    BWAPI::UnitType pop() {
-        if (queue.size() > 0) {
-            BWAPI::UnitType front = queue.front();
-            queue.pop_front();
-            return front;
-        }
-        return BWAPI::UnitTypes::Unknown;
+        queue_size = queue.size();
     }
 
     const std::deque<BWAPI::UnitType> &get_queue() {
         return queue;
+    }
+
+    void pop() {
+        if (queue_size > 0) {
+            queue.pop_front();
+            --queue_size;
+        }
+    }
+
+    BWAPI::UnitType front() {
+        if (queue_size > 0) {
+            return queue.front();
+        }
+        return BWAPI::UnitTypes::Unknown;
+
     }
 
     void push_overlords_front(int count) {
@@ -155,17 +164,20 @@ public:
         }
     }
 
-    void temp_print_and_clear_queue() {
+    void print_queue() {
         int i = 0;
         for (auto utype : queue) {
-            printf("%d: %s\n", i, utype.getName().c_str());
+            printf("MakeQueue #%d: %s\n", i, utype.getName().c_str());
             i++;
         }
-        queue.clear();
     }
 
     bool order_filled() {
-        return queue.size() == 0;
+        return queue_size == 0;
+    }
+
+    int size() {
+        return queue_size;
     }
 
     // overlord production assumes this order is going to be wanted forever

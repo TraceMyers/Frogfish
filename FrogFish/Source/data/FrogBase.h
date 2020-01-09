@@ -12,14 +12,27 @@ class FrogBase {
 private:
 
     const BWEM::Base *bwem_base;
-    std::vector<FUnit> larva;
-    std::vector<FUnit> workers;
-    std::vector<FUnit> structures;
-    std::vector<FUnit> resource_depots;
+    std::vector<FUnit> 
+        larva,
+        workers,
+        structures,
+        resource_depots;
 
 public:
 
-    FrogBase(const BWEM::Base *_bwem_base) : bwem_base(_bwem_base) {}
+    // for deciding what can/should be done at this base
+    // i.e. if danger level red, don't make drones here, and secure
+    // the base before transferring
+    // yellow might be a base that is near the enemy, but not
+    // currently under attack
+    enum DANGER_LEVEL {
+        GREEN,
+        YELLOW,
+        RED
+    };
+    DANGER_LEVEL danger_level;
+
+    FrogBase(const BWEM::Base *_bwem_base) : bwem_base(_bwem_base), danger_level(GREEN) {}
 
     void add_larva(FUnit _larva) {larva.push_back(_larva);}
 
@@ -79,6 +92,14 @@ public:
             return true;
         }
         return false;
+    }
+
+    void set_danger_level(DANGER_LEVEL level) {
+        danger_level = level;
+    }
+
+    DANGER_LEVEL get_danger_level() {
+        return danger_level;
     }
 
     const std::vector<FUnit> &get_larva() {return larva;}

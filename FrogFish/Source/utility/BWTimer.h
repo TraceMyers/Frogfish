@@ -95,4 +95,8 @@ public:
         frames_left = store_frames_left;
         started = true;
     }
+
+    int get_frames_left() {
+        return frames_left;
+    }
 };

@@ -1,10 +1,14 @@
 #include "FrogFish.h"
 #include "draw/DebugDraw.h"
 #include "production/MakeQueue.h"
+#include "production/MorphQueue.h"
+#include "production/BuildQueue.h"
+#include "production/MakeUnits.h"
+#include "production/OverlordProduction.h"
 #include "data/UnitStorage.h"
 #include "data/BaseStorage.h"
 #include "data/EnemyBase.h"
-#include "data/EconStats.h"
+#include "data/EconTracker.h"
 #include "datamgmt/BaseOwnership.h"
 #include "datamgmt/BaseAssets.h"
 #include "control/WorkerControl.h"
@@ -22,7 +26,9 @@ using namespace Filter;
 UnitStorage unit_storage;
 BaseStorage base_storage;
 MakeQueue make_queue;
-EconStats econ_stats;
+MorphQueue morph_queue;
+BuildQueue build_queue;
+EconTracker econ_tracker;
 BWTimer<void *> timer;
 
 void FrogFish::onStart() {
@@ -34,7 +40,7 @@ void FrogFish::onStart() {
     onStart_send_workers_to_mine();
     onStart_init_bwem();
     init_base_storage(the_map, base_storage);
-    econ_stats.init();
+    econ_tracker.init();
 }
 
 void FrogFish::onFrame() {
@@ -48,18 +54,30 @@ void FrogFish::onFrame() {
     unassign_bases(base_storage);
     unit_storage.clear_newly_assigned();
 
-    econ_stats.on_frame_update();    
+    econ_tracker.on_frame_update();    
 
     // draw
     draw_units(unit_storage);
     draw_base_info(base_storage);
+    draw_make_queue(make_queue);
 
     if (Broodwar->getFrameCount() % Broodwar->getLatencyFrames() != 0) {return;}
+
     // run commands
     send_idle_workers_to_mine(base_storage);
 
+    // try contiunous drone production with current mechanisms:
+    if (make_queue.order_filled()) {
+        std::vector<double> order_proportions(make_queue.mkq_unit_type_ct);
+        order_proportions[MakeQueue::DRONE] = 1.0;
+        std::vector<bool> high_priority(make_queue.mkq_unit_type_ct);
+        make_queue.take_order(base_storage, order_proportions, high_priority, 40);
+    }
+    auto_overlord_production(make_queue, morph_queue, build_queue, base_storage, econ_tracker);
+    spend_down(base_storage, make_queue, econ_tracker);
+
     if (timer.is_stopped()) {
-        timer.start(100, 0, false);
+        // timer.start(300, 0, false);
     }
 }
 

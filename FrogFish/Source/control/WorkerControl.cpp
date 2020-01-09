@@ -5,6 +5,7 @@
 #include "../data/FrogUnit.h"
 #include <BWEM/bwem.h>
 
+// TODO: centralize task setting
 void send_idle_workers_to_mine(BaseStorage &base_storage) {
     const std::vector<FBase> &self_bases = base_storage.get_self_bases();
     for (auto base : self_bases) {

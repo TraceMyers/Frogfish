@@ -1,4 +1,5 @@
 #include "DebugDraw.h"
+#include "../production/MakeQueue.h"
 #include "../data/UnitStorage.h"
 #include "../data/EnemyUnit.h"
 #include "../data/FrogUnit.h"
@@ -8,6 +9,7 @@
 #include <BWAPI.h>
 #include <iostream>
 #include <list>
+#include <deque>
 
 using namespace BWAPI;
 
@@ -149,5 +151,14 @@ void draw_base_info(BaseStorage &base_storage) {
             "larva: %d",
             e_base->get_larva_ct()
         );    
+    }
+}
+void draw_make_queue(MakeQueue &make_queue) {
+    const std::deque<BWAPI::UnitType> &queue = make_queue.get_queue();
+    int x = 10;
+    int y = 10;
+    for (auto &item : queue) {
+        Broodwar->drawTextScreen(BWAPI::Position(x, y), "%s", item.getName().c_str());
+        y += 10;
     }
 }
