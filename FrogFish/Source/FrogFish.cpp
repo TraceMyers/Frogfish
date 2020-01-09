@@ -48,7 +48,7 @@ void FrogFish::onFrame() {
     unassign_bases(base_storage);
     unit_storage.clear_newly_assigned();
 
-    //econ_stats.on_frame_update();    
+    econ_stats.on_frame_update();    
 
     // draw
     draw_units(unit_storage);
@@ -57,42 +57,8 @@ void FrogFish::onFrame() {
     if (Broodwar->getFrameCount() % Broodwar->getLatencyFrames() != 0) {return;}
     // run commands
     send_idle_workers_to_mine(base_storage);
-    just_make_drones(base_storage);
 
     if (timer.is_stopped()) {
-        std::vector<bool>priority(11);
-        std::vector<double>proportions(11);
-        proportions[MakeQueue::DRONE] = 0.1;
-        proportions[MakeQueue::ZERGLING] = 0.2;
-        proportions[MakeQueue::LURKER] = 0.3;
-        proportions[MakeQueue::MUTALISK] = 0.3;
-        proportions[MakeQueue::GUARDIAN] = 0.1;
-        make_queue.take_order(base_storage, proportions, priority, 90);
-        make_queue.temp_print_and_clear_queue();
-        /*
-        const std::vector<FBase> &self_bases = base_storage.get_self_bases();
-        printf("self base ct = %d\n", self_bases.size());
-        for (unsigned int i = 0; i < self_bases.size(); i++) {
-            printf("\nbase %d:\n", i);
-            const FBase f_base = self_bases[i];
-            printf(
-                "structures: %d\n",
-                f_base->get_structure_ct()
-            );
-            printf(
-                "workers: %d\n",
-                f_base->get_worker_ct()
-            );
-            printf(
-                "resource depots: %d\n",
-                f_base->get_resource_depot_ct()
-            );
-            printf(
-                "larva: %d\n\n",
-                f_base->get_larva_ct()
-            );
-        }
-        */
         timer.start(100, 0, false);
     }
 }
