@@ -1,0 +1,14 @@
+1/5/2020
+- assigning structures to bases (ZvZ):
+    - lair -> hive counts new structure
+    - same for hatch -> lair
+    - made an extractor, turned into base as expected
+        - canceled extractor out of vision, base remained
+        - (because onDestroy() is only called for 
+        visible/detected(?) units)
+    - killing structures INCREMENTED base counter:
+        - extractor
+
+1/7/2020
+- some enemy drones going in and out of vision while mining are being unassigned from base
+- they might actually be getting cleared from unitstorage
