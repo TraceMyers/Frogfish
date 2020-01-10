@@ -5,6 +5,11 @@
 #include "../data/BaseStorage.h"
 #include "../data/UnitStorage.h"
 
+void update_base_data(
+    BWEM::Map &the_map, 
+    BaseStorage &base_storage, 
+    UnitStorage &unit_storage
+);
 void init_base_storage(BWEM::Map &the_map, BaseStorage &base_storage);
 void assign_new_bases(
     BWEM::Map &the_map, 

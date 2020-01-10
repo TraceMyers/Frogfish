@@ -123,8 +123,6 @@
     <ClCompile Include="Source\Dll.cpp" />
     <ClCompile Include="Source\draw\DebugDraw.cpp" />
     <ClCompile Include="Source\FrogFish.cpp" />
-    <ClCompile Include="Source\production\MakeUnits.cpp" />
-    <ClCompile Include="Source\production\OverlordProduction.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\BWEM\area.h" />
@@ -158,9 +156,9 @@
     <ClInclude Include="Source\FrogFish.h" />
     <ClInclude Include="Source\production\BuildQueue.h" />
     <ClInclude Include="Source\production\MakeQueue.h" />
-    <ClInclude Include="Source\production\MakeUnits.h" />
     <ClInclude Include="Source\production\MorphQueue.h" />
-    <ClInclude Include="Source\production\OverlordProduction.h" />
+    <ClInclude Include="Source\production\ProductionCoordinator.h" />
+    <ClInclude Include="Source\production\UnitMaker.h" />
     <ClInclude Include="Source\utility\BWEMBaseArray.h" />
     <ClInclude Include="Source\utility\BWTimer.h" />
   </ItemGroup>

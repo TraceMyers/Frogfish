@@ -49,7 +49,7 @@ private:
 
 public:
 
-    int mkq_unit_type_ct = 8;
+    const static int MKQ_UNIT_TYPE_CT = 8;
 
     BWAPI::UnitType types[8] {
         BWAPI::UnitTypes::Zerg_Drone,
@@ -86,7 +86,7 @@ public:
         const std::vector<bool> &high_priority,
         int order_period
     ) {
-        assert(proportions.size() == (unsigned int)mkq_unit_type_ct);
+        assert(proportions.size() == (unsigned int)MKQ_UNIT_TYPE_CT);
         const std::vector<FBase> &bases = base_storage.get_self_bases();
         register int larvae_ct = 0;
         register int resource_depot_ct = 0;
@@ -98,13 +98,9 @@ public:
         larvae_ct = (larvae_ct < base_ct ? base_ct : larvae_ct);
         int order_size = 
             larvae_ct + (int) round(resource_depot_ct * order_period / LARVA_SPAWN_SEC);
-        printf("order period: %d\ncalc: %.2lf\n",
-            order_period,
-            resource_depot_ct * order_period / LARVA_SPAWN_SEC);
         
-        printf("order size: %d\n", order_size);
-        std::vector<int> unit_type_make_counts(mkq_unit_type_ct);
-        for (int i = 0; i < mkq_unit_type_ct ; ++i) {
+        std::vector<int> unit_type_make_counts(MKQ_UNIT_TYPE_CT);
+        for (int i = 0; i < MKQ_UNIT_TYPE_CT ; ++i) {
             if (proportions[i] == 0) {
                 unit_type_make_counts[i] = 0;
             }
@@ -120,7 +116,7 @@ public:
         bool still_filling_queue = true;
         while (still_filling_queue) {
             still_filling_queue = false;
-            for (int i = 0; i < mkq_unit_type_ct; ++i) {
+            for (int i = 0; i < MKQ_UNIT_TYPE_CT; ++i) {
                 const BWAPI::UnitType t = types[i];
                 if (high_priority[i]) {
                     still_filling_queue = true;
@@ -137,6 +133,7 @@ public:
             }
         }
         queue_size = queue.size();
+        printf("INSIDE queue size: %d\n", queue_size);
     }
 
     const std::deque<BWAPI::UnitType> &get_queue() {
@@ -161,14 +158,6 @@ public:
     void push_overlords_front(int count) {
         for (int i = 0; i < count; i++) {
             queue.push_front(BWAPI::UnitTypes::Zerg_Overlord);
-        }
-    }
-
-    void print_queue() {
-        int i = 0;
-        for (auto utype : queue) {
-            printf("MakeQueue #%d: %s\n", i, utype.getName().c_str());
-            i++;
         }
     }
 

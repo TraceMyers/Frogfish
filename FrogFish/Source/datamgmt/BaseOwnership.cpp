@@ -1,6 +1,7 @@
 #include "../utility/BWEMBaseArray.h"
 #include "../data/BaseStorage.h"
 #include "../data/UnitStorage.h"
+#include "BaseAssets.h"
 #include "BaseOwnership.h"
 #include <BWAPI.h>
 #include <BWEM/bwem.h>
@@ -9,18 +10,17 @@ using namespace BWAPI;
 
 // TODO: template refactor
 
-void init_base_storage(BWEM::Map &the_map, BaseStorage &base_storage) {
-    const std::vector<BWEM::Area> &areas = the_map.Areas();
-    int j = 0;
-    for (auto &area : areas) {
-        const std::vector<BWEM::Base> &bases = area.Bases();
-        for (unsigned int i = 0; i < bases.size(); ++i) {
-            base_storage.add_neutral_base(&bases[i]);
-            j++;
-        }
-    }
-    printf("BaseOwnership.init_base_storage(): Added %d neutral bases\n", j);
+void update_base_data(
+    BWEM::Map &the_map, 
+    BaseStorage &base_storage, 
+    UnitStorage &unit_storage
+) {
+    assign_new_bases(the_map, base_storage, unit_storage);    
+    assign_base_assets(the_map, base_storage, unit_storage);
+    unassign_bases(base_storage);
 }
+
+
 
 // *must* be called after UnitStorage::update()
 // and before UnitStorage::clear_newly_assigned()

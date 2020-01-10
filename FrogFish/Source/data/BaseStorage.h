@@ -24,9 +24,17 @@ private:
 
 public:
 
-    // only for initialization @ BaseOwnership.init_base_storage()
-    void add_neutral_base(const BWEM::Base *b) {
-        neutral_bases.add(b);
+    void init(BWEM::Map &the_map) {
+        const std::vector<BWEM::Area> &areas = the_map.Areas();
+        int j = 0;
+        for (auto &area : areas) {
+            const std::vector<BWEM::Base> &bases = area.Bases();
+            for (unsigned int i = 0; i < bases.size(); ++i) {
+                neutral_bases.add(&bases[i]);
+                j++;
+            }
+        }
+        printf("BaseOwnership.init_base_storage(): Added %d neutral bases\n", j);
     }
 
     void add_self_base(const BWEM::Base *b) {

@@ -58,8 +58,6 @@
     <ClCompile Include="Source\datamgmt\BaseOwnership.cpp" />
     <ClCompile Include="Source\datamgmt\BaseAssets.cpp" />
     <ClCompile Include="Source\control\WorkerControl.cpp" />
-    <ClCompile Include="Source\production\MakeUnits.cpp" />
-    <ClCompile Include="Source\production\OverlordProduction.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\BWEM\area.h">
@@ -161,13 +159,13 @@
     <ClInclude Include="Source\production\MakeQueue.h">
       <Filter>headers</Filter>
     </ClInclude>
-    <ClInclude Include="Source\production\MakeUnits.h">
-      <Filter>headers</Filter>
-    </ClInclude>
     <ClInclude Include="Source\production\MorphQueue.h">
       <Filter>headers</Filter>
     </ClInclude>
-    <ClInclude Include="Source\production\OverlordProduction.h">
+    <ClInclude Include="Source\production\ProductionCoordinator.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\production\UnitMaker.h">
       <Filter>headers</Filter>
     </ClInclude>
   </ItemGroup>
