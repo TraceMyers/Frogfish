@@ -697,6 +697,8 @@ void MapImpl::OnMineralDestroyed(BWAPI::Unit u)
 	bwem_assert(iMineral != m_Minerals.end());
 
 	fast_erase(m_Minerals, distance(m_Minerals.begin(), iMineral));
+
+    OnMineralDestroyed((*iMineral).get());
 }
 
 
@@ -747,6 +749,20 @@ void MapImpl::OnBlockingNeutralDestroyed(const Neutral * pBlocking)
 		GetGraph().ComputeChokePointDistanceMatrix();
 }
 
+void MapImpl::OnRefineryMorphed(BWAPI::Unit u) {
+
+}
+
+void MapImpl::OnRefineryDiscovered(BWAPI::Unit u) {
+	auto iGeyser = find_if(m_Geysers.begin(), m_Geysers.end(), [u](const unique_ptr<Geyser> & g){ return g->Unit() == u; });
+	bwem_assert(iGeyser != m_Geysers.end());
+
+	fast_erase(m_Geysers, distance(m_Geysers.begin(), iGeyser));
+}
+
+void MapImpl::OnGeyserDiscovered(BWAPI::Unit u) {
+
+}
 
 bool MapImpl::FindBasesForStartingLocations()
 {

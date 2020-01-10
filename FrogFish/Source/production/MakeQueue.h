@@ -133,7 +133,6 @@ public:
             }
         }
         queue_size = queue.size();
-        printf("INSIDE queue size: %d\n", queue_size);
     }
 
     const std::deque<BWAPI::UnitType> &get_queue() {

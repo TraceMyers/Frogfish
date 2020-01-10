@@ -121,8 +121,8 @@
     <ClCompile Include="Source\datamgmt\BaseAssets.cpp" />
     <ClCompile Include="Source\datamgmt\BaseOwnership.cpp" />
     <ClCompile Include="Source\Dll.cpp" />
-    <ClCompile Include="Source\draw\DebugDraw.cpp" />
     <ClCompile Include="Source\FrogFish.cpp" />
+    <ClCompile Include="Source\utility\DebugDraw.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\BWEM\area.h" />
@@ -152,7 +152,6 @@
     <ClInclude Include="Source\data\FrogBase.h" />
     <ClInclude Include="Source\data\FrogUnit.h" />
     <ClInclude Include="Source\data\UnitStorage.h" />
-    <ClInclude Include="Source\draw\DebugDraw.h" />
     <ClInclude Include="Source\FrogFish.h" />
     <ClInclude Include="Source\production\BuildQueue.h" />
     <ClInclude Include="Source\production\MakeQueue.h" />
@@ -161,6 +160,7 @@
     <ClInclude Include="Source\production\UnitMaker.h" />
     <ClInclude Include="Source\utility\BWEMBaseArray.h" />
     <ClInclude Include="Source\utility\BWTimer.h" />
+    <ClInclude Include="Source\utility\DebugDraw.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

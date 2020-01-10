@@ -108,7 +108,7 @@ public:
 
     const std::vector<FUnit> &get_structures() {return structures;}
 
-    const std::vector<FUnit> &get_resource_depot() {return resource_depots;}
+    const std::vector<FUnit> &get_resource_depots() {return resource_depots;}
 
     // only called when freeing this instance
     const BWEM::Base *free_data() {return bwem_base;}

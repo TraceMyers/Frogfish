@@ -163,6 +163,18 @@ public:
 	// Should be called for each destroyed BWAPI unit u having u->getType().isSpecialBuilding() == true
 	virtual void						OnStaticBuildingDestroyed(BWAPI::Unit u) = 0;
 
+    // Should be called for each morphed BWAPI::Unit u having u->getType().isRefinery() == true
+    // Removes geysers that have been morphed into refineries/extractors/assimilators in vision
+    virtual void                        OnRefineryMorphed(BWAPI::Unit u) = 0;
+
+    // Should be called for each morphed BWAPI::Unit u having u->getType().isRefinery() == true
+    // Removes geysers that have been morphed into refineries/extractors/assimilators out of vision
+    virtual void                        OnRefineryDiscovered(BWAPI::Unit u) = 0;
+
+    // Should be called for each discovered BWAPI::Unit u having u->getType() == BWAPI::UnitTypes::Resource_Vespene_Geyser
+    // Adds new geysers when refineries are destroyed / canceled
+    virtual void                        OnGeyserDiscovered(BWAPI::Unit u) = 0;
+
 	// Returns a reference to the Areas.
 	virtual const std::vector<Area> &	Areas() const = 0;
 
