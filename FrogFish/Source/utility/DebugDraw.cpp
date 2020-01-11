@@ -93,6 +93,11 @@ void draw_map(BWEM::Map &the_map) {
     try {
         BWEM::utils::gridMapExample(the_map);
         BWEM::utils::drawMap(the_map);
+        for (auto &area : the_map.Areas()) {
+            for (auto &geyser : area.Geysers()) {
+                Broodwar->drawCircleMap(geyser->Unit()->getPosition(), 5, BWAPI::Colors::Red);
+            }
+        }
     }
     catch (const std::exception & e) {
         Broodwar << "EXCEPTION: " << e.what() << std::endl;

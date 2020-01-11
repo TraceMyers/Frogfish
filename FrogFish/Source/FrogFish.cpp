@@ -36,12 +36,14 @@ void FrogFish::onStart() {
     onStart_init_bwem();
     base_storage.init(the_map);
     econ_tracker.init();
+    timer.start(10, 0);
 }
 
 void FrogFish::onFrame() {
 	if (Broodwar->isReplay() || Broodwar->isPaused() || !Broodwar->self()) {return;}
     timer.on_frame_update();
-
+    draw_map(the_map);
+    /*
     // update data
     unit_maker.on_frame_update();
     econ_tracker.on_frame_update();    
@@ -61,9 +63,8 @@ void FrogFish::onFrame() {
     // try contiunous drone production with current mechanisms:
 
     unit_maker.make_units(econ_tracker, base_storage, production_coordinator);
-    if (timer.is_stopped()) {
-        // timer.start(100, 0, false);
-    }
+    */
+    
 }
 
 
@@ -90,6 +91,9 @@ void FrogFish::onNukeDetect(Position target) {
 
 void FrogFish::onUnitDiscover(Unit unit) {
     unit_storage.queue_store(unit);
+    if (unit->getType() == BWAPI::UnitTypes::Resource_Vespene_Geyser) {
+        the_map.OnGeyserCreatedOrDiscovered(unit);
+    }
 }
 
 void FrogFish::onUnitEvade(Unit unit) {
@@ -106,6 +110,9 @@ void FrogFish::onUnitHide(Unit unit) {
 
 void FrogFish::onUnitCreate(Unit unit) {
     unit_storage.queue_store(unit);
+    if (unit->getType() == BWAPI::UnitTypes::Resource_Vespene_Geyser) {
+        the_map.OnGeyserCreatedOrDiscovered(unit);
+    }
 }
 
 void FrogFish::onUnitDestroy(Unit unit) {

@@ -23,6 +23,12 @@ map.h
 
 mapImpl.h
 
+
     void                        OnRefineryMorphed(BWAPI::Unit u) override;
     void                        OnRefineryDiscovered(BWAPI::Unit u) override;
     void                        OnGeyserDiscovered(BWAPI::Unit u) override;
+
+
+mapImpl.cpp
+
+**** changes to OnMineralDestroyed() ***

@@ -93,6 +93,7 @@ void Area::AddMineral(Mineral * pMineral)
 void Area::OnMineralDestroyed(const Mineral * pMineral)
 {
 	bwem_assert(pMineral);
+    //printf("area destroying mineral\n");
 
 	auto iMineral = find(m_Minerals.begin(), m_Minerals.end(), pMineral);
 	if (iMineral != m_Minerals.end())
@@ -105,6 +106,27 @@ void Area::OnMineralDestroyed(const Mineral * pMineral)
 }
 
 
+void Area::RemoveRefineryGeyser(const Geyser * pGeyser) 
+{
+    auto iGeyser = find(m_Geysers.begin(), m_Geysers.end(), pGeyser);
+    if (iGeyser != m_Geysers.end())
+        fast_erase(m_Geysers, distance(m_Geysers.begin(), iGeyser));
+    for (Base & base : Bases())
+        base.RemoveRefineryGeyser(pGeyser);
+}
+
+
+void Area::OnGeyserCreatedOrDiscovered(Geyser * pGeyser) 
+{
+	if(!contains(m_Geysers, pGeyser))
+    {
+        m_Geysers.push_back(pGeyser);
+        for (Base & base : Bases()) 
+            base.OnGeyserCreatedOrDiscovered(pGeyser);
+    }
+}
+
+
 void Area::AddChokePoints(Area * pArea, vector<ChokePoint> * pChokePoints)
 {
 	bwem_assert(!m_ChokePointsByArea[pArea] && pChokePoints);
@@ -114,7 +136,6 @@ void Area::AddChokePoints(Area * pArea, vector<ChokePoint> * pChokePoints)
 	for (const auto & cp : *pChokePoints)
 		m_ChokePoints.push_back(&cp);
 }
-
 
 
 vector<int> Area::ComputeDistances(const ChokePoint * pStartCP, const vector<const ChokePoint *> & TargetCPs) const

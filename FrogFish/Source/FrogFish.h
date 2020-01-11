@@ -36,6 +36,7 @@ private:
         try {
             Broodwar << "Map init..." << std::endl;
             the_map.Initialize();
+            the_map.EnableAutomaticPathAnalysis();
             bool starting_locs_ok = the_map.FindBasesForStartingLocations();
             assert(starting_locs_ok);
         }

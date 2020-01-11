@@ -12,6 +12,7 @@
 #include "neutral.h"
 #include "bwapiExt.h"
 #include "winutils.h"
+#include <ctime>
 
 
 using namespace BWAPI;
@@ -117,7 +118,7 @@ void MapImpl::Initialize()
 
 	GetGraph().CreateBases();
 ///	bw << "Graph::CreateBases: " << timer.ElapsedMilliseconds() << " ms" << endl; timer.Reset();
-
+    auto iG = Geysers().begin();
 ///	bw << "Map::Initialize: " << overallTimer.ElapsedMilliseconds() << " ms" << endl;
 }
 
@@ -696,9 +697,9 @@ void MapImpl::OnMineralDestroyed(BWAPI::Unit u)
 	auto iMineral = find_if(m_Minerals.begin(), m_Minerals.end(), [u](const unique_ptr<Mineral> & m){ return m->Unit() == u; });
 	bwem_assert(iMineral != m_Minerals.end());
 
-	fast_erase(m_Minerals, distance(m_Minerals.begin(), iMineral));
-
     OnMineralDestroyed((*iMineral).get());
+
+	fast_erase(m_Minerals, distance(m_Minerals.begin(), iMineral));
 }
 
 
@@ -749,20 +750,31 @@ void MapImpl::OnBlockingNeutralDestroyed(const Neutral * pBlocking)
 		GetGraph().ComputeChokePointDistanceMatrix();
 }
 
-void MapImpl::OnRefineryMorphed(BWAPI::Unit u) {
 
+void MapImpl::OnGeyserCreatedOrDiscovered(BWAPI::Unit u) 
+{
+    auto iGeyser = find_if(m_Geysers.begin(), m_Geysers.end(), [u](const unique_ptr<Geyser> & g){ return g->Unit() == u; });
+    if (iGeyser == m_Geysers.end()) 
+    {
+        auto iGeyserDead = find_if(m_Geysers.begin(), m_Geysers.end(), [u](const unique_ptr<Geyser> & g){ return !(g->Unit()->exists()); });
+        bwem_assert(iGeyserDead != m_Geysers.end());
+
+        // Remove from areas, bases, then map.
+        // Iterating because GetArea() is not consistent for this
+        Geyser * geyser = (*iGeyserDead).get();
+        vector<Area> & areas = m_Graph.Areas();
+        for (Area & area : areas)
+            area.RemoveRefineryGeyser(geyser);
+        fast_erase(m_Geysers, distance(m_Geysers.begin(), iGeyserDead)); 
+    
+        // Add new geyser to map, area, and bases
+        m_Geysers.push_back(make_unique<Geyser>(u, this));
+        auto pArea = m_Graph.GetNearestArea(u->getTilePosition());
+        if (pArea != nullptr)
+            pArea->OnGeyserCreatedOrDiscovered(&*(m_Geysers.back()));
+    }
 }
 
-void MapImpl::OnRefineryDiscovered(BWAPI::Unit u) {
-	auto iGeyser = find_if(m_Geysers.begin(), m_Geysers.end(), [u](const unique_ptr<Geyser> & g){ return g->Unit() == u; });
-	bwem_assert(iGeyser != m_Geysers.end());
-
-	fast_erase(m_Geysers, distance(m_Geysers.begin(), iGeyser));
-}
-
-void MapImpl::OnGeyserDiscovered(BWAPI::Unit u) {
-
-}
 
 bool MapImpl::FindBasesForStartingLocations()
 {

@@ -79,6 +79,20 @@ void Base::OnMineralDestroyed(const Mineral * pMineral)
 }
 
 	
+void Base::RemoveRefineryGeyser(const Geyser * pGeyser) 
+{
+    auto iGeyser = find(m_Geysers.begin(), m_Geysers.end(), pGeyser);
+    if (iGeyser != m_Geysers.end())
+        fast_erase(m_Geysers, distance(m_Geysers.begin(), iGeyser));
+}
+
+
+void Base::OnGeyserCreatedOrDiscovered(Geyser * pGeyser)
+{
+    m_Geysers.push_back(pGeyser);
+}
+
+
 } // namespace BWEM
 
 

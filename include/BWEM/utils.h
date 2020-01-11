@@ -165,8 +165,6 @@ inline bool contains(const T & Container, const E & Element)
 }
 
 
-
-
 template<class T>
 inline void fast_erase(std::vector<T> & Vector, int i)
 {

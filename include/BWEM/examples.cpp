@@ -85,6 +85,7 @@ void drawMap(const Map & theMap)
 				drawDiagonalCrossMap(Position(m->TopLeft()), Position(m->TopLeft() + m->Size()), MapDrawer::Color::minerals);
 		}
 
+
 	if (MapDrawer::showGeysers)
 		for (auto & g : theMap.Geysers())
 			bw->drawBoxMap(Position(g->TopLeft()), Position(g->TopLeft() + g->Size()) , MapDrawer::Color::geysers);
@@ -96,7 +97,7 @@ void drawMap(const Map & theMap)
 			if (s->Blocking())
 				drawDiagonalCrossMap(Position(s->TopLeft()), Position(s->TopLeft() + s->Size()), MapDrawer::Color::staticBuildings);
 		}
-
+    
 	for (const Area & area : theMap.Areas())
 		for (const Base & base : area.Bases())
 		{
