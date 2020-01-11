@@ -163,9 +163,10 @@ public:
 	// Should be called for each destroyed BWAPI unit u having u->getType().isSpecialBuilding() == true
 	virtual void						OnStaticBuildingDestroyed(BWAPI::Unit u) = 0;
 
-    // Should be called for each discovered BWAPI::Unit u having u->getType() == BWAPI::UnitTypes::Resource_Vespene_Geyser
-    // Adds new geysers when refineries are destroyed / canceled
-    virtual void                        OnGeyserCreatedOrDiscovered(BWAPI::Unit u) = 0;
+    // Should be called in onUnitDiscover, onUnitMorph, and onUnitCreate for any BWAPI::Unit u having 
+    // u->getType() == BWAPI::UnitTypes::Resource_Vespene_Geyser, if you want BWEM to track
+    // geysers for you. 
+    virtual void                        OnGeyserNoticed(BWAPI::Unit u) = 0;
 
 	// Returns a reference to the Areas.
 	virtual const std::vector<Area> &	Areas() const = 0;

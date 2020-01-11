@@ -81,7 +81,7 @@ public:
 
 	void						OnMineralDestroyed(BWAPI::Unit u) override;
 	void						OnStaticBuildingDestroyed(BWAPI::Unit u) override;
-    void                        OnGeyserCreatedOrDiscovered(BWAPI::Unit u) override;
+    void                        OnGeyserNoticed(BWAPI::Unit u) override;
 
 	const vector<Area> &		Areas() const override									{ return GetGraph().Areas(); }
 

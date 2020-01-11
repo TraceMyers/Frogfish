@@ -143,8 +143,8 @@ public:
 	void							AddGeyser(Geyser * pGeyser);
 	void							AddTileInformation(const BWAPI::TilePosition t, const Tile & tile);
 	void							OnMineralDestroyed(const Mineral * pMineral);
-    void                            RemoveRefineryGeyser(const Geyser * pGeyser); 
-    void                            OnGeyserCreatedOrDiscovered(Geyser * pGeyser); 
+    void                            RemoveDestroyedGeyser(const Geyser * pGeyser); 
+    void                            OnGeyserNoticed(Geyser * pGeyser); 
 
 	void							PostCollectInformation();
 	std::vector<int>				ComputeDistances(const ChokePoint * pStartCP, const std::vector<const ChokePoint *> & TargetCPs) const;

@@ -92,7 +92,7 @@ void FrogFish::onNukeDetect(Position target) {
 void FrogFish::onUnitDiscover(Unit unit) {
     unit_storage.queue_store(unit);
     if (unit->getType() == BWAPI::UnitTypes::Resource_Vespene_Geyser) {
-        the_map.OnGeyserCreatedOrDiscovered(unit);
+        the_map.OnGeyserNoticed(unit);
     }
 }
 
@@ -111,7 +111,7 @@ void FrogFish::onUnitHide(Unit unit) {
 void FrogFish::onUnitCreate(Unit unit) {
     unit_storage.queue_store(unit);
     if (unit->getType() == BWAPI::UnitTypes::Resource_Vespene_Geyser) {
-        the_map.OnGeyserCreatedOrDiscovered(unit);
+        the_map.OnGeyserNoticed(unit);
     }
 }
 
@@ -124,6 +124,9 @@ void FrogFish::onUnitDestroy(Unit unit) {
 
 void FrogFish::onUnitMorph(Unit unit) {
     unit_storage.queue_store(unit);
+    if (unit->getType() == BWAPI::UnitTypes::Resource_Vespene_Geyser) {
+        the_map.OnGeyserNoticed(unit);
+    }
 }
 
 void FrogFish::onUnitRenegade(Unit unit) {

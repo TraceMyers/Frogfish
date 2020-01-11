@@ -106,23 +106,23 @@ void Area::OnMineralDestroyed(const Mineral * pMineral)
 }
 
 
-void Area::RemoveRefineryGeyser(const Geyser * pGeyser) 
+void Area::RemoveDestroyedGeyser(const Geyser * pGeyser) 
 {
     auto iGeyser = find(m_Geysers.begin(), m_Geysers.end(), pGeyser);
     if (iGeyser != m_Geysers.end())
         fast_erase(m_Geysers, distance(m_Geysers.begin(), iGeyser));
     for (Base & base : Bases())
-        base.RemoveRefineryGeyser(pGeyser);
+        base.RemoveDestroyedGeyser(pGeyser);
 }
 
 
-void Area::OnGeyserCreatedOrDiscovered(Geyser * pGeyser) 
+void Area::OnGeyserNoticed(Geyser * pGeyser) 
 {
 	if(!contains(m_Geysers, pGeyser))
     {
         m_Geysers.push_back(pGeyser);
         for (Base & base : Bases()) 
-            base.OnGeyserCreatedOrDiscovered(pGeyser);
+            base.OnGeyserNoticed(pGeyser);
     }
 }
 

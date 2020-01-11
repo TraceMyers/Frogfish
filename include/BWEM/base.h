@@ -91,8 +91,8 @@ public:
 									Base(const Base & Other);
 	void							SetStartingLocation(const BWAPI::TilePosition & actualLocation);
 	void							OnMineralDestroyed(const Mineral * pMineral);
-    void                            RemoveRefineryGeyser(const Geyser * pGeyser);
-    void                            OnGeyserCreatedOrDiscovered(Geyser * pGeyser);
+    void                            RemoveDestroyedGeyser(const Geyser * pGeyser);
+    void                            OnGeyserNoticed(Geyser * pGeyser);
 
 private:
 	Map *							GetMap() const				{ return m_pMap; }

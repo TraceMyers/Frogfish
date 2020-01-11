@@ -79,7 +79,7 @@ void Base::OnMineralDestroyed(const Mineral * pMineral)
 }
 
 	
-void Base::RemoveRefineryGeyser(const Geyser * pGeyser) 
+void Base::RemoveDestroyedGeyser(const Geyser * pGeyser) 
 {
     auto iGeyser = find(m_Geysers.begin(), m_Geysers.end(), pGeyser);
     if (iGeyser != m_Geysers.end())
@@ -87,7 +87,7 @@ void Base::RemoveRefineryGeyser(const Geyser * pGeyser)
 }
 
 
-void Base::OnGeyserCreatedOrDiscovered(Geyser * pGeyser)
+void Base::OnGeyserNoticed(Geyser * pGeyser)
 {
     m_Geysers.push_back(pGeyser);
 }

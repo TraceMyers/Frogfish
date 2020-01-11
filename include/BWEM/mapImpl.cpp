@@ -751,7 +751,7 @@ void MapImpl::OnBlockingNeutralDestroyed(const Neutral * pBlocking)
 }
 
 
-void MapImpl::OnGeyserCreatedOrDiscovered(BWAPI::Unit u) 
+void MapImpl::OnGeyserNoticed(BWAPI::Unit u) 
 {
     auto iGeyser = find_if(m_Geysers.begin(), m_Geysers.end(), [u](const unique_ptr<Geyser> & g){ return g->Unit() == u; });
     if (iGeyser == m_Geysers.end()) 
@@ -759,19 +759,18 @@ void MapImpl::OnGeyserCreatedOrDiscovered(BWAPI::Unit u)
         auto iGeyserDead = find_if(m_Geysers.begin(), m_Geysers.end(), [u](const unique_ptr<Geyser> & g){ return !(g->Unit()->exists()); });
         bwem_assert(iGeyserDead != m_Geysers.end());
 
-        // Remove from areas, bases, then map.
-        // Iterating because GetArea() is not consistent for this
+        // Remove old geezer from areas, bases, then map.
         Geyser * geyser = (*iGeyserDead).get();
         vector<Area> & areas = m_Graph.Areas();
         for (Area & area : areas)
-            area.RemoveRefineryGeyser(geyser);
+            area.RemoveDestroyedGeyser(geyser);
         fast_erase(m_Geysers, distance(m_Geysers.begin(), iGeyserDead)); 
     
-        // Add new geyser to map, area, and bases
+        // Add new geezer to map, area, and bases
         m_Geysers.push_back(make_unique<Geyser>(u, this));
         auto pArea = m_Graph.GetNearestArea(u->getTilePosition());
         if (pArea != nullptr)
-            pArea->OnGeyserCreatedOrDiscovered(&*(m_Geysers.back()));
+            pArea->OnGeyserNoticed(&*(m_Geysers.back()));
     }
 }
 
