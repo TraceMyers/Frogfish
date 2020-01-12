@@ -12,10 +12,11 @@ class EnemyBase {
 private:
 
     const BWEM::Base *bwem_base;
-    std::vector<EUnit> larva;
-	std::vector<EUnit> workers;
-    std::vector<EUnit> structures;
-    std::vector<EUnit> resource_depots;
+    std::vector<EUnit> 
+        larva,
+        workers,
+        structures,
+        resource_depots;
 
 public:
 
@@ -90,7 +91,7 @@ public:
 
     const std::vector<EUnit> &get_workers() {return workers;}
 
-    const std::vector<EUnit> &get_resource_depot() {return resource_depots;}
+    const std::vector<EUnit> &get_resource_depots() {return resource_depots;}
 
     // only called when freeing this instance
     const BWEM::Base *free_data() {return bwem_base;}

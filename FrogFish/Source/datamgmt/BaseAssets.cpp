@@ -106,7 +106,6 @@ void assign_asset(
 template <class UnitT, class BaseT>
 void assign_assets(
     BWEM::Map &the_map, 
-    BaseStorage &base_storage,
     const std::map<int, UnitT> &units,
     const std::vector<BaseT> &bases
 ) {
@@ -175,12 +174,12 @@ void assign_base_assets(
 ) {
     const std::vector<FBase> &self_bases = base_storage.get_self_bases();
     const std::map<int, FUnit> &self_units = unit_storage.self_units();
-    assign_assets(the_map, base_storage, self_units, self_bases);
+    assign_assets(the_map, self_units, self_bases);
     const std::vector<FUnit> &self_newly_removed = unit_storage.get_self_newly_removed();
     remove_dead_assets(self_newly_removed, self_bases);
     const std::vector<EBase> &enemy_bases = base_storage.get_enemy_bases();
     const std::map<int, EUnit> &enemy_units = unit_storage.enemy_units();
-    assign_assets(the_map, base_storage, enemy_units, enemy_bases);
+    assign_assets(the_map, enemy_units, enemy_bases);
     const std::vector<EUnit> &enemy_newly_removed = unit_storage.get_enemy_newly_removed();
     remove_dead_assets(enemy_newly_removed, enemy_bases);
 }

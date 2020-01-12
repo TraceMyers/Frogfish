@@ -58,6 +58,7 @@
     <ClCompile Include="Source\datamgmt\BaseAssets.cpp" />
     <ClCompile Include="Source\control\WorkerControl.cpp" />
     <ClCompile Include="Source\utility\DebugDraw.cpp" />
+    <ClCompile Include="Source\production\BuildGraph.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\BWEM\area.h">
@@ -166,6 +167,9 @@
       <Filter>headers</Filter>
     </ClInclude>
     <ClInclude Include="Source\utility\DebugDraw.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\production\BuildGraph.h">
       <Filter>headers</Filter>
     </ClInclude>
   </ItemGroup>

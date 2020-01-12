@@ -122,6 +122,7 @@
     <ClCompile Include="Source\datamgmt\BaseOwnership.cpp" />
     <ClCompile Include="Source\Dll.cpp" />
     <ClCompile Include="Source\FrogFish.cpp" />
+    <ClCompile Include="Source\production\BuildGraph.cpp" />
     <ClCompile Include="Source\utility\DebugDraw.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -153,6 +154,7 @@
     <ClInclude Include="Source\data\FrogUnit.h" />
     <ClInclude Include="Source\data\UnitStorage.h" />
     <ClInclude Include="Source\FrogFish.h" />
+    <ClInclude Include="Source\production\BuildGraph.h" />
     <ClInclude Include="Source\production\BuildQueue.h" />
     <ClInclude Include="Source\production\MakeQueue.h" />
     <ClInclude Include="Source\production\MorphQueue.h" />

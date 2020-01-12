@@ -109,6 +109,12 @@ void draw_base_info(BaseStorage &base_storage) {
     for (unsigned int i = 0; i < self_bases.size(); i++) {
         const FBase f_base = self_bases[i];
         const Position &center = f_base->get_center();
+        Broodwar->drawBoxMap(
+            Position(center.x + 7, center.y - 62),
+            Position(center.x + 107, center.y - 9),
+            BWAPI::Colors::Black,
+            true 
+        );
         Broodwar->drawTextMap(Position(center.x + 10, center.y - 62), "Frog Base!");
         Broodwar->drawTextMap(
             Position(center.x + 10, center.y - 52), 
