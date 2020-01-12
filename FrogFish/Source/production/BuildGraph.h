@@ -38,6 +38,8 @@ public:
 
     void set_edge(int dir, BuildNode *n);
 
+    void remove_edge(int dir);
+
     BuildNode *get_edge(int dir);
 
     const std::vector<BuildNode *> &get_edges();
@@ -78,9 +80,12 @@ private:
     std::vector<BNode> geyser_nodes;
     int node_ID_counter;
     int chunk_counter;
+    int expand_counter;
+    std::vector<BNode> remove_queue;
 
 public:
 
+ 
     enum DIRECTIONS {RIGHT, UP, LEFT, DOWN};
 
     // BuildGraph(BWEM::Map &_the_map, FBase _base);
@@ -94,9 +99,11 @@ public:
 
     void connect_nodes();
 
-    void on_frame_update();
+    void on_frame_update(BWEM::Map &the_map);
 
     void update_occupied_tilepositions();
+
+    void remove_dead_chunks();
 
     // Chunks are box-rings of buildable tiles surrounding a hatchery.
     // 1. Checks one chunk to make sure creep is still there, and no buildings are in the way
@@ -106,12 +113,16 @@ public:
     // or not a unit is in the way.
     void update_chunk();
 
-    void try_expand();
+    void try_expand(BWEM::Map &the_map);
 
     const std::vector<BNode> &get_nodes();
 
     bool tilepos_buildable(TilePosition &tilepos);
- 
+
+    BNode find_node_at(TilePosition &tilepos);
+
+    void remove_dead_nodes();
+
     // called @ owner during onEnd()
     void free_data();
 };

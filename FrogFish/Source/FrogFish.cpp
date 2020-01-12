@@ -60,8 +60,8 @@ void FrogFish::onFrame() {
     for (int i = 0; i < nodes.size(); ++i) {
         if (nodes[i]->is_buildable()) {
             const BWAPI::TilePosition &tp = nodes[i]->get_tilepos();
-            BWAPI::Position top_left = BWAPI::Position(tp);
-            BWAPI::Position bot_right = BWAPI::Position(BWAPI::TilePosition(tp.x + 1, tp.y + 1));
+            BWAPI::Position top_left(tp);
+            BWAPI::Position bot_right(BWAPI::TilePosition(tp.x + 1, tp.y + 1));
             Broodwar->drawBoxMap(
                 top_left,
                 bot_right,
@@ -78,7 +78,7 @@ void FrogFish::onFrame() {
         build_graph.init(the_map, base_storage.get_self_bases()[0]);
     }
     else {
-        build_graph.on_frame_update();
+        build_graph.on_frame_update(the_map);
     }
 
     if (Broodwar->getFrameCount() % Broodwar->getLatencyFrames() != 0) {return;}
