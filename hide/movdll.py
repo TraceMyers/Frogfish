@@ -1,7 +1,7 @@
 import shutil
 
-new_src = '..\\..\\Release\\FrogFish.dll'
-new_dbg_src = '..\\..\\Debug\\FrogFish.dll'
+new_src = '..\\Release\\FrogFish.dll'
+new_dbg_src = '..\\Debug\\FrogFish.dll'
 new_dest = 'C:\\ProgramData\\bwapi\\starcraft\\bwapi-data\\AI\\FrogFish.dll'
 new_dbg_dest = 'C:\\ProgramData\\bwapi\\starcraft\\bwapi-data\\AI\\FrogFish_dbg.dll'
 
