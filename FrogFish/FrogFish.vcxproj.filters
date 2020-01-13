@@ -54,11 +54,12 @@
     <ClCompile Include="..\include\BWEM\winutils.cpp">
       <Filter>BWEM</Filter>
     </ClCompile>
-    <ClCompile Include="Source\datamgmt\BaseOwnership.cpp" />
-    <ClCompile Include="Source\datamgmt\BaseAssets.cpp" />
     <ClCompile Include="Source\control\WorkerControl.cpp" />
     <ClCompile Include="Source\utility\DebugDraw.cpp" />
     <ClCompile Include="Source\production\BuildGraph.cpp" />
+    <ClCompile Include="Source\production\BuildPlacement.cpp" />
+    <ClCompile Include="Source\unitdata\BaseAssets.cpp" />
+    <ClCompile Include="Source\unitdata\BaseOwnership.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\BWEM\area.h">
@@ -115,43 +116,22 @@
     <ClInclude Include="..\include\BWEM\winutils.h">
       <Filter>BWEM</Filter>
     </ClInclude>
-    <ClInclude Include="Source\FrogFish.h">
-      <Filter>headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\data\UnitStorage.h">
-      <Filter>headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\datamgmt\BaseOwnership.h">
-      <Filter>headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\data\BaseStorage.h">
-      <Filter>headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\data\EnemyBase.h">
-      <Filter>headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\data\EnemyUnit.h">
-      <Filter>headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\data\FrogBase.h">
-      <Filter>headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\data\FrogUnit.h">
-      <Filter>headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\utility\BWTimer.h">
-      <Filter>headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\datamgmt\BaseAssets.h">
-      <Filter>headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\utility\BWEMBaseArray.h">
-      <Filter>headers</Filter>
-    </ClInclude>
     <ClInclude Include="Source\control\WorkerControl.h">
       <Filter>headers</Filter>
     </ClInclude>
+    <ClInclude Include="Source\production\BuildGraph.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\production\BuildManager.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\production\BuildPlacement.h">
+      <Filter>headers</Filter>
+    </ClInclude>
     <ClInclude Include="Source\production\BuildQueue.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\production\EconTracker.h">
       <Filter>headers</Filter>
     </ClInclude>
     <ClInclude Include="Source\production\MakeQueue.h">
@@ -166,10 +146,37 @@
     <ClInclude Include="Source\production\UnitMaker.h">
       <Filter>headers</Filter>
     </ClInclude>
-    <ClInclude Include="Source\utility\DebugDraw.h">
+    <ClInclude Include="Source\unitdata\BaseAssets.h">
       <Filter>headers</Filter>
     </ClInclude>
-    <ClInclude Include="Source\production\BuildGraph.h">
+    <ClInclude Include="Source\unitdata\BaseOwnership.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\unitdata\BaseStorage.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\unitdata\BWEMBaseArray.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\unitdata\EnemyBase.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\unitdata\EnemyUnit.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\unitdata\FrogBase.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\unitdata\FrogUnit.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\unitdata\UnitStorage.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\utility\BWTimer.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\utility\DebugDraw.h">
       <Filter>headers</Filter>
     </ClInclude>
   </ItemGroup>

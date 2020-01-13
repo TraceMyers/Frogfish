@@ -1,8 +1,9 @@
-#include "../utility/BWEMBaseArray.h"
-#include "../data/BaseStorage.h"
-#include "../data/UnitStorage.h"
-#include "BaseAssets.h"
 #include "BaseOwnership.h"
+#include "BaseAssets.h"
+#include "../FrogFish.h"
+#include "../unitdata/BWEMBaseArray.h"
+#include "../unitdata/BaseStorage.h"
+#include "../unitdata/UnitStorage.h"
 #include <BWAPI.h>
 #include <BWEM/bwem.h>
 
@@ -10,13 +11,9 @@ using namespace BWAPI;
 
 // TODO: template refactor
 
-void update_base_data(
-    BWEM::Map &the_map, 
-    BaseStorage &base_storage, 
-    UnitStorage &unit_storage
-) {
-    assign_new_bases(the_map, base_storage, unit_storage);    
-    assign_base_assets(the_map, base_storage, unit_storage);
+void update_base_data(BaseStorage &base_storage, UnitStorage &unit_storage) {
+    assign_new_bases(base_storage, unit_storage);    
+    assign_base_assets(base_storage, unit_storage);
     unassign_bases(base_storage);
 }
 
@@ -24,34 +21,29 @@ void update_base_data(
 
 // *must* be called after UnitStorage::update()
 // and before UnitStorage::clear_newly_assigned()
-void assign_new_bases(
-    BWEM::Map &the_map, 
-    BaseStorage &base_storage, 
-    UnitStorage &unit_storage
-) {
+void assign_new_bases(BaseStorage &base_storage, UnitStorage &unit_storage) {
     const BWEMBaseArray &neutral_bases = base_storage.get_neutral_bases();
 
     const std::vector<FUnit> &new_self_units = unit_storage.get_self_newly_stored();
-    self_assign_new_bases(the_map, base_storage, new_self_units, neutral_bases);
+    self_assign_new_bases(base_storage, new_self_units, neutral_bases);
     const std::vector<FUnit> &changed_type_self_units = unit_storage.get_self_newly_changed_type();
-    self_assign_new_bases(the_map, base_storage, changed_type_self_units, neutral_bases);
+    self_assign_new_bases(base_storage, changed_type_self_units, neutral_bases);
 
     const BWAPI::Race &enemy_race = Broodwar->enemy()->getRace();
     const std::vector<EUnit> &new_enemy_units = unit_storage.get_enemy_newly_stored();
-    enemy_assign_new_bases(the_map, base_storage, new_enemy_units, neutral_bases);
+    enemy_assign_new_bases(base_storage, new_enemy_units, neutral_bases);
     if (enemy_race == BWAPI::Races::Zerg) {
         const std::vector<EUnit> &changed_type_enemy_units = unit_storage.get_enemy_newly_changed_type();
-        enemy_assign_new_bases(the_map, base_storage, changed_type_enemy_units, neutral_bases);
+        enemy_assign_new_bases(base_storage, changed_type_enemy_units, neutral_bases);
     }
     else if (enemy_race == BWAPI::Races::Terran) {
         const std::vector<EUnit> &changed_pos_enemy_units = unit_storage.get_enemy_newly_changed_pos();
-        enemy_assign_new_bases(the_map, base_storage, changed_pos_enemy_units, neutral_bases);
+        enemy_assign_new_bases(base_storage, changed_pos_enemy_units, neutral_bases);
     }
 }
 
 template <class UnitArrayT>
 void self_assign_new_bases(
-    BWEM::Map &the_map, 
     BaseStorage &base_storage, 
     const UnitArrayT &self_units,
     const BWEMBaseArray &neutral_bases
@@ -99,7 +91,6 @@ void self_assign_new_bases(
 
 template <class UnitArrayT>
 void enemy_assign_new_bases(
-    BWEM::Map &the_map, 
     BaseStorage &base_storage, 
     const UnitArrayT &enemy_units,
     const BWEMBaseArray &neutral_bases

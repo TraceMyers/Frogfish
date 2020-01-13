@@ -3,10 +3,10 @@
 #include "MakeQueue.h"
 #include "MorphQueue.h"
 #include "BuildQueue.h"
-#include "../data/BaseStorage.h"
-#include "../data/EconTracker.h"
-#include "../utility/BWTimer.h"
+#include "EconTracker.h"
 #include "ProductionCoordinator.h"
+#include "../unitdata/BaseStorage.h"
+#include "../utility/BWTimer.h"
 #include <BWAPI.h>
 #include <vector>
 #include <deque>

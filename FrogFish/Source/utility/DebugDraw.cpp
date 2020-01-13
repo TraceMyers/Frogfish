@@ -1,11 +1,13 @@
 #include "DebugDraw.h"
 #include "../production/MakeQueue.h"
-#include "../data/UnitStorage.h"
-#include "../data/EnemyUnit.h"
-#include "../data/FrogUnit.h"
-#include "../data/EnemyUnit.h"
-#include "../data/BaseStorage.h"
-#include "../data/FrogBase.h"
+#include "../production/BuildGraph.h"
+#include "../production/BuildPlacement.h"
+#include "../unitdata/UnitStorage.h"
+#include "../unitdata/EnemyUnit.h"
+#include "../unitdata/FrogUnit.h"
+#include "../unitdata/EnemyUnit.h"
+#include "../unitdata/BaseStorage.h"
+#include "../unitdata/FrogBase.h"
 #include <BWAPI.h>
 #include <iostream>
 #include <list>
@@ -15,7 +17,7 @@ using namespace BWAPI;
 
 std::list<std::string *> out_buff;
 
-void append_debug_text(std::string *dbg_line) {
+void DebugDraw::append_debug_text(std::string *dbg_line) {
     if (out_buff.size() >= 18) {
         std::string *line = out_buff.front();
         delete line;
@@ -24,7 +26,7 @@ void append_debug_text(std::string *dbg_line) {
     out_buff.push_back(dbg_line);
 }
 
-void draw_debug_text() {
+void DebugDraw::draw_debug_text() {
     std::list<std::string *>::const_iterator it;
     const int x = 10;
     int y = 10;
@@ -34,7 +36,7 @@ void draw_debug_text() {
     }
 }
 
-void draw_units(UnitStorage &unit_storage) {
+void DebugDraw::draw_units(UnitStorage &unit_storage) {
     const std::map<int, FUnit> &self_units = unit_storage.self_units();
     register std::map<int, FUnit>::const_iterator self_it;
     register FUnit f_unit;
@@ -89,7 +91,7 @@ void draw_units(UnitStorage &unit_storage) {
     }
 }
 
-void draw_map(BWEM::Map &the_map) {
+void DebugDraw::draw_map() {
     try {
         BWEM::utils::gridMapExample(the_map);
         BWEM::utils::drawMap(the_map);
@@ -104,7 +106,7 @@ void draw_map(BWEM::Map &the_map) {
     }
 }
 
-void draw_base_info(BaseStorage &base_storage) {
+void DebugDraw::draw_base_info(BaseStorage &base_storage) {
     const std::vector<FBase> &self_bases = base_storage.get_self_bases();
     for (unsigned int i = 0; i < self_bases.size(); i++) {
         const FBase f_base = self_bases[i];
@@ -164,12 +166,40 @@ void draw_base_info(BaseStorage &base_storage) {
         );    
     }
 }
-void draw_make_queue(MakeQueue &make_queue) {
+
+void DebugDraw::draw_make_queue(MakeQueue &make_queue) {
     const std::deque<BWAPI::UnitType> &queue = make_queue.get_queue();
     int x = 10;
     int y = 10;
     for (auto &item : queue) {
         Broodwar->drawTextScreen(BWAPI::Position(x, y), "%s", item.getName().c_str());
         y += 10;
+    }
+}
+
+void DebugDraw::draw_build_graphs(BaseStorage &base_storage) {
+    BuildGraph *build_graphs = BuildPlacement::get_graphs();
+    for (int i = 0; i < BuildPlacement::BASELEN; ++i) {
+        BuildGraph &build_graph = build_graphs[i];
+        if (build_graph.get_base() != nullptr) {
+            auto &nodes = build_graph.get_nodes();
+            for (unsigned int j = 0; j < nodes.size(); ++j) {
+                if (nodes[j]->is_buildable()) {
+                    const BWAPI::TilePosition &tp = nodes[j]->get_tilepos();
+                    BWAPI::Position top_left(tp);
+                    BWAPI::Position bot_right(BWAPI::TilePosition(tp.x + 1, tp.y + 1));
+                    Broodwar->drawBoxMap(
+                        top_left,
+                        bot_right,
+                        BWAPI::Colors::Green
+                    );
+                    const std::vector<int> &dims = nodes[i]->get_buildable_dimensions();
+                    Broodwar->drawTextMap(
+                        BWAPI::Position(tp) + BWAPI::Position(5, 10), 
+                        "%dx%d", dims[0], dims[1]
+                    );
+                }
+            }
+        }
     }
 }

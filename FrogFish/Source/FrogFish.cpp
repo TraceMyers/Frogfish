@@ -1,15 +1,16 @@
 #include "FrogFish.h"
 #include "utility/DebugDraw.h"
 #include "utility/BWTimer.h"
-#include "data/UnitStorage.h"
-#include "data/BaseStorage.h"
-#include "data/EnemyBase.h"
-#include "data/EconTracker.h"
-#include "datamgmt/BaseOwnership.h"
-#include "control/WorkerControl.h"
+#include "unitdata/UnitStorage.h"
+#include "unitdata/BaseStorage.h"
+#include "unitdata/EnemyBase.h"
+#include "unitdata/BaseOwnership.h"
+#include "production/EconTracker.h"
 #include "production/UnitMaker.h"
 #include "production/ProductionCoordinator.h"
 #include "production/BuildGraph.h"
+#include "production/BuildPlacement.h"
+#include "control/WorkerControl.h"
 #include <BWAPI.h>
 #include <iostream>
 #include <string>
@@ -26,7 +27,6 @@ EconTracker econ_tracker;
 ProductionCoordinator production_coordinator;
 UnitMaker unit_maker;
 BWTimer<void *> timer;
-BuildGraph build_graph;
 
 bool first_frame_over = false;
 int node_i = 0;
@@ -34,12 +34,12 @@ int node_i = 0;
 void FrogFish::onStart() {
     Broodwar->sendText("Hello Sailor!");
     Broodwar->enableFlag(Flag::UserInput);
-    Broodwar->setLocalSpeed(24);
+    Broodwar->setLocalSpeed(12);
     Broodwar->setCommandOptimizationLevel(2);
     onStart_alloc_debug_console();
     onStart_send_workers_to_mine();
     onStart_init_bwem();
-    base_storage.init(the_map);
+    base_storage.init();
     econ_tracker.init();
     timer.start(0, 5);
 }
@@ -52,34 +52,16 @@ void FrogFish::onFrame() {
     unit_maker.on_frame_update();
     econ_tracker.on_frame_update();    
     unit_storage.update();
-    update_base_data(the_map, base_storage, unit_storage);
+    update_base_data(base_storage, unit_storage);
     unit_storage.clear_newly_assigned();
+    BuildPlacement::on_frame_update(base_storage);
+    base_storage.clear_newly_assigned();
 
     // draw
-    auto &nodes = build_graph.get_nodes();
-    for (int i = 0; i < nodes.size(); ++i) {
-        if (nodes[i]->is_buildable()) {
-            const BWAPI::TilePosition &tp = nodes[i]->get_tilepos();
-            BWAPI::Position top_left(tp);
-            BWAPI::Position bot_right(BWAPI::TilePosition(tp.x + 1, tp.y + 1));
-            Broodwar->drawBoxMap(
-                top_left,
-                bot_right,
-                BWAPI::Colors::Green
-            );
-        }
-    }
     
-    draw_units(unit_storage);
-    draw_base_info(base_storage);
-
-    if (!first_frame_over) {
-        first_frame_over = true;
-        build_graph.init(the_map, base_storage.get_self_bases()[0]);
-    }
-    else {
-        build_graph.on_frame_update(the_map);
-    }
+    DebugDraw::draw_units(unit_storage);
+    DebugDraw::draw_base_info(base_storage);
+    DebugDraw::draw_build_graphs(base_storage);
 
     if (Broodwar->getFrameCount() % Broodwar->getLatencyFrames() != 0) {return;}
     // RUN COMMANDS -----------------------------------------------------------------
@@ -87,7 +69,7 @@ void FrogFish::onFrame() {
     send_idle_workers_to_mine(base_storage);
 
     // try contiunous drone production with current mechanisms:
-    // unit_maker.make_units(econ_tracker, base_storage, production_coordinator);
+    unit_maker.make_units(econ_tracker, base_storage, production_coordinator);
     
 }
 

@@ -1,8 +1,9 @@
 #pragma once
 
+#include "../FrogFish.h"
 #include "FrogBase.h"
 #include "EnemyBase.h"
-#include "../utility/BWEMBaseArray.h"
+#include "../unitdata/BWEMBaseArray.h"
 #include <BWEM/bwem.h>
 #include <BWAPI.h>
 #include <vector>
@@ -24,7 +25,7 @@ private:
 
 public:
 
-    void init(BWEM::Map &the_map) {
+    void init() {
         const std::vector<BWEM::Area> &areas = the_map.Areas();
         int j = 0;
         for (auto &area : areas) {

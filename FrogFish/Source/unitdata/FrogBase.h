@@ -5,6 +5,8 @@
 #include <BWEM/bwem.h>
 #include <vector>
 
+class BuildGraph;
+
 class FrogBase {
 // instantiate only once
 // use free_data() when done
@@ -18,6 +20,7 @@ private:
         structures,
         resource_depots;
 
+
 public:
 
     // for deciding what can/should be done at this base
@@ -26,13 +29,19 @@ public:
     // yellow might be a base that is near the enemy, but not
     // currently under attack
     enum DANGER_LEVEL {
-        GREEN,
-        YELLOW,
-        RED
+        VERY_LOW,
+        LOW,
+        MEDIUM,
+        HIGH,
+        VERY_HIGH
     };
+
     DANGER_LEVEL danger_level;
 
-    FrogBase(const BWEM::Base *_bwem_base) : bwem_base(_bwem_base), danger_level(GREEN) {}
+    FrogBase(const BWEM::Base *_bwem_base) : 
+        bwem_base(_bwem_base), 
+        danger_level(VERY_LOW)
+    {}
 
     void add_larva(FUnit _larva) {larva.push_back(_larva);}
 
@@ -51,14 +60,14 @@ public:
     void add_structure(FUnit structure) {structures.push_back(structure);}
 
     void remove_structure(FUnit structure) {
-        std::vector<FUnit>::iterator it = std::remove(structures.begin(), structures.end(), structure);
+        std::vector<FUnit>::iterator it = std::find(structures.begin(), structures.end(), structure);
         structures.erase(it, structures.end());
     }
 
     void add_resource_depot(FUnit _resource_depot) {resource_depots.push_back(_resource_depot);}
 
     void remove_resource_depot(FUnit _resource_depot) {
-        std::vector<FUnit>::iterator it = std::remove(resource_depots.begin(), resource_depots.end(), _resource_depot);
+        std::vector<FUnit>::iterator it = std::find(resource_depots.begin(), resource_depots.end(), _resource_depot);
         resource_depots.erase(it, resource_depots.end());
     }
 

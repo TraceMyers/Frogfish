@@ -1,128 +1,119 @@
 #pragma once
 
+#include "../FrogFish.h"
+#include "../unitdata/FrogBase.h"
 #include <BWEM/bwem.h>
 #include <BWAPI.h>
-#include "../data/FrogBase.h"
 
-// TODO: set blocks_mining
+/*******************************************************************************
+ * For regularly updating creep tiling at Zerg bases to aid building placement *
+ ******************************************************************************/
+
+////////////////////////////////////////+/////////////////////////////////////////
+///                                 BuildNode                                   //
+//////////////////////////////////////////////////////////////////////////////////
+//       There is probably no need to interface directly with a BuildNode,
+//       Except maybe to draw with them.
+//       Create a BuildGraph, and the nodes will be generated.
 
 class BuildNode {
 
 private:
 
-    const BWEM::Tile &tile;
-    BWAPI::TilePosition tilepos;
+    const BWEM::Tile&        _tile;
+    BWAPI::TilePosition      tilepos;
     std::vector<BuildNode *> edges;
-    std::vector<int> buildable_dimensions;
-    bool immediately_buildable;
-    bool blocks_mining;
-    bool occupied;
+    std::vector<int>         buildable_dimensions;
+    bool                     blocks_mining;
+    bool                     occupied;
 
 public:
 
     int ID;
 
-    BuildNode(const BWEM::Tile &_t, BWAPI::TilePosition tp, int _ID) : 
-        tile(_t), 
-        tilepos(tp),
-        buildable_dimensions({0, 0}),
-        edges({nullptr, nullptr, nullptr, nullptr}),
-        immediately_buildable(false),
-        ID(_ID),
-        occupied(false)
-    {}
+    BuildNode(const BWEM::Tile &_t, BWAPI::TilePosition tp, int _ID); 
+    const BWEM::Tile &               bwem_tile();
+    BWAPI::TilePosition              get_tilepos();
+    const std::vector<BuildNode *> & get_edges();
+    // Gives more or less up-to-date information about whether or not a zerg can build here
+    // with a building size of at least 2x2 TilePositions (Creep Colony, etc.)
+    // NOTE: there IS a delay between the truth and the update of this status.
+    bool                             is_buildable();
+    // Gives more or less up-to-date information about the size of building that can be
+    // built here. 
+    // NOTE: there IS a delay between the truth and the update of this status.
+    const std::vector<int> &         get_buildable_dimensions();
+    int                              get_ID();
 
-    // BuildNode(const BWEM::Tile &_t, BWAPI::TilePosition tp);
+/************************************Internal************************************/
+    // Internal
+    BuildNode *                      get_edge(int dir);
+    // Internal
+    void                             set_buildable_dimensions(int x, int y);
+    // Internal
+    void                             set_edge(int dir, BuildNode *n);
+    // Internal
+    bool                             operator ==(const BuildNode &other) const;
 
-    const BWAPI::TilePosition &get_tilepos();
-
-    void set_edge(int dir, BuildNode *n);
-
-    void remove_edge(int dir);
-
-    BuildNode *get_edge(int dir);
-
-    const std::vector<BuildNode *> &get_edges();
-
-    void set_buildable_dimensions(int x, int y);
-
-    // buildable_dimensions tells you what size building can be made ON this Node
-    // (takes into account neighboring tiles, buildings, statics & creep)
-    const std::vector<int> &get_buildable_dimensions();
-
-    // Depending on how often the graph is updated, gives more or less up-to-date information
-    // about whether or not this tile and its required neighboring tiles have creep, and
-    // are not blocked by buildings
-    bool is_buildable();
-
-    void set_immediately_buildable(bool value);
-
-    // Depending on how often the graph is updated, gives more or less up-to-date information
-    // about whether or not this tile is blocked by a unit (and is buildable)
-    // might change to be as-certain-as-possible this frame
-    bool is_immediately_buildable();
-
-    int get_ID();
-
-    bool BuildNode::operator ==(const BuildNode &other) const;
+/************************************Internal************************************/
 };
 
-typedef BuildNode *BNode;
+typedef BuildNode *                  BNode;
 
-// template <class BaseT>
+
+////////////////////////////////////////+/////////////////////////////////////////
+///                                BuildGraph                                   //
+//////////////////////////////////////////////////////////////////////////////////
+// Create a BuildGraph to generate a creep build graph that automatically updates
+// when creep spreads. Requires a pointer to an instance of type T1 to be 
+// passed in, where T1 implements a member function named get_resource_depots(). 
+// The function should return a const std::vector<T2 *> of hatcheries in the base. 
+// T2 (the resource depot) needs a member function called get_tilepos() that 
+// returns its TilePosition.
+
 class BuildGraph {
 
 private:
 
-    FBase base = nullptr;
+    FBase              base;
     std::vector<BNode> nodes;
-    std::vector<std::vector<BNode>> node_chunks;
     std::vector<BNode> geyser_nodes;
-    int node_ID_counter;
-    int chunk_counter;
-    int expand_counter;
+    int                node_ID_counter;
+    int                start_chunk;
+    int                end_chunk;
+    int                CHUNK_SIZE;
     std::vector<BNode> remove_queue;
+
+    void                       populate_graph(FUnit structure);
+    void                       connect_nodes();
+    void                       update_occupied_tilepositions();
+    void                       update_chunk();
+    void                       try_expand();
+    BNode                      find_node_at(TilePosition &tilepos);
+    void                       remove_dead_nodes();
+    void                       seed_creep(FUnit structure);
 
 public:
 
- 
-    enum DIRECTIONS {RIGHT, UP, LEFT, DOWN};
+    enum               DIRECTIONS {RIGHT, UP, LEFT, DOWN};
 
-    // BuildGraph(BWEM::Map &_the_map, FBase _base);
+    // A BuildGraph is tied to a Zerg base. The base can't be reassigned.
     BuildGraph();
-
-    void init(BWEM::Map &_the_map, FBase _base);
-
-    // Loops over each resource depot and radially checks for creep
-    // from their centers, adding new nodes to the map.
-    void populate_graph(BWEM::Map &the_map, FBase _base);
-
-    void connect_nodes();
-
-    void on_frame_update(BWEM::Map &the_map);
-
-    void update_occupied_tilepositions();
-
-    void remove_dead_chunks();
-
-    // Chunks are box-rings of buildable tiles surrounding a hatchery.
-    // 1. Checks one chunk to make sure creep is still there, and no buildings are in the way
-    // 2. Updates the buildable size of each node, which is the size of the building
-    // that can be placed AT this node (checked by referencing neighbor nodes)
-    // 3. TODO: set whether or not the tile is immediately buildable: whether
-    // or not a unit is in the way.
-    void update_chunk();
-
-    void try_expand(BWEM::Map &the_map);
-
-    const std::vector<BNode> &get_nodes();
-
-    bool tilepos_buildable(TilePosition &tilepos);
-
-    BNode find_node_at(TilePosition &tilepos);
-
-    void remove_dead_nodes();
-
-    // called @ owner during onEnd()
-    void free_data();
+    // Called when creep has already started growing at the base
+    void                       init(FBase base);
+    // Called in onFrame only after init()
+    // Iterates over nodes, setting the size of building which can be placed at
+    // each of them, if at all. Also expands the creep. Processes shouldn't
+    // add any noticeable overhead, since they are updated in small chunks per
+    // frame.
+    void                       on_frame_update();
+    //
+    const std::vector<BNode> & get_nodes();
+    // Checks whether the node at the TilePosition is buildable
+    bool                       tilepos_buildable(TilePosition &tilepos);
+    FBase                      get_base();
+    // For keeping the Graph around when its Base is gone, and reusing the graph
+    void                       clear();
+    // Called at owner when no longer using this graph
+    void                       free_data();
 };

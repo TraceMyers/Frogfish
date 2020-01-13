@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../data/FrogBase.h"
-#include "../data/UnitStorage.h"
-#include "../data/BaseStorage.h"
+#include "../unitdata/FrogBase.h"
+#include "../unitdata/UnitStorage.h"
+#include "../unitdata/BaseStorage.h"
 #include <BWAPI.h>
 #include <vector>
 #include <map>

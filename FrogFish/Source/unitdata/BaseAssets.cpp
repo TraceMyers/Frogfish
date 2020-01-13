@@ -1,7 +1,8 @@
 #include "BaseAssets.h"
+#include "../FrogFish.h"
+#include "../unitdata/BaseStorage.h"
+#include "../unitdata/UnitStorage.h"
 #include <BWEM/bwem.h>
-#include "../data/BaseStorage.h"
-#include "../data/UnitStorage.h"
 
 template <class UnitT, class BaseT>
 inline void assign_asset_to_base(const UnitT asset, const BaseT base) {
@@ -20,11 +21,7 @@ inline void assign_asset_to_base(const UnitT asset, const BaseT base) {
 }
 
 template <class UnitT, class BaseT>
-void assign_asset(
-    BWEM::Map &the_map, 
-    const std::vector<BaseT> &bases,
-    UnitT asset
-) {
+void assign_asset(const std::vector<BaseT> &bases, UnitT asset) {
     const TilePosition structure_tilepos = asset->get_tilepos();
     if (the_map.Valid(structure_tilepos)) {
         const BWEM::Area *asset_area = the_map.GetArea(structure_tilepos);
@@ -104,11 +101,7 @@ void assign_asset(
 }
 
 template <class UnitT, class BaseT>
-void assign_assets(
-    BWEM::Map &the_map, 
-    const std::map<int, UnitT> &units,
-    const std::vector<BaseT> &bases
-) {
+void assign_assets(const std::map<int, UnitT> &units, const std::vector<BaseT> &bases) {
     if (bases.size() > 0) {
         std::map<int, UnitT>::const_iterator unit_it;
         for (unit_it = units.begin(); unit_it != units.end(); ++unit_it) {
@@ -120,7 +113,7 @@ void assign_assets(
                 || unit->get_type() == BWAPI::UnitTypes::Zerg_Egg
             ) {
                 // eggs are let through to unassign them from self base larva
-                assign_asset(the_map, bases, unit);
+                assign_asset(bases, unit);
             }
         }
     }
@@ -167,19 +160,15 @@ void remove_dead_assets(const std::vector<UnitT> &assets, const std::vector<Base
     }
 }
 
-void assign_base_assets(
-    BWEM::Map &the_map, 
-    BaseStorage &base_storage,
-    UnitStorage &unit_storage
-) {
+void assign_base_assets(BaseStorage &base_storage, UnitStorage &unit_storage) {
     const std::vector<FBase> &self_bases = base_storage.get_self_bases();
     const std::map<int, FUnit> &self_units = unit_storage.self_units();
-    assign_assets(the_map, self_units, self_bases);
+    assign_assets(self_units, self_bases);
     const std::vector<FUnit> &self_newly_removed = unit_storage.get_self_newly_removed();
     remove_dead_assets(self_newly_removed, self_bases);
     const std::vector<EBase> &enemy_bases = base_storage.get_enemy_bases();
     const std::map<int, EUnit> &enemy_units = unit_storage.enemy_units();
-    assign_assets(the_map, enemy_units, enemy_bases);
+    assign_assets(enemy_units, enemy_bases);
     const std::vector<EUnit> &enemy_newly_removed = unit_storage.get_enemy_newly_removed();
     remove_dead_assets(enemy_newly_removed, enemy_bases);
 }

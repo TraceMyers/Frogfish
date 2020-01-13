@@ -1,9 +1,9 @@
-#include <BWAPI.h>
 #include "WorkerControl.h"
-#include "../data/BaseStorage.h"
-#include "../data/FrogBase.h"
-#include "../data/FrogUnit.h"
+#include "../unitdata/BaseStorage.h"
+#include "../unitdata/FrogBase.h"
+#include "../unitdata/FrogUnit.h"
 #include <BWEM/bwem.h>
+#include <BWAPI.h>
 
 // TODO: centralize task setting
 void send_idle_workers_to_mine(BaseStorage &base_storage) {

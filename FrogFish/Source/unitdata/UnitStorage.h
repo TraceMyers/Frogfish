@@ -51,7 +51,6 @@ private:
         int ID = u->getID();
 
         if ((f_unit = self_ID_2_funit[ID]) != NULL) {
-            //printf("removing self unit %s\n", f_unit->get_name().c_str());
             self_ID_2_funit.erase(ID);
             self_newly_removed.push_back(f_unit);
         }
