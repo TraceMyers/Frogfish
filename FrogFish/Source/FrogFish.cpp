@@ -61,7 +61,7 @@ void FrogFish::onFrame() {
     
     DebugDraw::draw_units(unit_storage);
     DebugDraw::draw_base_info(base_storage);
-    DebugDraw::draw_build_graphs(base_storage);
+    DebugDraw::draw_build_graphs();
 
     if (Broodwar->getFrameCount() % Broodwar->getLatencyFrames() != 0) {return;}
     // RUN COMMANDS -----------------------------------------------------------------

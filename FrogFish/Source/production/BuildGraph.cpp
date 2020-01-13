@@ -56,14 +56,12 @@ BuildGraph::BuildGraph() : base(nullptr) {}
 void BuildGraph::init(FBase _base) {
     node_ID_counter = 0;
     start_chunk = 0;
-    end_chunk = 10000;
-    CHUNK_SIZE = 3;
+    end_chunk = 100000;
+    CHUNK_SIZE = 5;
     base = _base;
     for (auto & hatch : base->get_resource_depots()) {
-        // populate_graph(hatch);
         seed_creep(hatch);
     }
-    // connect_nodes();
 }
 
 FBase BuildGraph::get_base() {
@@ -98,8 +96,8 @@ void BuildGraph::seed_creep(FUnit structure) {
     TilePosition structure_tilepos = structure->get_tilepos();
     const BWEM::Tile &_t = the_map.GetTile(structure_tilepos);
     if (
-        Broodwar->hasCreep(structure_tilepos)
-        && structure_tilepos.isValid() 
+        structure_tilepos.isValid() 
+        && Broodwar->hasCreep(structure_tilepos)
         && find_node_at(structure_tilepos) == nullptr
     ) {
         nodes.push_back(new BuildNode(_t, structure_tilepos, node_ID_counter));
@@ -107,79 +105,9 @@ void BuildGraph::seed_creep(FUnit structure) {
     }
 }
 
-void BuildGraph::populate_graph(FUnit structure) {
-    TilePosition hatch_tilepos = structure->get_tilepos();
-    int 
-        corner_step = 2,
-        next_square_diff[5][2] {{0, 0}, {1, 0}, {0, -1}, {-1, 0}, {0, 1}},
-        outer_step = 1,
-        steps_this_turn = 8,
-        i,
-        inner_step,
-        creep_ct;
-    const BWEM::Tile &hatch_t = the_map.GetTile(hatch_tilepos);
-    nodes.push_back(new BuildNode(hatch_t, hatch_tilepos, node_ID_counter));
-    while(true) {
-        i = 0;
-        inner_step = 0;
-        creep_ct = 0;
-        BWAPI::TilePosition check_square(
-            hatch_tilepos.x - outer_step, hatch_tilepos.y - outer_step
-        );
-        while (inner_step < steps_this_turn) {
-            check_square = BWAPI::TilePosition(
-                check_square.x + next_square_diff[i][0], 
-                check_square.y + next_square_diff[i][1]
-            );
-            if (
-                check_square.isValid()
-                && Broodwar->hasCreep(check_square)
-            ) {
-                const BWEM::Tile &t = the_map.GetTile(check_square);
-                nodes.push_back(new BuildNode(t, check_square, node_ID_counter));
-                ++creep_ct;
-                ++node_ID_counter;
-            }
-            if (inner_step % corner_step == 0) {
-                ++i;
-            }
-            ++inner_step;
-        }
-        if (creep_ct == 0) {
-            break;
-        }
-        corner_step += 2;
-        ++outer_step;
-        steps_this_turn += 8;
-    }
-}
-
-void BuildGraph::connect_nodes() {
-    for (auto & node : nodes) {
-        TilePosition node_pos = node->get_tilepos();
-        int directions[4][2] {{1, 0}, {0, -1}, {-1, 0}, {0, 1}};
-        for (int i = 0; i < 4; ++i) {
-            TilePosition neighbor_tilepos(
-                node_pos.x + directions[i][0], node_pos.y + directions[i][1]
-            );
-            std::vector<BNode>::iterator neighbor_node = find_if(
-                nodes.begin(), 
-                nodes.end(), 
-                [neighbor_tilepos]
-                    (const BNode &bn)
-                    {return bn->get_tilepos() == neighbor_tilepos;}
-            );
-            if (neighbor_node != nodes.end()) {
-                node->set_edge(i, *neighbor_node);
-            }
-        }
-    }
-}
-
 void BuildGraph::update_chunk() {
     int path[11] {LEFT, DOWN, RIGHT, RIGHT, UP, RIGHT, DOWN, DOWN, LEFT, LEFT, LEFT};
     for (int check_i = start_chunk; check_i < end_chunk; ++check_i) {
-        register bool buildable[12] {false};
         BNode check_node = nodes[check_i];
         int disconnected_ct = 0;
         for (auto &edge : check_node->get_edges()) {
@@ -191,43 +119,26 @@ void BuildGraph::update_chunk() {
             remove_queue.push_back(check_node);
         }
         else {
+            check_node->set_buildable_dimensions(0, 0);
             BNode bnode = check_node->get_edge(0);
             int i;
             if (bnode != nullptr) {
                 for (i = 0; i < 12; ++i) {
-                    const TilePosition &tp = bnode->get_tilepos();
-                    if (Broodwar->isBuildable(tp, true)) {
-                        buildable[i] = true;
+                    const TilePosition tp = bnode->get_tilepos();
+                    if (!Broodwar->isBuildable(tp, true)) {
+                        break;
                     }
                     if (i == 3) {
-                        if (buildable[0] && buildable[1] && buildable[2] && buildable[3]) {
-                            check_node->set_buildable_dimensions(2, 2);
-                        }
-                        else {
-                            check_node->set_buildable_dimensions(0, 0);
-                            break;
-                        }
+                        check_node->set_buildable_dimensions(2, 2);
                     }
                     else if (i == 5) {
-                        if (buildable[4] && buildable[5]) {
-                            check_node->set_buildable_dimensions(3, 2);
-                        }
-                        else {
-                            break;
-                        }
+                        check_node->set_buildable_dimensions(3, 2);
                     }
                     else if (i == 7) {
-                        if (buildable[6] && buildable[7]) {
-                            check_node->set_buildable_dimensions(4, 2);
-                        }
-                        else {
-                            break;
-                        }
+                        check_node->set_buildable_dimensions(4, 2);
                     }
                     else if (i == 11) {
-                        if (buildable[8] && buildable[9] && buildable[10] && buildable[11]) {
-                            check_node->set_buildable_dimensions(4, 3);
-                        }
+                        check_node->set_buildable_dimensions(4, 3);
                         break;
                     }
                     bnode = bnode->get_edge(path[i]);
@@ -341,7 +252,7 @@ void BuildGraph::remove_dead_nodes() {
         if((edge = node->get_edge(UP)) != nullptr) edge->set_edge(DOWN, nullptr);
         if((edge = node->get_edge(LEFT)) != nullptr) edge ->set_edge(RIGHT, nullptr);
         if((edge = node->get_edge(DOWN)) != nullptr) edge ->set_edge(UP, nullptr);
-        auto node_it = std::find(nodes.begin(), nodes.end(), node);
+        auto node_it = std::remove(nodes.begin(), nodes.end(), node);
         if (node_it != nodes.end()) {
             nodes.erase(node_it);
         }

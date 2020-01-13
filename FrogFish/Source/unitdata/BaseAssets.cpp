@@ -31,7 +31,6 @@ void assign_asset(const std::vector<BaseT> &bases, UnitT asset) {
                 BaseT base = bases[i];
                 if (
                     asset_area->Id() == base->get_area()->Id()
-                    && !asset->is_lifted()
                 ) {
                     if (asset->is_missing()) {
                         if (asset->is_struct() && base->has_structure(asset)) {

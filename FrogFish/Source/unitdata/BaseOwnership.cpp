@@ -9,15 +9,11 @@
 
 using namespace BWAPI;
 
-// TODO: template refactor
-
 void update_base_data(BaseStorage &base_storage, UnitStorage &unit_storage) {
     assign_new_bases(base_storage, unit_storage);    
     assign_base_assets(base_storage, unit_storage);
     unassign_bases(base_storage);
 }
-
-
 
 // *must* be called after UnitStorage::update()
 // and before UnitStorage::clear_newly_assigned()
@@ -140,25 +136,18 @@ void enemy_assign_new_bases(
 // the function that adds structures to bases
 void unassign_bases(BaseStorage &base_storage) {
     const std::vector<FBase> &self_bases = base_storage.get_self_bases();
-    std::vector<FBase> remove_self_bases;
     for (unsigned int i = 0; i < self_bases.size(); i++) {
         const FBase f_base = self_bases[i];
         if (f_base->get_structure_ct() == 0) {
-            remove_self_bases.push_back(f_base);
+            printf("removing a base.\n");
+            base_storage.remove_self_base(f_base);
         }
     }
-    for (auto &f_base : remove_self_bases) {
-        base_storage.remove_self_base(f_base);
-    }
     const std::vector<EBase> &enemy_bases = base_storage.get_enemy_bases();
-    std::vector<EBase> remove_enemy_bases;
     for (unsigned int i = 0; i < enemy_bases.size(); i++) {
         const EBase e_base = enemy_bases[i];
         if (e_base->get_structure_ct() == 0) {
-            remove_enemy_bases.push_back(e_base);
+            base_storage.remove_enemy_base(e_base);
         }
-    }
-    for (auto &e_base : remove_enemy_bases) {
-        base_storage.remove_enemy_base(e_base);
     }
 }

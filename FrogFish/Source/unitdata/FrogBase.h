@@ -60,14 +60,14 @@ public:
     void add_structure(FUnit structure) {structures.push_back(structure);}
 
     void remove_structure(FUnit structure) {
-        std::vector<FUnit>::iterator it = std::find(structures.begin(), structures.end(), structure);
+        std::vector<FUnit>::iterator it = std::remove(structures.begin(), structures.end(), structure);
         structures.erase(it, structures.end());
     }
 
     void add_resource_depot(FUnit _resource_depot) {resource_depots.push_back(_resource_depot);}
 
     void remove_resource_depot(FUnit _resource_depot) {
-        std::vector<FUnit>::iterator it = std::find(resource_depots.begin(), resource_depots.end(), _resource_depot);
+        std::vector<FUnit>::iterator it = std::remove(resource_depots.begin(), resource_depots.end(), _resource_depot);
         resource_depots.erase(it, resource_depots.end());
     }
 

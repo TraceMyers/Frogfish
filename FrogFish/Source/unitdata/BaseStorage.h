@@ -48,11 +48,6 @@ public:
     }
 
     void remove_self_base(const FBase &f_base) {
-        std::vector<FBase>::iterator it = 
-            std::remove(self_bases.begin(), self_bases.end(), f_base);
-        self_bases.erase(it, self_bases.end());
-        const BWEM::Base *b = f_base->free_data();
-        neutral_bases.add(b);
         self_newly_removed.push_back(f_base);
     }
 
@@ -64,11 +59,6 @@ public:
     }
 
     void remove_enemy_base(const EBase &e_base) {
-        std::vector<EBase>::iterator it = 
-            std::remove(enemy_bases.begin(), enemy_bases.end(), e_base);
-        enemy_bases.erase(it, enemy_bases.end());
-        const BWEM::Base *b = e_base->free_data();
-        neutral_bases.add(b);
         enemy_newly_removed.push_back(e_base);
     }
 
@@ -76,6 +66,10 @@ public:
         self_newly_stored.clear();
         while (self_newly_removed.size() > 0) {
             FBase f_base = self_newly_removed.back();
+            auto it = std::remove(self_bases.begin(), self_bases.end(), f_base);
+            self_bases.erase(it, self_bases.end());
+            const BWEM::Base *b = f_base->free_data();
+            neutral_bases.add(b);
             self_newly_removed.pop_back();
             delete f_base;
         }
@@ -83,6 +77,10 @@ public:
         enemy_newly_stored.clear();
         while (enemy_newly_removed.size() > 0) {
             EBase e_base = enemy_newly_removed.back();
+            auto it = std::remove(enemy_bases.begin(), enemy_bases.end(), e_base);
+            enemy_bases.erase(it, enemy_bases.end());
+            const BWEM::Base *b = e_base->free_data();
+            neutral_bases.add(b);
             enemy_newly_removed.pop_back();
             delete e_base;
         }
@@ -106,6 +104,7 @@ public:
     // Only called by FrogFish::onEnd()
     void free_data() {
         while (self_bases.size() > 0) {
+
             FBase f_base = self_bases.back();
             self_bases.pop_back();
             delete f_base;

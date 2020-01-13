@@ -13,7 +13,6 @@ void BuildPlacement::on_frame_update(BaseStorage &base_storage) {
     for (auto base : self_removed_bases) {
         for (unsigned int i = 0; i < BuildPlacement::BASELEN; ++i) {
             if (self_bases[i] == base) {
-                printf("removing a base\n");
                 self_bases[i] = nullptr;
                 self_graphs[i].clear();
             }
@@ -22,7 +21,6 @@ void BuildPlacement::on_frame_update(BaseStorage &base_storage) {
     for (auto base : self_stored_bases) {
         for (unsigned int i = 0; i < BuildPlacement::BASELEN; ++i) {
             if (self_bases[i] == nullptr) {
-                printf("assigning new base\n");
                 self_bases[i] = base;
                 self_graphs[i].init(base);
                 break;

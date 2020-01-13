@@ -177,7 +177,7 @@ void DebugDraw::draw_make_queue(MakeQueue &make_queue) {
     }
 }
 
-void DebugDraw::draw_build_graphs(BaseStorage &base_storage) {
+void DebugDraw::draw_build_graphs() {
     BuildGraph *build_graphs = BuildPlacement::get_graphs();
     for (int i = 0; i < BuildPlacement::BASELEN; ++i) {
         BuildGraph &build_graph = build_graphs[i];
@@ -185,7 +185,7 @@ void DebugDraw::draw_build_graphs(BaseStorage &base_storage) {
             auto &nodes = build_graph.get_nodes();
             for (unsigned int j = 0; j < nodes.size(); ++j) {
                 if (nodes[j]->is_buildable()) {
-                    const BWAPI::TilePosition &tp = nodes[j]->get_tilepos();
+                    BWAPI::TilePosition tp = nodes[j]->get_tilepos();
                     BWAPI::Position top_left(tp);
                     BWAPI::Position bot_right(BWAPI::TilePosition(tp.x + 1, tp.y + 1));
                     Broodwar->drawBoxMap(
@@ -193,7 +193,7 @@ void DebugDraw::draw_build_graphs(BaseStorage &base_storage) {
                         bot_right,
                         BWAPI::Colors::Green
                     );
-                    const std::vector<int> &dims = nodes[i]->get_buildable_dimensions();
+                    const std::vector<int> &dims = nodes[j]->get_buildable_dimensions();
                     Broodwar->drawTextMap(
                         BWAPI::Position(tp) + BWAPI::Position(5, 10), 
                         "%dx%d", dims[0], dims[1]
