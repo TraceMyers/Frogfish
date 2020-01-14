@@ -60,6 +60,11 @@
     <ClCompile Include="Source\production\BuildPlacement.cpp" />
     <ClCompile Include="Source\unitdata\BaseAssets.cpp" />
     <ClCompile Include="Source\unitdata\BaseOwnership.cpp" />
+    <ClCompile Include="Source\production\ProductionCoordinator.cpp" />
+    <ClCompile Include="Source\production\UnitMaker.cpp" />
+    <ClCompile Include="Source\production\ConstructionManager.cpp" />
+    <ClCompile Include="Source\utility\BWTimer.cpp" />
+    <ClCompile Include="Source\production\EconTracker.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\BWEM\area.h">
@@ -122,9 +127,6 @@
     <ClInclude Include="Source\production\BuildGraph.h">
       <Filter>headers</Filter>
     </ClInclude>
-    <ClInclude Include="Source\production\BuildManager.h">
-      <Filter>headers</Filter>
-    </ClInclude>
     <ClInclude Include="Source\production\BuildPlacement.h">
       <Filter>headers</Filter>
     </ClInclude>
@@ -141,9 +143,6 @@
       <Filter>headers</Filter>
     </ClInclude>
     <ClInclude Include="Source\production\ProductionCoordinator.h">
-      <Filter>headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\production\UnitMaker.h">
       <Filter>headers</Filter>
     </ClInclude>
     <ClInclude Include="Source\unitdata\BaseAssets.h">
@@ -177,6 +176,15 @@
       <Filter>headers</Filter>
     </ClInclude>
     <ClInclude Include="Source\utility\DebugDraw.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\production\UnitMaker.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\production\ConstructionManager.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\production\BuildOrder.h">
       <Filter>headers</Filter>
     </ClInclude>
   </ItemGroup>

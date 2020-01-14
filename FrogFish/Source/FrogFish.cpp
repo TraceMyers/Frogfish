@@ -3,13 +3,8 @@
 #include "utility/BWTimer.h"
 #include "unitdata/UnitStorage.h"
 #include "unitdata/BaseStorage.h"
-#include "unitdata/EnemyBase.h"
 #include "unitdata/BaseOwnership.h"
-#include "production/EconTracker.h"
-#include "production/UnitMaker.h"
 #include "production/ProductionCoordinator.h"
-#include "production/BuildGraph.h"
-#include "production/BuildPlacement.h"
 #include "control/WorkerControl.h"
 #include <BWAPI.h>
 #include <iostream>
@@ -17,16 +12,15 @@
 #include <set>
 #include <chrono>
 #include <vector>
+#include <fstream>
 
 using namespace BWAPI;
 using namespace Filter;
 
 UnitStorage unit_storage;
 BaseStorage base_storage;
-EconTracker econ_tracker;
 ProductionCoordinator production_coordinator;
-UnitMaker unit_maker;
-BWTimer<void *> timer;
+BWTimer timer;
 
 bool first_frame_over = false;
 int node_i = 0;
@@ -40,8 +34,9 @@ void FrogFish::onStart() {
     onStart_send_workers_to_mine();
     onStart_init_bwem();
     base_storage.init();
-    econ_tracker.init();
     timer.start(0, 5);
+    production_coordinator.init();
+    production_coordinator.load_build_order("terran", "9_pool");
 }
 
 void FrogFish::onFrame() {
@@ -49,28 +44,26 @@ void FrogFish::onFrame() {
     timer.on_frame_update();
 
     // update data
-    unit_maker.on_frame_update();
-    econ_tracker.on_frame_update();    
     unit_storage.update();
-    update_base_data(base_storage, unit_storage);
-    unit_storage.clear_newly_assigned();
-    BuildPlacement::on_frame_update(base_storage);
-    base_storage.clear_newly_assigned();
+    BaseOwnership::update_base_data(base_storage, unit_storage);
+    production_coordinator.on_frame_update(base_storage);
+
 
     // draw
-    
+    DebugDraw::draw_build_graphs();
     DebugDraw::draw_units(unit_storage);
     DebugDraw::draw_base_info(base_storage);
-    DebugDraw::draw_build_graphs();
+
+    // Delete units from newly_stored and newly_removed lists
+    // after other functions have gotten a chance to see that they're
+    // being removed
+    unit_storage.clear_newly_assigned();
+    base_storage.clear_newly_assigned();
 
     if (Broodwar->getFrameCount() % Broodwar->getLatencyFrames() != 0) {return;}
     // RUN COMMANDS -----------------------------------------------------------------
-
+    production_coordinator.produce(base_storage);
     send_idle_workers_to_mine(base_storage);
-
-    // try contiunous drone production with current mechanisms:
-    unit_maker.make_units(econ_tracker, base_storage, production_coordinator);
-    
 }
 
 void FrogFish::onSendText(std::string text) {

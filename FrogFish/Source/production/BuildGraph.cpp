@@ -57,7 +57,7 @@ void BuildGraph::init(FBase _base) {
     node_ID_counter = 0;
     start_chunk = 0;
     end_chunk = 100000;
-    CHUNK_SIZE = 5;
+    CHUNK_SIZE = 20;
     base = _base;
     for (auto & hatch : base->get_resource_depots()) {
         seed_creep(hatch);
@@ -73,13 +73,13 @@ void BuildGraph::on_frame_update() {
     int nodes_size = nodes.size();
     if (nodes_size > 0) {
         if (end_chunk > nodes_size) {
-            if (CHUNK_SIZE >= nodes_size) {
-                end_chunk = nodes_size;
+            if (start_chunk >= nodes_size) {
+                start_chunk = 0;
+                end_chunk = (CHUNK_SIZE > nodes_size ? nodes_size : CHUNK_SIZE);
             }
             else {
-                end_chunk = CHUNK_SIZE;
+                end_chunk = nodes_size;
             }
-            start_chunk = 0;
         }
         update_chunk();
         try_expand();

@@ -1,4 +1,5 @@
 #pragma once
+#pragma message("Makequeue")
 
 #include "../unitdata/FrogBase.h"
 #include "../unitdata/UnitStorage.h"
@@ -7,34 +8,6 @@
 #include <vector>
 #include <map>
 #include <deque>
-// make units by proportions per UnitType
-// try to fairly fulfill the proportions with limited larva per command frame
-// don't just fill out one type in order before moving on to next,
-// otherwise a type might constantly get passed up when new proportion orders
-// are sent
-// UnitType proportions -> static order
-//      lowest proportion brought up to 1
-//      all other proportions scaled up the same way and rounded
-//      makes an order to be filled out
-//      make one of each type in rounds unless the type's order is filled, then
-//      skip over it
-// drones are produced at bases where they are needed the most
-//      assign all of the neediest base's larva to drone production
-// all units can be required to be made at a specific base, which reserves
-// larva for that unit type at that base (overrides drone priority)
-// (decision to drone in bursts, save for mutas, etc. made elsewhere)
-//      for example: save for mutas is as simple as setting the Mutalisk proportion to 1
-//      before the unit can be built
-
-//      if saving needs to happen, but only to a proportion of production,
-//      larva can be reserved for a unittype until it becomes available,
-//      either at specific bases or not 
-// overlords are produced when:
-    // unit production econ capacity, along with current larva + incoming larva over time
-        // and current unit order shows that another order of the same kind
-        // would hit a supply block
-        // larva spawn rate: 1 per 340 frames
-    // overlords are given high priority at the safest bases 
 
 #ifndef LARVA_SPAWN_SEC
 #define LARVA_SPAWN_SEC 14.166
@@ -80,12 +53,14 @@ public:
     // the order period needs to be accurate
     // NOTE: unit proportions are essentially de-prioritizing if
     // put in in equal rounds; higher proportions only resolve later in the queue
-    void take_order(
+    void take_proportion_order(
         BaseStorage &base_storage,
         const std::vector<double> &proportions,
         const std::vector<bool> &high_priority,
         int order_period
     ) {
+        queue.clear();
+        queue_size = 0;
         assert(proportions.size() == (unsigned int)MKQ_UNIT_TYPE_CT);
         const std::vector<FBase> &bases = base_storage.get_self_bases();
         register int larvae_ct = 0;
@@ -135,6 +110,14 @@ public:
         queue_size = queue.size();
     }
 
+    void take_exact_order(const std::vector<UnitType> &unit_types) {
+        queue.clear();
+        for (auto &ut : unit_types) {
+            queue.push_back(ut);
+        }
+        queue_size = queue.size();
+    }
+
     const std::deque<BWAPI::UnitType> &get_queue() {
         return queue;
     }
@@ -167,11 +150,5 @@ public:
     int size() {
         return queue_size;
     }
-
-    // overlord production assumes this order is going to be wanted forever
-    // , projects larva production and mineral/gas spending capacity
-    // to buffer
-
-
 };
 

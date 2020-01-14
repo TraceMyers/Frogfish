@@ -1,4 +1,5 @@
 #pragma once
+#pragma message("FrogBase")
 
 #include "FrogUnit.h"
 #include <BWAPI.h>

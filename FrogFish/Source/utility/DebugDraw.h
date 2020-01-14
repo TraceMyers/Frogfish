@@ -1,10 +1,10 @@
 #pragma once
+#pragma message("DebugDraw")
 
 #include "../FrogFish.h"
 #include "../unitdata/UnitStorage.h"
 #include "../unitdata/BaseStorage.h"
 #include "../production/MakeQueue.h"
-#include "../production/BuildManager.h"
 #include <BWEM/bwem.h>
 #include <string>
 

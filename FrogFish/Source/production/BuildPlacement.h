@@ -1,4 +1,5 @@
 #pragma once
+#pragma message("BuildPlacement")
 
 #include "BuildGraph.h"
 #include "../unitdata/FrogBase.h"
@@ -13,5 +14,7 @@ namespace BuildPlacement {
 
     void add_and_remove_bases(BaseStorage &base_storage);
 
+    TilePosition find_any_node_for_placement(FBase base, int width, int height);
+
     BuildGraph *get_graphs();
-};
+}

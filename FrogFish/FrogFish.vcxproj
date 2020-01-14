@@ -122,8 +122,13 @@
     <ClCompile Include="Source\FrogFish.cpp" />
     <ClCompile Include="Source\production\BuildGraph.cpp" />
     <ClCompile Include="Source\production\BuildPlacement.cpp" />
+    <ClCompile Include="Source\production\ConstructionManager.cpp" />
+    <ClCompile Include="Source\production\EconTracker.cpp" />
+    <ClCompile Include="Source\production\ProductionCoordinator.cpp" />
+    <ClCompile Include="Source\production\UnitMaker.cpp" />
     <ClCompile Include="Source\unitdata\BaseAssets.cpp" />
     <ClCompile Include="Source\unitdata\BaseOwnership.cpp" />
+    <ClCompile Include="Source\utility\BWTimer.cpp" />
     <ClCompile Include="Source\utility\DebugDraw.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -147,9 +152,10 @@
     <ClInclude Include="..\include\BWEM\winutils.h" />
     <ClInclude Include="Source\control\WorkerControl.h" />
     <ClInclude Include="Source\production\BuildGraph.h" />
-    <ClInclude Include="Source\production\BuildManager.h" />
+    <ClInclude Include="Source\production\BuildOrder.h" />
     <ClInclude Include="Source\production\BuildPlacement.h" />
     <ClInclude Include="Source\production\BuildQueue.h" />
+    <ClInclude Include="Source\production\ConstructionManager.h" />
     <ClInclude Include="Source\production\EconTracker.h" />
     <ClInclude Include="Source\production\MakeQueue.h" />
     <ClInclude Include="Source\production\MorphQueue.h" />

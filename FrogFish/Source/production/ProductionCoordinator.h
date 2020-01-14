@@ -1,28 +1,40 @@
 #pragma once
+#pragma message("ProductionCoordinator")
 
-#include "MakeQueue.h"
+#include "BuildOrder.h"
+#include "UnitMaker.h"
+// #include "EconTracker.h"
+#include "UnitMaker.h"
+#include "ConstructionManager.h"
+#include "../unitdata/BaseStorage.h"
 
+// has the ability to switch between build orders and real-time plans
+// for instance, though the bot always starts with a build order, it may
+// need to interrupt the build order to react to an enemy attack. It could
+// then potentially continue the build order (or another BO) after that.
 class ProductionCoordinator {
 
 private:
 
-std::vector<double> make_proportions;
-std::vector<bool> make_priorities;
+    BuildOrder build_order;
+    EconTracker econ_tracker;
+    UnitMaker unit_maker;
+    ConstructionManager construction_manager;
+
+    std::vector<double> make_proportions;
+    std::vector<bool> make_priorities;
 
 public:
 
-    ProductionCoordinator() :
-        make_proportions(MakeQueue::MKQ_UNIT_TYPE_CT),
-        make_priorities(MakeQueue::MKQ_UNIT_TYPE_CT)
-    {
-        make_proportions[MakeQueue::DRONE] = 1.0;
-    }
+    void init();
 
-    const std::vector<double> &get_make_proportions() {
-        return make_proportions;
-    }
+    void load_build_order(const char *race, const char *name);
 
-    const std::vector<bool> &get_make_priorities() {
-        return make_priorities;
-    }
+    void on_frame_update(BaseStorage &base_storage);
+
+    void produce(BaseStorage &base_storage);
+
+    const std::vector<double> &get_make_proportions();
+
+    const std::vector<bool> &get_make_priorities();
 };

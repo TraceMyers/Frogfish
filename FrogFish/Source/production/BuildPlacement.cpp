@@ -29,10 +29,25 @@ void BuildPlacement::on_frame_update(BaseStorage &base_storage) {
         }
     }
     for (unsigned int i = 0; i < BuildPlacement::BASELEN; ++i) {
-        if (self_graphs[i].get_base() != nullptr) {
+        if (self_bases[i] != nullptr) {
             self_graphs[i].on_frame_update();
         }
     }
+}
+
+TilePosition BuildPlacement::find_any_node_for_placement(FBase base, int width, int height) {
+    for (int i = 0; i < BuildPlacement::BASELEN; ++i) {
+        if (self_bases[i] == base) {
+            const auto &bnodes = self_graphs[i].get_nodes();
+            for (auto &node : bnodes) {
+                auto &node_build_dims = node->get_buildable_dimensions();
+                if (node_build_dims[0] >= width && node_build_dims[1] >= height) {
+                    return node->get_tilepos();
+                }
+            }
+        }
+    }
+    return TilePosition(-1, -1);
 }
 
 BuildGraph *BuildPlacement::get_graphs() {

@@ -1,5 +1,5 @@
 #pragma once
-
+#pragma message("BuildQueue")
 #include <deque>
 #include <BWAPI.h>
 

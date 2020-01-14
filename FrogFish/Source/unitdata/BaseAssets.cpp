@@ -159,7 +159,7 @@ void remove_dead_assets(const std::vector<UnitT> &assets, const std::vector<Base
     }
 }
 
-void assign_base_assets(BaseStorage &base_storage, UnitStorage &unit_storage) {
+void BaseAssets::assign_base_assets(BaseStorage &base_storage, UnitStorage &unit_storage) {
     const std::vector<FBase> &self_bases = base_storage.get_self_bases();
     const std::map<int, FUnit> &self_units = unit_storage.self_units();
     assign_assets(self_units, self_bases);

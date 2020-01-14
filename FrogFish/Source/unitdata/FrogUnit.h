@@ -1,19 +1,20 @@
 #pragma once
+#pragma message ("FrogUnit")
 
-#include <BWAPI.h>
 #include "../utility/BWTimer.h"
+#include <BWAPI.h>
 
-using namespace BWAPI;
+
 
 class FrogUnit {
 
 private:
 
-    Unit bwapi_unit;
-    UnitType type;
+    BWAPI::Unit bwapi_unit;
+    BWAPI::UnitType type;
     std::vector<double> velocity {0.0, 0.0};
     bool cmd_ready;
-    BWTimer<FrogUnit *> cmd_timer;
+    BWTimer cmd_timer;
 
 public:
 
@@ -22,7 +23,7 @@ public:
         MINE_MINERALS,
         MINE_GAS,
         TRANSFER_BASE,
-        MORPH_STRUCT,
+        BUILD_STRUCT,
         MORPH_UNIT,
         ATTACK,
         SCOUT
@@ -40,7 +41,7 @@ public:
     FTYPES f_type;
     FTASKS f_task;
 
-    FrogUnit(const Unit u) : 
+    FrogUnit(const BWAPI::Unit u) : 
         bwapi_unit(u),
         cmd_ready(true),
         f_task(FTASKS::IDLE),
@@ -69,9 +70,12 @@ public:
 
     void update_cmd_timer() {
         cmd_timer.on_frame_update();
+        if (cmd_timer.is_stopped()) {
+            set_ready();
+        }
     }
 
-    const Unit bwapi_u() {return bwapi_unit;}
+    const BWAPI::Unit bwapi_u() {return bwapi_unit;}
 
     int get_ID() {return bwapi_unit->getID();}
 
@@ -81,9 +85,9 @@ public:
 
     int get_energy() {return bwapi_unit->getEnergy();}
 
-    const Position get_pos() {return bwapi_unit->getPosition();}
+    const BWAPI::Position get_pos() {return bwapi_unit->getPosition();}
 
-    const TilePosition get_tilepos() {return bwapi_unit->getTilePosition();}
+    const BWAPI::TilePosition get_tilepos() {return bwapi_unit->getTilePosition();}
 
     const std::vector<double> &get_velocity() {
         velocity[0] = bwapi_unit->getVelocityX();
@@ -91,7 +95,7 @@ public:
         return velocity;
     }
 
-    const UnitType &get_type() {return type;}
+    const BWAPI::UnitType &get_type() {return type;}
 
     const std::string &get_name() {return type.getName();}
 
@@ -110,12 +114,11 @@ public:
     bool type_changed() {return type == bwapi_unit->getType();}
 
     // only for use by FUnit
-    static void set_ready(FrogUnit *f_unit) {f_unit->cmd_ready = true;}
+    void set_ready() {cmd_ready = true;}
 
     void set_cmd_delay(int frames) {
         cmd_ready = false;
-        static void (*func)(FrogUnit *f_unit) = &set_ready;
-        cmd_timer.start(this, func, 0, frames);
+        cmd_timer.start(0, frames);
     }
 
     // template stuff -----------

@@ -9,15 +9,15 @@
 
 using namespace BWAPI;
 
-void update_base_data(BaseStorage &base_storage, UnitStorage &unit_storage) {
+void BaseOwnership::update_base_data(BaseStorage &base_storage, UnitStorage &unit_storage) {
     assign_new_bases(base_storage, unit_storage);    
-    assign_base_assets(base_storage, unit_storage);
+    BaseAssets::assign_base_assets(base_storage, unit_storage);
     unassign_bases(base_storage);
 }
 
 // *must* be called after UnitStorage::update()
 // and before UnitStorage::clear_newly_assigned()
-void assign_new_bases(BaseStorage &base_storage, UnitStorage &unit_storage) {
+void BaseOwnership::assign_new_bases(BaseStorage &base_storage, UnitStorage &unit_storage) {
     const BWEMBaseArray &neutral_bases = base_storage.get_neutral_bases();
 
     const std::vector<FUnit> &new_self_units = unit_storage.get_self_newly_stored();
@@ -39,7 +39,7 @@ void assign_new_bases(BaseStorage &base_storage, UnitStorage &unit_storage) {
 }
 
 template <class UnitArrayT>
-void self_assign_new_bases(
+void BaseOwnership::self_assign_new_bases(
     BaseStorage &base_storage, 
     const UnitArrayT &self_units,
     const BWEMBaseArray &neutral_bases
@@ -53,7 +53,6 @@ void self_assign_new_bases(
                 if (structure_area != nullptr) {
                     const std::vector<BWEM::Base> &area_bases = structure_area->Bases();
                     std::vector<const BWEM::Base *> potential_new_bases;
-                    //std::vector<BWEM::Base *> potential_new_bases;
                     for (auto &base : area_bases) {
                         int neutral_base_i = neutral_bases.find(&base);
                         if (neutral_base_i != -1) {
@@ -86,7 +85,7 @@ void self_assign_new_bases(
 }
 
 template <class UnitArrayT>
-void enemy_assign_new_bases(
+void BaseOwnership::enemy_assign_new_bases(
     BaseStorage &base_storage, 
     const UnitArrayT &enemy_units,
     const BWEMBaseArray &neutral_bases
@@ -134,7 +133,7 @@ void enemy_assign_new_bases(
 // must either call before assign_new_bases()
 // or call after both assign_new_bases() and
 // the function that adds structures to bases
-void unassign_bases(BaseStorage &base_storage) {
+void BaseOwnership::unassign_bases(BaseStorage &base_storage) {
     const std::vector<FBase> &self_bases = base_storage.get_self_bases();
     for (unsigned int i = 0; i < self_bases.size(); i++) {
         const FBase f_base = self_bases[i];

@@ -1,5 +1,5 @@
 #pragma once
-
+#pragma message("BaseStorage")
 #include "../FrogFish.h"
 #include "FrogBase.h"
 #include "EnemyBase.h"
