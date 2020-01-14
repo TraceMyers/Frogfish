@@ -148,3 +148,4 @@
 [1/13/2020 1:01:34 PM] ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 [1/13/2020 1:01:34 PM] Injected into process "Chaoslauncher - MultiInstance.exe"
 [1/13/2020 1:01:34 PM] ICC module loaded
+[1/14/2020 5:45:47 AM] ICC module unloaded

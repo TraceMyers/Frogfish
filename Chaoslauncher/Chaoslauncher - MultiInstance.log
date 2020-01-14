@@ -180,3 +180,42 @@
 1/14/2020 1:46:07 AM 41284 ApplyPatch for BWAPI 4.4.0 Injector [DEBUG]
 1/14/2020 1:46:07 AM 41284 ApplyPatch for W-MODE 1.02
 1/14/2020 1:46:07 AM 41284 Starting Starcraft completed
+1/14/2020 4:57:21 AM 41284 Startbutton
+1/14/2020 4:57:21 AM 41284 Starting Game Starcraft 1.16.1 C:\ProgramData\bwapi\starcraft\StarCraft.exe
+1/14/2020 4:57:21 AM 41284 BWAPI 4.4.0 Injector [DEBUG] Version  Compatible
+1/14/2020 4:57:21 AM 41284 W-MODE 1.02 Version 1.0.2 Compatible
+1/14/2020 4:57:21 AM 41284 Obtained DebugPrivilege
+1/14/2020 4:57:21 AM 41284 CreateProcess
+1/14/2020 4:57:21 AM 41284 Call ScSuspended for all active Plugins
+1/14/2020 4:57:21 AM 41284 ApplyPatchSuspended for BWAPI 4.4.0 Injector [DEBUG]
+1/14/2020 4:57:21 AM 41284 ApplyPatchSuspended for W-MODE 1.02
+1/14/2020 4:57:21 AM 41284 ResumeThread
+1/14/2020 4:57:21 AM 41284 WaitForInputIdle
+1/14/2020 4:57:21 AM 41284 Call ScWindowCreated for all active Plugins
+1/14/2020 4:57:21 AM 41284 ApplyPatch for BWAPI 4.4.0 Injector [DEBUG]
+1/14/2020 4:57:21 AM 41284 ApplyPatch for W-MODE 1.02
+1/14/2020 4:57:21 AM 41284 Starting Starcraft completed
+1/14/2020 5:11:53 AM 41284 Startbutton
+1/14/2020 5:11:53 AM 41284 Starting Game Starcraft 1.16.1 C:\ProgramData\bwapi\starcraft\StarCraft.exe
+1/14/2020 5:11:53 AM 41284 BWAPI 4.4.0 Injector [DEBUG] Version  Compatible
+1/14/2020 5:11:53 AM 41284 W-MODE 1.02 Version 1.0.2 Compatible
+1/14/2020 5:11:53 AM 41284 Obtained DebugPrivilege
+1/14/2020 5:11:53 AM 41284 CreateProcess
+1/14/2020 5:11:53 AM 41284 Call ScSuspended for all active Plugins
+1/14/2020 5:11:53 AM 41284 ApplyPatchSuspended for BWAPI 4.4.0 Injector [DEBUG]
+1/14/2020 5:11:53 AM 41284 ApplyPatchSuspended for W-MODE 1.02
+1/14/2020 5:11:53 AM 41284 ResumeThread
+1/14/2020 5:11:53 AM 41284 WaitForInputIdle
+1/14/2020 5:11:53 AM 41284 Call ScWindowCreated for all active Plugins
+1/14/2020 5:11:53 AM 41284 ApplyPatch for BWAPI 4.4.0 Injector [DEBUG]
+1/14/2020 5:11:53 AM 41284 ApplyPatch for W-MODE 1.02
+1/14/2020 5:11:53 AM 41284 Starting Starcraft completed
+1/14/2020 5:45:47 AM 41284 Finishing
+1/14/2020 5:45:47 AM 41284 Unloading Plugin ICCup
+1/14/2020 5:45:47 AM 41284 Unloading Plugin APMAlert (1.16.1)
+1/14/2020 5:45:47 AM 41284 Unloading Plugin BWAPI 4.4.0 Injector [RELEASE]
+1/14/2020 5:45:47 AM 41284 Unloading Plugin BWAPI 4.4.0 Injector [DEBUG]
+1/14/2020 5:45:47 AM 41284 Unloading Plugin Chaosplugin for 1.16.1
+1/14/2020 5:45:47 AM 41284 Unloading Plugin LatencyChanger for 1.16.1
+1/14/2020 5:45:47 AM 41284 Unloading Plugin RepFix
+1/14/2020 5:45:47 AM 41284 Unloading Plugin RWAPlayer (1.16.1)

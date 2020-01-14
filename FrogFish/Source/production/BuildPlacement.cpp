@@ -2,6 +2,7 @@
 #include "BuildGraph.h"
 #include "../unitdata/FrogBase.h"
 #include "../unitdata/BaseStorage.h"
+#include "BWEM/bwem.h"
 #include <vector>
 
 FBase self_bases[BuildPlacement::BASELEN] {nullptr};
@@ -48,6 +49,10 @@ TilePosition BuildPlacement::find_any_node_for_placement(FBase base, int width, 
         }
     }
     return TilePosition(-1, -1);
+}
+
+const std::vector<BWEM::Geyser *> &BuildPlacement::get_base_geysers(FBase base) {
+    return base->get_geysers();
 }
 
 BuildGraph *BuildPlacement::get_graphs() {

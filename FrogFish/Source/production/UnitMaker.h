@@ -14,6 +14,7 @@ private:
     MorphQueue morph_queue;
     BuildOrder *build_order;
     std::vector<BWTimer> overlord_making_timers;
+    bool finished_init_droning = false;
 
     enum MODE {
         PAUSED,
