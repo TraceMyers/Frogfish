@@ -130,6 +130,7 @@
     <ClCompile Include="Source\unitdata\BaseOwnership.cpp" />
     <ClCompile Include="Source\utility\BWTimer.cpp" />
     <ClCompile Include="Source\utility\DebugDraw.cpp" />
+    <ClCompile Include="Source\utility\FrogMath.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\BWEM\area.h" />
@@ -172,6 +173,7 @@
     <ClInclude Include="Source\unitdata\UnitStorage.h" />
     <ClInclude Include="Source\utility\BWTimer.h" />
     <ClInclude Include="Source\utility\DebugDraw.h" />
+    <ClInclude Include="Source\utility\FrogMath.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

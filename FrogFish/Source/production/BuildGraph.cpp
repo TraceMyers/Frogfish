@@ -1,6 +1,7 @@
 #include "BuildGraph.h"
-// #include "../unitdata/FrogBase.h"
+#include "../unitdata/FrogBase.h"
 #include "../unitdata/FrogUnit.h"
+#include "../utility/FrogMath.h"
 #include <BWAPI.h>
 #include <BWEM/bwem.h>
 
@@ -14,15 +15,19 @@ typedef FrogBase *FBase;
 BuildNode::BuildNode(const BWEM::Tile &_t, BWAPI::TilePosition tp, int _ID) : 
     _tile(_t), 
     tilepos(tp),
+    pos(BWAPI::Position(tp)),
     buildable_dimensions({0, 0}),
     edges({nullptr, nullptr, nullptr, nullptr}),
     ID(_ID),
+    _blocks_mining(false),
     occupied(false)
 {}
 
 const BWEM::Tile &BuildNode::bwem_tile() {return _tile;}
 
 BWAPI::TilePosition BuildNode::get_tilepos() {return tilepos;}
+
+BWAPI::Position BuildNode::get_pos() {return pos;}
 
 void BuildNode::set_edge(int dir, BuildNode *n) {edges[dir] = n;}
 
@@ -38,6 +43,14 @@ void BuildNode::set_buildable_dimensions(int x, int y) {
 }
 
 const std::vector<int> &BuildNode::get_buildable_dimensions() {return buildable_dimensions;}
+
+void BuildNode::set_blocks_mining(bool value) {_blocks_mining = value;}
+
+bool BuildNode::blocks_mining() {return _blocks_mining;}
+
+void BuildNode::set_blocks_larva(bool value) {_blocks_larva = value;}
+
+bool BuildNode::blocks_larva() {return _blocks_larva;}
 
 int BuildNode::get_ID() {return ID;}
 
@@ -59,6 +72,7 @@ void BuildGraph::init(FBase _base) {
     end_chunk = 100000;
     CHUNK_SIZE = 20;
     base = _base;
+    resource_blocking_angles = FrogMath::get_buffered_resource_angles(base);
     for (auto & hatch : base->get_resource_depots()) {
         seed_creep(hatch);
     }
@@ -83,6 +97,9 @@ void BuildGraph::on_frame_update() {
         }
         update_chunk();
         try_expand();
+        if (resource_blocking_angles[0] >= 0) {
+            flag_resource_blocking_nodes();
+        }
         remove_dead_nodes();
         start_chunk += CHUNK_SIZE;
         end_chunk += CHUNK_SIZE;
@@ -90,6 +107,7 @@ void BuildGraph::on_frame_update() {
     for (auto & structure : base->get_structures()) {
         seed_creep(structure);
     }
+    bg_timer.on_frame_update();
 }
 
 void BuildGraph::seed_creep(FUnit structure) {
@@ -110,6 +128,8 @@ void BuildGraph::update_chunk() {
     for (int check_i = start_chunk; check_i < end_chunk; ++check_i) {
         BNode check_node = nodes[check_i];
         int disconnected_ct = 0;
+        bool this_node_mineral_blocking = check_node->blocks_mining();
+        
         for (auto &edge : check_node->get_edges()) {
             if (edge == nullptr) {
                 ++disconnected_ct;
@@ -117,38 +137,71 @@ void BuildGraph::update_chunk() {
         }
         if (disconnected_ct == 4 || !Broodwar->hasCreep(check_node->get_tilepos())) {
             remove_queue.push_back(check_node);
+            continue;
         }
-        else {
-            check_node->set_buildable_dimensions(0, 0);
-            BNode bnode = check_node->get_edge(0);
-            int i;
-            if (bnode != nullptr) {
-                for (i = 0; i < 12; ++i) {
-                    const TilePosition tp = bnode->get_tilepos();
-                    if (!Broodwar->isBuildable(tp, true)) {
-                        break;
-                    }
-                    if (i == 3) {
-                        check_node->set_buildable_dimensions(2, 2);
-                    }
-                    else if (i == 5) {
-                        check_node->set_buildable_dimensions(3, 2);
-                    }
-                    else if (i == 7) {
-                        check_node->set_buildable_dimensions(4, 2);
-                    }
-                    else if (i == 11) {
-                        check_node->set_buildable_dimensions(4, 3);
-                        break;
-                    }
-                    bnode = bnode->get_edge(path[i]);
-                    if (bnode == nullptr) {
-                        break;
-                    }
+
+        check_node->set_buildable_dimensions(0, 0);
+        auto &hatches = base->get_resource_depots();
+        std::vector<BWAPI::TilePosition> hatch_tilepositions;
+        for (auto &hatch : hatches) {
+            hatch_tilepositions.push_back(hatch->get_tilepos());
+        }
+        bool below_hatch = node_below_hatch(check_node, hatch_tilepositions);
+        if (below_hatch) {
+            continue;
+        }
+
+        BNode bnode = check_node->get_edge(0);
+        int i;
+        if (bnode != nullptr) {
+            for (i = 0; i < 12; ++i) {
+                const TilePosition tp = bnode->get_tilepos();
+                if (
+                    !Broodwar->isBuildable(tp, true) 
+                    ||
+                    (!this_node_mineral_blocking && bnode->blocks_mining())
+                    ||
+                    bnode->blocks_larva()
+                ) {
+                    break;
+                }
+                if (i == 3) {
+                    check_node->set_buildable_dimensions(2, 2);
+                }
+                else if (i == 5) {
+                    check_node->set_buildable_dimensions(3, 2);
+                }
+                else if (i == 7) {
+                    check_node->set_buildable_dimensions(4, 2);
+                }
+                else if (i == 11) {
+                    check_node->set_buildable_dimensions(4, 3);
+                    break;
+                }
+                bnode = bnode->get_edge(path[i]);
+                if (bnode == nullptr) {
+                    break;
                 }
             }
         }
     }
+}
+
+bool BuildGraph::node_below_hatch(BNode node, std::vector<BWAPI::TilePosition> hatch_tilepositions) {
+    TilePosition node_tilepos = node->get_tilepos();
+    int path[16][2] {{0, -3}, {1, 0}, {1, 0}, {0, 1}, {0, 1}, {0, 1}, {0, -3}, {-3, 0}, {-1, 0}, {-1, 0}, {-1, 0}, {0, 1}, {0, 1}, {0, 1}, {0, 1}};
+    for (int i = 0; i < 16; ++i) {
+        node_tilepos.x += path[i][0];
+        node_tilepos.y += path[i][1];
+        for (auto &hatch_tp : hatch_tilepositions) {
+            if (hatch_tp == node_tilepos) {
+                node->set_blocks_larva(true);
+                return true;
+            }
+        }
+    } 
+    node->set_blocks_larva(false);
+    return false;
 }
 
 void BuildGraph::try_expand() {
@@ -207,6 +260,25 @@ void BuildGraph::try_expand() {
                     }
                 }
             }
+        }
+    }
+}
+
+void BuildGraph::flag_resource_blocking_nodes() {
+    BWAPI::Position base_center = base->get_center();
+    for (int check_i = start_chunk; check_i < end_chunk; ++check_i) {
+        auto &node = nodes[check_i];
+        double angle_to_node = FrogMath::get_angle(base_center, node->get_pos());
+        if (FrogMath::angle_is_between(
+            angle_to_node,
+            resource_blocking_angles[0],
+            resource_blocking_angles[1],
+            resource_blocking_angles[2]
+        )) {
+            node->set_blocks_mining(true);
+        }
+        else {
+            node->set_blocks_mining(false);
         }
     }
 }

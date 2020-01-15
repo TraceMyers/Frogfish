@@ -65,6 +65,7 @@
     <ClCompile Include="Source\production\ConstructionManager.cpp" />
     <ClCompile Include="Source\utility\BWTimer.cpp" />
     <ClCompile Include="Source\production\EconTracker.cpp" />
+    <ClCompile Include="Source\utility\FrogMath.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\BWEM\area.h">
@@ -185,6 +186,9 @@
       <Filter>headers</Filter>
     </ClInclude>
     <ClInclude Include="Source\production\BuildOrder.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\utility\FrogMath.h">
       <Filter>headers</Filter>
     </ClInclude>
   </ItemGroup>

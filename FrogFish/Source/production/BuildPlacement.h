@@ -17,6 +17,8 @@ namespace BuildPlacement {
 
     TilePosition find_any_node_for_placement(FBase base, int width, int height);
 
+    TilePosition find_node_for_tech_placement(FBase base, int width, int height);
+
     const std::vector<BWEM::Geyser *> &get_base_geysers(FBase base);
 
     BuildGraph *get_graphs();

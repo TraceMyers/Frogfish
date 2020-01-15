@@ -42,13 +42,21 @@ TilePosition BuildPlacement::find_any_node_for_placement(FBase base, int width, 
             const auto &bnodes = self_graphs[i].get_nodes();
             for (auto &node : bnodes) {
                 auto &node_build_dims = node->get_buildable_dimensions();
-                if (node_build_dims[0] >= width && node_build_dims[1] >= height) {
+                if (
+                    node_build_dims[0] >= width 
+                    && node_build_dims[1] >= height
+                    && !node->blocks_mining()
+                ) {
                     return node->get_tilepos();
                 }
             }
         }
     }
     return TilePosition(-1, -1);
+}
+
+TilePosition find_node_for_tech_placement(FBase base, int width, int height) {
+    return BWAPI::TilePosition(0, 0);
 }
 
 const std::vector<BWEM::Geyser *> &BuildPlacement::get_base_geysers(FBase base) {

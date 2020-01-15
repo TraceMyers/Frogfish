@@ -1,5 +1,6 @@
 #pragma once
-#pragma message("BWTimer")
+#include <thread>
+#include <chrono>
 
 class BWTimer {
 
@@ -23,4 +24,5 @@ public:
     bool is_stopped();
     void restart();
     int get_frames_left();
+    void sleep_for(int seconds);
 };

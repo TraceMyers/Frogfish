@@ -3,8 +3,10 @@
 
 #include "../FrogFish.h"
 #include "../unitdata/FrogBase.h"
+#include "../utility/BWTimer.h"
 #include <BWEM/bwem.h>
 #include <BWAPI.h>
+
 
 /*******************************************************************************
  * For regularly updating creep tiling at Zerg bases to aid building placement *
@@ -23,9 +25,11 @@ private:
 
     const BWEM::Tile&        _tile;
     BWAPI::TilePosition      tilepos;
+    BWAPI::Position          pos;
     std::vector<BuildNode *> edges;
     std::vector<int>         buildable_dimensions;
-    bool                     blocks_mining;
+    bool                     _blocks_mining;
+    bool                     _blocks_larva;
     bool                     occupied;
 
 public:
@@ -35,6 +39,7 @@ public:
     BuildNode(const BWEM::Tile &_t, BWAPI::TilePosition tp, int _ID); 
     const BWEM::Tile &               bwem_tile();
     BWAPI::TilePosition              get_tilepos();
+    BWAPI::Position                  get_pos(); 
     const std::vector<BuildNode *> & get_edges();
     // Gives more or less up-to-date information about whether or not a zerg can build here
     // with a building size of at least 2x2 TilePositions (Creep Colony, etc.)
@@ -44,9 +49,15 @@ public:
     // built here. 
     // NOTE: there IS a delay between the truth and the update of this status.
     const std::vector<int> &         get_buildable_dimensions();
+    bool                             blocks_mining();
+    bool                             blocks_larva();
     int                              get_ID();
 
 /************************************Internal************************************/
+    // Internal
+    void                             set_blocks_mining(bool value);
+    // Internal
+    void                             set_blocks_larva(bool value);
     // Internal
     BuildNode *                      get_edge(int dir);
     // Internal
@@ -76,20 +87,23 @@ class BuildGraph {
 
 private:
 
-    FBase              base;
-    std::vector<BNode> nodes;
-    std::vector<BNode> geyser_nodes;
-    int                node_ID_counter;
-    int                start_chunk;
-    int                end_chunk;
-    int                CHUNK_SIZE;
-    std::vector<BNode> remove_queue;
+    FBase               base;
+    std::vector<BNode>  nodes;
+    std::vector<BNode>  geyser_nodes;
+    int                 node_ID_counter;
+    int                 start_chunk;
+    int                 end_chunk;
+    int                 CHUNK_SIZE;
+    std::vector<BNode>  remove_queue;
+    std::vector<double> resource_blocking_angles;
+    BWTimer             bg_timer;
 
     void                       populate_graph(FUnit structure);
     void                       connect_nodes();
     void                       update_occupied_tilepositions();
     void                       update_chunk();
     void                       try_expand();
+    bool                       node_below_hatch(BNode node, std::vector<BWAPI::TilePosition>);
     BNode                      find_node_at(TilePosition &tilepos);
     void                       remove_dead_nodes();
     void                       seed_creep(FUnit structure);
@@ -113,6 +127,7 @@ public:
     // Checks whether the node at the TilePosition is buildable
     bool                       tilepos_buildable(TilePosition &tilepos);
     FBase                      get_base();
+    void                       flag_resource_blocking_nodes();
     // For keeping the Graph around when its Base is gone, and reusing the graph
     void                       clear();
     // Called at owner when no longer using this graph

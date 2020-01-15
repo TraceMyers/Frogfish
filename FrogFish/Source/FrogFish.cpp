@@ -14,7 +14,6 @@
 #include <vector>
 #include <fstream>
 
-using namespace BWAPI;
 using namespace Filter;
 
 UnitStorage unit_storage;
@@ -51,8 +50,8 @@ void FrogFish::onFrame() {
 
     // draw
     DebugDraw::draw_build_graphs();
-    DebugDraw::draw_units(unit_storage);
-    DebugDraw::draw_base_info(base_storage);
+    // DebugDraw::draw_units(unit_storage);
+    // DebugDraw::draw_base_info(base_storage);
 
     // Delete units from newly_stored and newly_removed lists
     // after other functions have gotten a chance to see that they're
@@ -70,15 +69,15 @@ void FrogFish::onSendText(std::string text) {
     Broodwar->sendText("%s", text.c_str());
 }
 
-void FrogFish::onReceiveText(Player player, std::string text) {
+void FrogFish::onReceiveText(BWAPI::Player player, std::string text) {
     Broodwar << player->getName() << " said \"" << text << "\"" << std::endl;
 }
 
-void FrogFish::onPlayerLeft(Player player) {
+void FrogFish::onPlayerLeft(BWAPI::Player player) {
     Broodwar->sendText("Goodbye %s!", player->getName().c_str());
 }
 
-void FrogFish::onNukeDetect(Position target) {
+void FrogFish::onNukeDetect(BWAPI::Position target) {
     if (target) {
         Broodwar << "Nuclear Launch Detected at " << target << std::endl;
     }
@@ -87,47 +86,47 @@ void FrogFish::onNukeDetect(Position target) {
     }
 }
 
-void FrogFish::onUnitDiscover(Unit unit) {
+void FrogFish::onUnitDiscover(BWAPI::Unit unit) {
     unit_storage.queue_store(unit);
     if (unit->getType() == BWAPI::UnitTypes::Resource_Vespene_Geyser) {
         the_map.OnGeyserNoticed(unit);
     }
 }
 
-void FrogFish::onUnitEvade(Unit unit) {
+void FrogFish::onUnitEvade(BWAPI::Unit unit) {
     // pass
 }
 
-void FrogFish::onUnitShow(Unit unit) {
+void FrogFish::onUnitShow(BWAPI::Unit unit) {
     // pass
 }
 
-void FrogFish::onUnitHide(Unit unit) {
+void FrogFish::onUnitHide(BWAPI::Unit unit) {
     // pass
 }
 
-void FrogFish::onUnitCreate(Unit unit) {
+void FrogFish::onUnitCreate(BWAPI::Unit unit) {
     unit_storage.queue_store(unit);
     if (unit->getType() == BWAPI::UnitTypes::Resource_Vespene_Geyser) {
         the_map.OnGeyserNoticed(unit);
     }
 }
 
-void FrogFish::onUnitDestroy(Unit unit) {
+void FrogFish::onUnitDestroy(BWAPI::Unit unit) {
     unit_storage.queue_remove(unit);
     // TODO: doesn't catch cases where destroyed out of vision!
     if (unit->getType().isMineralField()) {the_map.OnMineralDestroyed(unit);}
     else if (unit->getType().isSpecialBuilding()) {the_map.OnStaticBuildingDestroyed(unit);}
 }
 
-void FrogFish::onUnitMorph(Unit unit) {
+void FrogFish::onUnitMorph(BWAPI::Unit unit) {
     unit_storage.queue_store(unit);
     if (unit->getType() == BWAPI::UnitTypes::Resource_Vespene_Geyser) {
         the_map.OnGeyserNoticed(unit);
     }
 }
 
-void FrogFish::onUnitRenegade(Unit unit) {
+void FrogFish::onUnitRenegade(BWAPI::Unit unit) {
     // pass
 }
 
