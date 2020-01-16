@@ -4,6 +4,7 @@
 #include "BuildOrder.h"
 #include "ConstructionManager.h"
 #include "../unitdata/BaseStorage.h"
+#include "../unitdata/UnitStorage.h"
 
 void ProductionCoordinator::init() {
     econ_tracker.init();
@@ -22,9 +23,9 @@ void ProductionCoordinator::on_frame_update(BaseStorage &base_storage) {
     unit_maker.on_frame_update();
 }
 
-void ProductionCoordinator::produce(BaseStorage &base_storage) {
+void ProductionCoordinator::produce(BaseStorage &base_storage, UnitStorage &unit_storage) {
     unit_maker.make_units(econ_tracker, base_storage);
-    construction_manager.build_structures(econ_tracker, base_storage);
+    construction_manager.build_structures(econ_tracker, base_storage, unit_storage);
 }
 
 const std::vector<double> &ProductionCoordinator::get_make_proportions() {

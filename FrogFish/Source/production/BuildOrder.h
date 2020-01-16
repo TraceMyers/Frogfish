@@ -251,7 +251,7 @@ public:
     }
 
     bool finished() {
-        return cur_item >= build_items.size();
+        return (unsigned int)cur_item >= build_items.size();
     }
 
     void print() {

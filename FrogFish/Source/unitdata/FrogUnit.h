@@ -15,6 +15,7 @@ private:
     std::vector<double> velocity {0.0, 0.0};
     bool cmd_ready;
     BWTimer cmd_timer;
+    int _ID;
 
 public:
 
@@ -45,7 +46,8 @@ public:
         bwapi_unit(u),
         cmd_ready(true),
         f_task(FTASKS::IDLE),
-        f_type(FTYPES::UNASSIGNED)
+        f_type(FTYPES::UNASSIGNED),
+        _ID(u->getID())
     {update();}
 
     void update() {
@@ -77,7 +79,7 @@ public:
 
     const BWAPI::Unit bwapi_u() {return bwapi_unit;}
 
-    int get_ID() {return bwapi_unit->getID();}
+    int get_ID() {return _ID;}
 
     int get_max_hp() {return bwapi_unit->getType().maxHitPoints();}
 

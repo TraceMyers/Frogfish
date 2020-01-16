@@ -66,6 +66,8 @@
     <ClCompile Include="Source\utility\BWTimer.cpp" />
     <ClCompile Include="Source\production\EconTracker.cpp" />
     <ClCompile Include="Source\utility\FrogMath.cpp" />
+    <ClCompile Include="Source\production\ConstructionStorage.cpp" />
+    <ClCompile Include="Source\pathing\WalkGraph.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\BWEM\area.h">
@@ -131,9 +133,6 @@
     <ClInclude Include="Source\production\BuildPlacement.h">
       <Filter>headers</Filter>
     </ClInclude>
-    <ClInclude Include="Source\production\BuildQueue.h">
-      <Filter>headers</Filter>
-    </ClInclude>
     <ClInclude Include="Source\production\EconTracker.h">
       <Filter>headers</Filter>
     </ClInclude>
@@ -189,6 +188,12 @@
       <Filter>headers</Filter>
     </ClInclude>
     <ClInclude Include="Source\utility\FrogMath.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\production\ConstructionStorage.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\pathing\WalkGraph.h">
       <Filter>headers</Filter>
     </ClInclude>
   </ItemGroup>

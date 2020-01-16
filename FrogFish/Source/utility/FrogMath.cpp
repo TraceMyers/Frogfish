@@ -18,7 +18,6 @@ double FrogMath::get_angle(BWAPI::Position a, BWAPI::Position b) {
 // a and b. This allows it to work with angles > 180 degrees
 // always returns true if 'check' == a or b
 bool FrogMath::angle_is_between(double check, double a, double b, double inside) {
-    bool check_val;
     if (b < a) {
         if (inside > b && inside < a) {
             return check > b && check < a;
@@ -35,7 +34,6 @@ bool FrogMath::angle_is_between(double check, double a, double b, double inside)
             return (check < a || check > b);
         }
     }
-    return check_val;
 }
 
 // Requires a reference angle for what constitutes "inside", or in-between
@@ -76,8 +74,6 @@ std::vector<double> FrogMath::get_buffered_resource_angles(FBase base) {
     BWAPI::Position hatch_center = base->get_center();
     hatch_center.x += 64;
     hatch_center.y += 48;
-    double max_resource_angle_diff = 0.0;
-    BWEM::Mineral *max_dist_mineral;
     std::vector<double> angles;
 
     auto &geysers = base->get_geysers();
@@ -127,7 +123,7 @@ std::vector<double> FrogMath::get_buffered_resource_angles(FBase base) {
     int max_i = std::distance(angles.begin(), std::max_element(angles.begin(), angles.end()));
     int min_i = std::distance(angles.begin(), std::min_element(angles.begin(), angles.end()));
     int inside_i = 0;
-    for (int i = 0; i < angles.size(); ++i) {
+    for (unsigned i = 0; i < angles.size(); ++i) {
         if (i != max_i && i != min_i) {
             inside_i = i;
             break;

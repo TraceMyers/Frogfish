@@ -7,6 +7,7 @@
 #include "UnitMaker.h"
 #include "ConstructionManager.h"
 #include "../unitdata/BaseStorage.h"
+#include "../unitdata/UnitStorage.h"
 
 // has the ability to switch between build orders and real-time plans
 // for instance, though the bot always starts with a build order, it may
@@ -32,7 +33,7 @@ public:
 
     void on_frame_update(BaseStorage &base_storage);
 
-    void produce(BaseStorage &base_storage);
+    void produce(BaseStorage &base_storage, UnitStorage &unit_storage);
 
     const std::vector<double> &get_make_proportions();
 
