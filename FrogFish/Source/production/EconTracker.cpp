@@ -23,12 +23,12 @@ EconTracker::EconTracker() :
     gas_per_frame(0.0),
     larva_per_frame(0.0),
     supply_per_frame(0.0),
-    prev_supply(self->supplyUsed()),
     supply_frames()
 {}
 
 void EconTracker::init() {
     self = Broodwar->self(); 
+    prev_supply = self->supplyUsed();
     supply_frame_timer.start(SUPPLY_FRAME_SECONDS, 0);
 }
 
@@ -268,8 +268,8 @@ std::vector<std::vector<int>> EconTracker::build_order_sim(
             auto ID_it = making_IDs.begin();
             auto type_it = making_types.begin();
             auto frames_it = making_frames_left.begin();
-            bool found_cancel;
-            for ( ; ID_it < making_IDs.end(); ++ID_it, ++type_it, ++frames_it) {
+            bool found_cancel = false;
+            for ( ; ID_it != making_IDs.end(); ++ID_it, ++type_it, ++frames_it) {
                 if (*(ID_it) == cancel_ID) {
                     BWAPI::UnitType &cancel_type = *type_it;
                     minerals += cancel_type.mineralPrice() * 0.75;
@@ -361,7 +361,7 @@ std::vector<std::vector<int>> EconTracker::build_order_sim(
                 auto ID_it = making_IDs.begin();
                 auto type_it = making_types.begin();
                 auto frames_it = making_frames_left.begin();
-                for ( ; ID_it < making_IDs.end(); ++ID_it, ++type_it, ++frames_it) {
+                for ( ; ID_it != making_IDs.end(); ++ID_it, ++type_it, ++frames_it) {
                     *(frames_it) -= 24;
                     if (*(frames_it) <= 0) {
                         BWAPI::UnitType &finished_type = *(type_it);
@@ -387,11 +387,12 @@ std::vector<std::vector<int>> EconTracker::build_order_sim(
                         ID_it = making_IDs.erase(ID_it);
                         type_it = making_types.erase(type_it);
                         frames_it = making_frames_left.erase(frames_it);
+                        if (ID_it == making_IDs.end()) {break;}
                     }
                 }
                 type_it = making_types_in.begin();
                 frames_it = making_frames_left_in.begin();
-                for ( ; type_it < making_types_in.end(); ++type_it, ++frames_it) {
+                for ( ; type_it != making_types_in.end(); ++type_it, ++frames_it) {
                     *(frames_it) -= 24;
                     if (*(frames_it) <= 0) {
                         BWAPI::UnitType &finished_type = *(type_it);
@@ -415,6 +416,7 @@ std::vector<std::vector<int>> EconTracker::build_order_sim(
 
                         type_it = making_types_in.erase(type_it);
                         frames_it = making_frames_left_in.erase(frames_it);
+                        if (type_it == making_types_in.end()) {break;}
                     }
                 }
             }

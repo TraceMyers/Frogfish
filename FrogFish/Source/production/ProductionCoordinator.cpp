@@ -6,6 +6,16 @@
 #include "../unitdata/BaseStorage.h"
 #include "../unitdata/UnitStorage.h"
 
+ProductionCoordinator::ProductionCoordinator() :
+    make_proportions(),
+    make_priorities(),
+    econ_timing_estimates(),
+    econ_tracker(),
+    unit_maker(),
+    build_order(),
+    construction_manager()
+{}
+
 void ProductionCoordinator::init() {
     econ_tracker.init();
     test_timer.start(3, 0);

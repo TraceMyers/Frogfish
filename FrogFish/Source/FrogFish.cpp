@@ -52,7 +52,7 @@ void FrogFish::onFrame() {
     BaseOwnership::update_base_data(base_storage, unit_storage);
 
     // 2. update production data
-    production_coordinator.on_frame_update(base_storage, unit_storage);
+	production_coordinator.on_frame_update(base_storage, unit_storage);
 
     // PRE-LAST. draw
     DebugDraw::draw_build_graphs();
@@ -63,7 +63,7 @@ void FrogFish::onFrame() {
     unit_storage.clear_newly_assigned();
     base_storage.clear_newly_assigned();
 
-    // if (Broodwar->getFrameCount() % Broodwar->getLatencyFrames() != 0) {return;}
+    if (Broodwar->getFrameCount() % Broodwar->getLatencyFrames() != 0) {return;}
     // RUN COMMANDS -----------------------------------------------------------------
     production_coordinator.produce(base_storage, unit_storage);
     WorkerControl::send_idle_workers_to_mine(base_storage);

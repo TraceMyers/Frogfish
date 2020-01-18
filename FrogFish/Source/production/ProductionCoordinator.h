@@ -32,6 +32,8 @@ private:
 
 public:
 
+    ProductionCoordinator();
+
     void init();
 
     void load_build_order(const char *race, const char *name);
