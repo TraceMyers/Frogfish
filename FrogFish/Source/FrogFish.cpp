@@ -6,35 +6,28 @@
 #include "unitdata/BaseOwnership.h"
 #include "production/ProductionCoordinator.h"
 #include "control/WorkerControl.h"
-#include "pathing/WalkGraph.h"
 #include "unitdata/BWEMBaseArray.h"
-#include "unitdata/FrogUnit.h"
 #include <BWAPI.h>
 #include <iostream>
 #include <string>
-#include <set>
-#include <chrono>
 #include <vector>
-#include <fstream>
 
 using namespace Filter;
-// :tabp & :tabn    :: next prev
-// ctrl + tab       :: open tab list
-// ctrl + w         :: close tab
-// ctrl + shift + e :: file explorer
-// ctrl + b         :: toggle side bar
+// TODO:
+//  - need to expand the features of pathfinding beyond simply providing paths.
+//  - pathfinding needs to solve problems like: getting a unit from point a
+//  to point b while avoiding potential and known danger. This would mean things like
+//  risk-averse pathing, (moderately well-)known & seen danger avoidance, and
+//  connecting with battle sim to decide if any path between a and b is too dangerous
+//  for the unit to attempt without army intervention
+//  - For now, pathing just needs to handle moving units from a to b with either
+//  attacking or not attacking in mind
 
 UnitStorage unit_storage;
 BaseStorage base_storage;
 ProductionCoordinator production_coordinator;
-WalkGraph walk_graph;
 BWTimer timer;
-FUnit worker;
 
-bool first_frame_over = false;
-int node_i = 0;
-std::vector<BWAPI::Position> path;
-int path_i = 0;
 
 void FrogFish::onStart() {
     Broodwar->sendText("Hello Sailor!");
@@ -47,56 +40,33 @@ void FrogFish::onStart() {
     base_storage.init();
     production_coordinator.init();
     production_coordinator.load_build_order("terran", "9_pool");
-    walk_graph.init();
+    timer.start(10,0);
 }
 
 void FrogFish::onFrame() {
 	if (Broodwar->isReplay() || Broodwar->isPaused() || !Broodwar->self()) {return;}
     timer.on_frame_update();
 
-    // update data
+    // 1. update basic data that everything else references
     unit_storage.update();
     BaseOwnership::update_base_data(base_storage, unit_storage);
-    production_coordinator.on_frame_update(base_storage);
 
-    if (path.size() > 0) {
-        for (auto &pos : path) {
-            Broodwar->drawCircleMap(pos, 6, BWAPI::Colors::Red, true);
-        }
-    }
-    // draw
+    // 2. update production data
+    production_coordinator.on_frame_update(base_storage, unit_storage);
+
+    // PRE-LAST. draw
     DebugDraw::draw_build_graphs();
-    // DebugDraw::draw_units(unit_storage);
-    // DebugDraw::draw_base_info(base_storage);
 
-    // Delete units from newly_stored and newly_removed lists
-    // after other functions have gotten a chance to see that they're
-    // being removed
+    // LAST. 
+    // clear storage of changes to basic data that everybody else references
+    // once others have had a chance to use that info
     unit_storage.clear_newly_assigned();
     base_storage.clear_newly_assigned();
 
-    if (Broodwar->getFrameCount() % Broodwar->getLatencyFrames() != 0) {return;}
+    // if (Broodwar->getFrameCount() % Broodwar->getLatencyFrames() != 0) {return;}
     // RUN COMMANDS -----------------------------------------------------------------
     production_coordinator.produce(base_storage, unit_storage);
-    send_idle_workers_to_mine(base_storage);
-    if (path_i < path.size()) {
-        while (path_i < path.size() && worker->get_pos().getApproxDistance(path[path_i]) < 96) {
-            ++path_i;
-        }
-        worker->bwapi_u()->move(path[path_i]);   
-    }
-
-    // destination back mineral blocks, need to check blocking neutral tiles
-    if (timer.is_stopped()) {
-        worker = base_storage.get_self_bases()[0]->get_workers()[0];
-        const BWEMBaseArray &neutrals = base_storage.get_neutral_bases();
-        const BWEM::Base *b = neutrals[1];
-        BWAPI::Position start = worker->get_pos();
-        BWAPI::Position target = b->Center();
-        path = walk_graph.get_path(start, target);
-        printf("path size: %d\n", (int)path.size());
-        timer.start(10000, 0);
-    }
+    WorkerControl::send_idle_workers_to_mine(base_storage);
 }
 
 void FrogFish::onSendText(std::string text) {

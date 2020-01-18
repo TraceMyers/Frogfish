@@ -1,5 +1,6 @@
 #pragma once
-#pragma message("BaseOwnership")
+#pragma message("including BaseOwnership")
+
 #include <BWEM/bwem.h>
 #include "../unitdata/BWEMBaseArray.h"
 #include "../unitdata/BaseStorage.h"

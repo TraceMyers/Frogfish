@@ -1,5 +1,5 @@
 #pragma once
-#pragma message("BuildGraph")
+#pragma message("including BuildGraph")
 
 #include "../FrogFish.h"
 #include "../unitdata/FrogBase.h"

@@ -1,5 +1,5 @@
 #pragma once
-#pragma message("MophQueue")
+#pragma message("including MophQueue")
 
 #include <deque>
 #include <BWAPI.h>

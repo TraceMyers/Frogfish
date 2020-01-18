@@ -1,35 +1,38 @@
 #include "../FrogFish.h"
 #include "EconTracker.h"
+#include "MakeQueue.h"
+#include "../unitdata/UnitStorage.h"
+#include "../unitdata/BaseStorage.h"
+#include "../unitdata/FrogBase.h"
+#include "../unitdata/FrogUnit.h"
 #include "../utility/BWTimer.h"
 #include <BWAPI.h>
+#include <BWEM/bwem.h>
 #include <vector>
+#include <iostream>
+#include <fstream>
+#include <iomanip>
 
-
-EconTracker::EconTracker(int _calc_delay_seconds) : 
-    calc_delay_seconds(_calc_delay_seconds),
-    prev_total_minerals(50),
-    prev_total_gas(0),
-    prev_used_supply(8),
+// TODO: need to reserve minerals and gas separately
+EconTracker::EconTracker() : 
     reserved_minerals(0),
     reserved_gas(0),
+    larva_ct(0),
     reserved_resource_ID(0),
-    minerals_per_sec(0.0),
-    gas_per_sec(0.0),
-    supply_per_sec(0.0),
-    sf_head(0),
-    sf_prev(8)
-{
-    update_calc_timer.start(calc_delay_seconds, 0);
+    minerals_per_frame(0.0),
+    gas_per_frame(0.0),
+    larva_per_frame(0.0),
+    supply_per_frame(0.0),
+    prev_supply(self->supplyUsed()),
+    supply_frames()
+{}
+
+void EconTracker::init() {
+    self = Broodwar->self(); 
+    supply_frame_timer.start(SUPPLY_FRAME_SECONDS, 0);
 }
 
-void EconTracker::init() {self = Broodwar->self();}
-
-void EconTracker::on_frame_update() {
-    update_calc_timer.on_frame_update();
-    if (update_calc_timer.is_stopped()) {
-        calc_stats();
-        update_calc_timer.restart(); 
-    }
+void EconTracker::on_frame_update(BaseStorage &base_storage, UnitStorage &unit_storage) {
     int reservation_ct = reservation_timers.size();
     std::vector<int> kill_res_IDs(reservation_ct);
     for (int i = 0; i < reservation_ct; ++i) {
@@ -41,61 +44,110 @@ void EconTracker::on_frame_update() {
     for (auto _ID : kill_res_IDs) {
         end_reservation(_ID);
     }
-    int x = 10;
-    int y = 10;
-    for (int i = 0; i < FRAME_CT; ++i) {
-        Broodwar->drawTextScreen(x, y, "%d: %.3lf", i, supply_frames[i]);
-        y += 10;
-    }
-}
-
-// TODO: this probably needs to get more accurate in the future
-// 15 seconds is a long delay to get new economic information
-// maybe use 15 second frames, and just move the frame forward
-void EconTracker::calc_stats() {
-    int cur_total_minerals = self->gatheredMinerals();
-    int difference = cur_total_minerals - prev_total_minerals;
-    minerals_per_sec = (double) difference / calc_delay_seconds;
-    prev_total_minerals = cur_total_minerals;
-    int cur_total_gas = self->gatheredGas();
-    difference = cur_total_gas - prev_total_gas;
-    gas_per_sec = (double) difference / calc_delay_seconds;
-    prev_total_gas = cur_total_gas;
-    int cur_used_supply = self->supplyUsed();
-    difference = cur_used_supply - prev_used_supply;
-    supply_frames[sf_head] = (double)difference / calc_delay_seconds;
-    prev_used_supply = cur_used_supply;
-    ++sf_head;
-    if (sf_head == FRAME_CT) {
-        sf_head = 0;
+	calc_income_stats(base_storage);
+    supply_frame_timer.on_frame_update();
+    if (supply_frame_timer.is_stopped()) {
+        calc_supply_per_frame(unit_storage);
+        supply_frame_timer.restart();
     }
 
 }
 
-// creates a curved average distribution of recent supply
-// for more accurate averaging
-double EconTracker::supply_frames_average() {
-    double 
-        long_term_supply_change = 0.0,
-        distribution_factor = 0.35;
-    for (int i = sf_head, moved_ct = 0; moved_ct < FRAME_CT; ++i, ++moved_ct)  {
-        if (i == FRAME_CT) {
-            i = 0;
+// keep current coefs for normal mining, but need a coef for distance
+// greater than some constant to calc long distance mining
+void EconTracker::calc_income_stats(BaseStorage &base_storage) {
+    larva_ct = 0;
+	minerals_per_frame = 0.0;
+    gas_per_frame = 0.0;
+    larva_per_frame = 0.0;
+    for (auto &base : base_storage.get_self_bases()) {
+        // larva
+        larva_ct += base->get_larva_ct();
+
+        auto &minerals = base->get_minerals();
+		int resource_depot_ct = base->get_resource_depot_ct();
+		FUnit main_hatch;
+		if (resource_depot_ct > 0) {
+			double min_dist = 100000000.0;
+			for (auto &hatch : base->get_resource_depots()) {
+				int dist = 0;
+                BWAPI::Position hatch_pos = hatch->get_pos();
+				for (auto &mineral : minerals) {
+					dist += hatch_pos.getApproxDistance(mineral->Pos());
+				}
+                if (dist < min_dist) {
+                    main_hatch = hatch;
+                    min_dist = dist;
+                }
+                // larva per frame
+                larva_per_frame += LPF_CONST;
+			}
+		}
+        else {
+            continue;
         }
-        if (supply_frames[i] == 0 && i != 0 && i != FRAME_CT - 1) {
-            supply_frames[i] = (supply_frames[i - 1] + supply_frames[i + 1]) / 3.0;
+        int 
+            mineral_worker_ct = 0;
+        for (auto &worker : base->get_workers()) {
+            if (worker->f_task == FrogUnit::MINE_MINERALS) {
+                ++mineral_worker_ct;
+            }
+            // gas per frame
+            else if (worker->f_task == FrogUnit::MINE_GAS) {
+                gas_per_frame += GPF_CONST;
+            }
         }
-        long_term_supply_change += supply_frames[i] * distribution_factor;
-        distribution_factor *= 0.7157;
+        int mineral_ct = minerals.size(); 
+
+		double
+			min_sat = (double)mineral_worker_ct / mineral_ct,
+			min_sat_plus_1 = min_sat + 1,
+			min_sat_sq_fact = min_sat_plus_1 * min_sat_plus_1,
+			min_sat_cu_fact = min_sat_sq_fact * min_sat_plus_1;
+
+        // minerals per frame
+        minerals_per_frame += 
+			(
+				MPF_INTERCEPT
+				+ min_sat * MPF_SATURATION_COEF
+				+ min_sat_sq_fact * MPF_SATURATION_SQ_COEF
+				+ min_sat_cu_fact * MPF_SATURATION_CU_COEF
+			) 
+			* mineral_worker_ct;
     }
-    return long_term_supply_change; //* 0.5 + supply_frames[0] * 0.5;
 }
 
-double EconTracker::get_minerals_per_sec() {return minerals_per_sec;}
+void EconTracker::calc_supply_per_frame(UnitStorage &unit_storage) {
+    double supply_per_frame_period = 0.0;
+    int supply_diff = self->supplyUsed() - prev_supply;
+    prev_supply = self->supplyUsed();
+    for (int i = 0; i < SUPPLY_FRAME_CT; ++i) {
+        if (i < SUPPLY_FRAME_CT - 1) {
+            supply_frames[i + 1] = supply_frames[i];
+        }
+        if (i == 0) {
+            supply_frames[i] = supply_diff;
+        }
+        supply_per_frame_period += supply_frames[i] * SUPPLY_FRAME_POLY_FACT;
+    } 
+    supply_per_frame = supply_per_frame_period / (SUPPLY_FRAME_SECONDS * 24);
+}
+    
+double EconTracker::get_minerals_per_frame() {return minerals_per_frame;}
 
-double EconTracker::get_gas_per_sec() {return gas_per_sec;}
+double EconTracker::get_gas_per_frame() {return gas_per_frame;}
 
-double EconTracker::get_supply_per_sec() {return supply_frames_average();}
+double EconTracker::get_larva_per_frame() {return larva_per_frame;}
+
+double EconTracker::get_supply_per_frame() {return supply_per_frame;}
+
+double EconTracker::get_minerals_per_sec() {return minerals_per_frame * 24;}
+
+double EconTracker::get_gas_per_sec() {return gas_per_frame * 24;}
+
+double EconTracker::get_larva_per_sec() {return larva_per_frame * 24;}
+
+double EconTracker::get_supply_per_sec() {return supply_per_frame * 24;}
 
 int EconTracker::get_free_minerals() {return self->minerals() - reserved_minerals;}
 
@@ -153,4 +205,220 @@ bool EconTracker::extend_reservation(unsigned int ID, int seconds) {
         }
     }
     return false;
+}
+
+// TODO: 
+//      - if using reservations, need to factor them here
+//      - upgrades
+
+// Assumes:
+    // - things are made immediately when they can be
+    // - that when an extractor finishes, 3 drones go to gas, all others mine minerals
+    // - drones mine minerals at bases with a drone-to-mineral ratio of 1, 
+    // which is pretty accurate for ratios between ~0.4 and ~1.6
+    // - drones are available to make buildings, and that they will be taken off
+    // of mineral mining. 
+    // - that units being morphed from other units have those units available to
+    // morph from
+    // - that larva are spawn continuously from every hatchery (no sitting on larva)
+// - Cancels do not support more than 1 cancellation per ID or passed-in making type
+// - Becomes fairly inaccurate if a cancellation is in the build order wherein the
+// building finishes before the cancellation can occur.
+std::vector<std::vector<int>> EconTracker::build_order_sim(
+    UnitStorage &unit_storage,
+    BuildOrder *build_order
+) {
+    std::vector<BWAPI::UnitType> making_types_in;
+    std::vector<int> making_frames_left_in;
+    for (auto &unit : unit_storage.self_units()) {
+        FUnit u = unit.second;
+        if (u->f_type == FrogUnit::EGG) {
+            making_types_in.push_back(u->bwapi_u()->getBuildType());
+            making_frames_left_in.push_back(u->bwapi_u()->getRemainingBuildTime());
+        }
+    }
+
+    std::vector<std::vector<int>> seconds_until_make;
+    double 
+        minerals = get_free_minerals(),
+        gas = get_free_gas(),
+        larva = larva_ct,
+        supply_used = self->supplyUsed(),
+        supply_total = self->supplyTotal(),
+        mps = minerals_per_frame * 24,
+        gps = gas_per_frame * 24,
+        lps = larva_per_frame * 24,
+        add_drone_mps = MPF_SIMPLE_CONST * 24,
+        add_drone_gps = GPF_CONST * 24,
+        add_hatch_lps = LPF_CONST * 24;
+    unsigned cur_ID;
+    int
+        ID_start = build_order->cur_item,
+        extractor_drone_sink = 0,
+        cur_ID_make_ct = 0;
+    std::vector<int> making_IDs;
+    std::vector<BWAPI::UnitType> making_types;
+    std::vector<int> making_frames_left;
+
+    int seconds_passed = 0;
+    for (cur_ID = ID_start; cur_ID < build_order->size(); ++cur_ID) {
+        const BuildItem &item = build_order->get(cur_ID);
+        if (item.build_type == BuildItem::CANCEL) {
+            int cancel_ID = item.required_i;
+            auto ID_it = making_IDs.begin();
+            auto type_it = making_types.begin();
+            auto frames_it = making_frames_left.begin();
+            bool found_cancel;
+            for ( ; ID_it < making_IDs.end(); ++ID_it, ++type_it, ++frames_it) {
+                if (*(ID_it) == cancel_ID) {
+                    BWAPI::UnitType &cancel_type = *type_it;
+                    minerals += cancel_type.mineralPrice() * 0.75;
+                    gas += cancel_type.gasPrice() * 0.75;
+                    supply_used -= cancel_type.supplyRequired();
+
+                    making_IDs.erase(ID_it);
+                    making_types.erase(type_it);
+                    making_frames_left.erase(frames_it);
+                    found_cancel = true;
+
+                    if (item.make_type.isBuilding()) {
+                        mps += add_drone_mps;
+                    }
+                    break;
+                }
+            }
+            if (!found_cancel) {
+                type_it = making_types_in.begin();
+                for ( ; type_it < making_types_in.end(); ++type_it) {
+                    if (item.make_type == *type_it) {
+                        const BWAPI::UnitType &cancel_type = item.make_type;
+                        minerals += cancel_type.mineralPrice() * 0.75;
+                        gas += cancel_type.gasPrice() * 0.75;
+                        supply_used -= cancel_type.supplyRequired();
+                        making_types_in.erase(type_it);
+
+                        if (item.make_type.isBuilding()) {
+                            mps += add_drone_mps;
+                            supply_used += 2;
+                        }
+                        found_cancel = true;
+                        break;
+                    }
+                }
+            }
+            // advances to the next item even if a cancellation isn't found in order
+            // to not go into an infinite loop if a cancellation was scheduled incorrectly
+            ++cur_ID;
+        }
+        else {
+            BWAPI::UnitType u_type = item.make_type;
+            int 
+                min_cost = u_type.mineralPrice(),
+                gas_cost = u_type.gasPrice(),
+                supply_cost = u_type.supplyRequired(),
+                make_ct = item.count;
+            bool from_larva = false;
+            for (int i = 0; i < MakeQueue::MKQ_UNIT_TYPE_CT; ++i) {
+                if (u_type == MakeQueue::types[i]) {
+                    from_larva = true;
+                    break;
+                }
+            }
+            if (
+                min_cost < minerals 
+                && gas_cost < gas 
+                && supply_cost < (supply_total - supply_used)
+                && (!from_larva || larva >= 1)
+            ) {
+                minerals -= min_cost;
+                gas -= gas_cost;
+                supply_used -= supply_cost;
+                if (cur_ID_make_ct == make_ct) {
+                    cur_ID_make_ct = 0;
+                    ++cur_ID;
+                }
+                else {
+                    cur_ID_make_ct += 1;
+                }
+
+                if (u_type.isBuilding()) {
+                    mps -= add_drone_mps;
+                    supply_used -= 2;
+                }
+                making_IDs.push_back(cur_ID);
+                making_types.push_back(u_type);
+                making_frames_left.push_back(u_type.buildTime() + FINISH_TIME);
+                if (from_larva) {
+                    --larva;
+                }
+                seconds_until_make.push_back(std::vector<int> {(int)cur_ID, seconds_passed});
+            }
+            else {
+                ++seconds_passed;
+                minerals += mps;
+                gas += gps;
+                larva += lps;
+                auto ID_it = making_IDs.begin();
+                auto type_it = making_types.begin();
+                auto frames_it = making_frames_left.begin();
+                for ( ; ID_it < making_IDs.end(); ++ID_it, ++type_it, ++frames_it) {
+                    *(frames_it) -= 24;
+                    if (*(frames_it) <= 0) {
+                        BWAPI::UnitType &finished_type = *(type_it);
+                        int finished_ID = *(ID_it);
+
+                        supply_total += finished_type.supplyProvided();
+                        if (finished_type == BWAPI::UnitTypes::Zerg_Extractor) {
+                            extractor_drone_sink += 3;
+                        }
+                        else if (finished_type == BWAPI::UnitTypes::Zerg_Drone) {
+                            if (extractor_drone_sink > 0) {
+                                gps += add_drone_gps;
+                                --extractor_drone_sink;
+                            }
+                            else {
+                                mps += add_drone_mps;
+                            }
+                        }
+                        else if (finished_type == BWAPI::UnitTypes::Zerg_Hatchery) {
+                            lps += add_hatch_lps;
+                        }
+
+                        ID_it = making_IDs.erase(ID_it);
+                        type_it = making_types.erase(type_it);
+                        frames_it = making_frames_left.erase(frames_it);
+                    }
+                }
+                type_it = making_types_in.begin();
+                frames_it = making_frames_left_in.begin();
+                for ( ; type_it < making_types_in.end(); ++type_it, ++frames_it) {
+                    *(frames_it) -= 24;
+                    if (*(frames_it) <= 0) {
+                        BWAPI::UnitType &finished_type = *(type_it);
+
+                        supply_total += finished_type.supplyProvided();
+                        if (finished_type == BWAPI::UnitTypes::Zerg_Extractor) {
+                            extractor_drone_sink += 3;
+                        }
+                        else if (finished_type == BWAPI::UnitTypes::Zerg_Drone) {
+                            if (extractor_drone_sink > 0) {
+                                gps += add_drone_gps;
+                                --extractor_drone_sink;
+                            }
+                            else {
+                                mps += add_drone_mps;
+                            }
+                        }
+                        else if (finished_type == BWAPI::UnitTypes::Zerg_Hatchery) {
+                            lps += add_hatch_lps;
+                        }
+
+                        type_it = making_types_in.erase(type_it);
+                        frames_it = making_frames_left_in.erase(frames_it);
+                    }
+                }
+            }
+        }
+    }
+    return seconds_until_make;
 }

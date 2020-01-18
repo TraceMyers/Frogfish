@@ -1,4 +1,5 @@
 #pragma once
+#pragma message("including BWEMBaseArray")
 
 #include <BWEM/bwem.h>
 #include <string.h>

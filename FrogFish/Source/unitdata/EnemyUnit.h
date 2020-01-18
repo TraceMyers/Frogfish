@@ -1,5 +1,5 @@
 #pragma once
-#pragma message("EnemyUnit")
+#pragma message("including EnemyUnit")
 #include <BWAPI.h>
 
 using namespace BWAPI;

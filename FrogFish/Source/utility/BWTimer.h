@@ -1,4 +1,5 @@
 #pragma once
+#pragma message("including BWTimer")
 
 class BWTimer {
 

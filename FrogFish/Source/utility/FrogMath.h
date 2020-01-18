@@ -1,4 +1,5 @@
 #pragma once
+#pragma message("including FrogMath")
 
 #include <BWAPI.h>
 #include "../unitdata/FrogBase.h"
@@ -19,5 +20,4 @@ namespace FrogMath {
     );
     std::vector<double> unit_vector(BWAPI::Position a, BWAPI::Position b);
     std::vector<double> get_buffered_resource_angles(FBase base);
-
 }

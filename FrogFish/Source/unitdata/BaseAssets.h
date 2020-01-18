@@ -1,5 +1,6 @@
 #pragma once
-#pragma message("BaseAssets")
+#pragma message("including BaseAssets")
+
 #include "../unitdata/UnitStorage.h"
 #include "../unitdata/BaseStorage.h"
 

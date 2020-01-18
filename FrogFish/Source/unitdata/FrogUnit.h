@@ -1,5 +1,5 @@
 #pragma once
-#pragma message ("FrogUnit")
+#pragma message ("including FrogUnit")
 
 #include "../utility/BWTimer.h"
 #include <BWAPI.h>
@@ -18,6 +18,8 @@ private:
     int _ID;
 
 public:
+
+    int waypoint;
 
     enum FTASKS {
         IDLE,
@@ -47,7 +49,8 @@ public:
         cmd_ready(true),
         f_task(FTASKS::IDLE),
         f_type(FTYPES::UNASSIGNED),
-        _ID(u->getID())
+        _ID(u->getID()),
+        waypoint(0)
     {update();}
 
     void update() {

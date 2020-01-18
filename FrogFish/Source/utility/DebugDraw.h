@@ -1,5 +1,5 @@
 #pragma once
-#pragma message("DebugDraw")
+#pragma message("including DebugDraw")
 
 #include "../FrogFish.h"
 #include "../unitdata/UnitStorage.h"

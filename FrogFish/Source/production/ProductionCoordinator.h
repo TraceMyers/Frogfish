@@ -1,5 +1,5 @@
 #pragma once
-#pragma message("ProductionCoordinator")
+#pragma message("including ProductionCoordinator")
 
 #include "BuildOrder.h"
 #include "UnitMaker.h"
@@ -8,6 +8,7 @@
 #include "ConstructionManager.h"
 #include "../unitdata/BaseStorage.h"
 #include "../unitdata/UnitStorage.h"
+#include "../utility/BWTimer.h"
 
 // has the ability to switch between build orders and real-time plans
 // for instance, though the bot always starts with a build order, it may
@@ -24,6 +25,10 @@ private:
 
     std::vector<double> make_proportions;
     std::vector<bool> make_priorities;
+    std::vector<std::vector<int>> econ_timing_estimates;
+
+    BWTimer test_timer;
+    bool init_test = false;
 
 public:
 
@@ -31,7 +36,7 @@ public:
 
     void load_build_order(const char *race, const char *name);
 
-    void on_frame_update(BaseStorage &base_storage);
+    void on_frame_update(BaseStorage &base_storage, UnitStorage &unit_storage);
 
     void produce(BaseStorage &base_storage, UnitStorage &unit_storage);
 

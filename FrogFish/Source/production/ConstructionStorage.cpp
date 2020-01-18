@@ -1,12 +1,14 @@
 #include "ConstructionStorage.h"
+#include "../pathing/PathFinding.h"
 #include "../unitdata/FrogUnit.h"
 #include "../unitdata/UnitStorage.h"
 #include "BuildGraph.h"
 #include <deque>
 #include <BWAPI.h>
 
+
 // TODO: After pathing is in, store path here and make a function that
-// quickly approximates time left on route based on how many waypoints
+// quickly approximates time left on route based on how many waypoint_ctrs
 // have been cleared, or just store the path here and do calculation at
 // construction manager, probably
 
@@ -16,11 +18,24 @@ ConstructionStorage::ConstructionStorage() :
     target_nodes(),
     build_IDs(),
     status(),
-    build_ct(0)
+    build_ct(0),
+    paths()
 {} 
 
 void ConstructionStorage::on_frame_update(UnitStorage &unit_storage) {
     clear_lost_and_completed();
+    for (int i = 0; i < build_ct; ++i) {
+        if (status[i] == WAIT) {
+            depart_timers[i].on_frame_update();
+            if (depart_timers[i].is_stopped()) {
+                status[i] = EN_ROUTE;
+            }
+        }
+        if (status[i] == EN_ROUTE && build_units[i]->is_ready()) {
+            PathFinding::move(build_units[i], paths[i], NEAR_ENOUGH);
+            build_units[i]->set_cmd_delay(2);
+        }
+    }
     change_build_states(unit_storage);
 }
 
@@ -42,24 +57,24 @@ FUnit ConstructionStorage::get_unit(int build_ID) {
     return nullptr;
 }
 
-BNode ConstructionStorage::get_target_node(int build_ID) {
+TilePosition ConstructionStorage::get_target_node(int build_ID) {
     for (int i = 0; i < build_ct; ++i) {
         if (build_ID == build_IDs[i]) {
             return target_nodes[i];
         }
     }
-    return nullptr;
+    return TilePosition(-1, -1);
 }
 
 ConstructionStorage::SET_TARGET_CODE ConstructionStorage::set_target_node(
     int build_ID, 
-    BNode target
+    TilePosition target
 ) {
     for (int i = 0; i < build_ct; ++i) {
         if (build_ID == build_IDs[i]) {
             if (status[i] == EN_ROUTE || status[i] == AT_SITE) {
                 target_nodes[i] = target;
-                BWAPI::Position target_pos = target->get_pos();
+                BWAPI::Position target_pos = Position(target);
                 if (build_units[i]->get_pos().getApproxDistance(target_pos) > NEAR_ENOUGH) {
                     status[i] = EN_ROUTE;
                 }
@@ -76,13 +91,27 @@ ConstructionStorage::SET_TARGET_CODE ConstructionStorage::set_target_node(
     return NOT_FOUND;
 }
 
-void ConstructionStorage::add_tracker(FUnit drone, BWAPI::UnitType build_type, BNode target, int build_ID) {
+void ConstructionStorage::add_tracker(
+    FUnit drone, 
+    BWAPI::UnitType build_type, 
+    TilePosition target, 
+    int build_ID,
+    std::vector<BWAPI::Position> _path,
+    int frames_until_depart
+) {
     if (build_ct < MAX_BUILD) {
         build_units[build_ct] = drone;
         build_types[build_ct] = build_type;
         target_nodes[build_ct] = target;
         build_IDs[build_ct] = build_ID;
-        status[build_ct] = EN_ROUTE;
+        paths[build_ct] = _path;
+        if (frames_until_depart > 0) {
+            status[build_ct] = WAIT;
+            depart_timers[build_ct].start(0, frames_until_depart);
+        }
+        else {
+            status[build_ct] = EN_ROUTE;
+        }
         ++build_ct;
     }
     else {
@@ -90,7 +119,7 @@ void ConstructionStorage::add_tracker(FUnit drone, BWAPI::UnitType build_type, B
     }
 }
 
-void ConstructionStorage::add_extractor(FUnit extractor, BNode target_node, int build_ID) {
+void ConstructionStorage::add_extractor(FUnit extractor, TilePosition target_node, int build_ID) {
     if (build_ct < MAX_BUILD) {
         build_units[build_ct] = extractor;
         build_types[build_ct] = BWAPI::UnitTypes::Zerg_Extractor;
@@ -108,13 +137,18 @@ void ConstructionStorage::add_extractor(FUnit extractor, BNode target_node, int 
 void ConstructionStorage::advance_status(int i) {
     switch(status[i]) {
         case EN_ROUTE:
+            printf("drone made it to site\n");
             status[i] = AT_SITE;
         break;
         case AT_SITE:
+            // need extra logic to confirm construction is happening
+            printf("building under construction\n");
+            build_units[i]->bwapi_u()->build(build_types[i], target_nodes[i]);
             status[i] = UNDER_CONSTR;
             build_units[i]->set_cmd_delay(build_types[i].buildTime() + _100_PERCENT);
         break;
         case UNDER_CONSTR:
+            printf("structure completed\n");
             status[i] = COMPLETED;
         break;
         default:
@@ -146,10 +180,9 @@ void ConstructionStorage::change_build_states(UnitStorage &unit_storage) {
                 status[i] = LOST;
             }
         }
-        BWAPI::Position target_pos = target_nodes[i]->get_pos();
+        BWAPI::Position target_pos = BWAPI::Position(target_nodes[i]);
         if (
-            (status[i] == EN_ROUTE
-            && build_units[i]->get_pos().getApproxDistance(target_pos) <= NEAR_ENOUGH)
+            (status[i] == EN_ROUTE && build_units[i]->get_pos().getApproxDistance(target_pos) <= NEAR_ENOUGH)
             ||
             (status[i] == AT_SITE
             && build_units[i]->get_type() == build_types[i])

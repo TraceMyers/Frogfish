@@ -1,5 +1,5 @@
 #pragma once
-#pragma message("UnitStorage")
+#pragma message("including UnitStorage")
 
 #include "EnemyUnit.h"
 #include "FrogUnit.h"

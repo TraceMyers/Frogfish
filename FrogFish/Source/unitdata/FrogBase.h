@@ -1,5 +1,5 @@
 #pragma once
-#pragma message("FrogBase")
+#pragma message("including FrogBase")
 
 #include "FrogUnit.h"
 #include <BWAPI.h>
@@ -20,7 +20,6 @@ private:
         workers,
         structures,
         resource_depots;
-
 
 public:
 

@@ -6,7 +6,7 @@
 #include <BWAPI.h>
 
 // TODO: centralize task setting
-void send_idle_workers_to_mine(BaseStorage &base_storage) {
+void WorkerControl::send_idle_workers_to_mine(BaseStorage &base_storage) {
     const std::vector<FBase> &self_bases = base_storage.get_self_bases();
     for (auto base : self_bases) {
         const std::vector<FUnit> &workers = base->get_workers();

@@ -55,12 +55,20 @@ TilePosition BuildPlacement::find_any_node_for_placement(FBase base, int width, 
     return TilePosition(-1, -1);
 }
 
-TilePosition find_node_for_tech_placement(FBase base, int width, int height) {
+TilePosition BuildPlacement::find_node_for_tech_placement(FBase base, int width, int height) {
     return BWAPI::TilePosition(0, 0);
 }
 
-const std::vector<BWEM::Geyser *> &BuildPlacement::get_base_geysers(FBase base) {
-    return base->get_geysers();
+TilePosition BuildPlacement::get_base_geyser_tilepos(FBase base) {
+    for (const BWEM::Geyser *geyser : base->get_geysers()) {
+        if (
+            geyser->Unit()->exists() 
+            && geyser->Unit()->getType() == BWAPI::UnitTypes::Resource_Vespene_Geyser 
+        ) {
+            return geyser->TopLeft();
+        }
+    }
+    return TilePosition(-1 , -1);
 }
 
 BuildGraph *BuildPlacement::get_graphs() {

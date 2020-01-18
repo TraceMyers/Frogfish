@@ -1,5 +1,5 @@
 #pragma once
-#pragma message("BuildPlacement")
+#pragma message("including BuildPlacement")
 
 #include "BuildGraph.h"
 #include "../unitdata/FrogBase.h"
@@ -19,7 +19,7 @@ namespace BuildPlacement {
 
     TilePosition find_node_for_tech_placement(FBase base, int width, int height);
 
-    const std::vector<BWEM::Geyser *> &get_base_geysers(FBase base);
+    TilePosition get_base_geyser_tilepos(FBase base);
 
     BuildGraph *get_graphs();
 }

@@ -120,12 +120,14 @@
     <ClCompile Include="Source\control\WorkerControl.cpp" />
     <ClCompile Include="Source\Dll.cpp" />
     <ClCompile Include="Source\FrogFish.cpp" />
-    <ClCompile Include="Source\pathing\WalkGraph.cpp" />
+    <ClCompile Include="Source\pathing\PathFinding.cpp" />
     <ClCompile Include="Source\production\BuildGraph.cpp" />
+    <ClCompile Include="Source\production\BuildOrder.cpp" />
     <ClCompile Include="Source\production\BuildPlacement.cpp" />
     <ClCompile Include="Source\production\ConstructionManager.cpp" />
     <ClCompile Include="Source\production\ConstructionStorage.cpp" />
     <ClCompile Include="Source\production\EconTracker.cpp" />
+    <ClCompile Include="Source\production\MakeQueue.cpp" />
     <ClCompile Include="Source\production\ProductionCoordinator.cpp" />
     <ClCompile Include="Source\production\UnitMaker.cpp" />
     <ClCompile Include="Source\unitdata\BaseAssets.cpp" />
@@ -154,7 +156,8 @@
     <ClInclude Include="..\include\BWEM\utils.h" />
     <ClInclude Include="..\include\BWEM\winutils.h" />
     <ClInclude Include="Source\control\WorkerControl.h" />
-    <ClInclude Include="Source\pathing\WalkGraph.h" />
+    <ClInclude Include="Source\FrogFish.h" />
+    <ClInclude Include="Source\pathing\PathFinding.h" />
     <ClInclude Include="Source\production\BuildGraph.h" />
     <ClInclude Include="Source\production\BuildOrder.h" />
     <ClInclude Include="Source\production\BuildPlacement.h" />

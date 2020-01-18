@@ -1,5 +1,8 @@
 #pragma once
+#pragma message("including WorkerControl")
 
 #include "../unitdata/BaseStorage.h"
 
-void send_idle_workers_to_mine(BaseStorage &base_storage);
+namespace WorkerControl {
+    void send_idle_workers_to_mine(BaseStorage &base_storage);
+}
