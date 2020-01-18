@@ -172,3 +172,7 @@
 [1/17/2020 11:23:15 PM] ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 [1/17/2020 11:23:15 PM] Injected into process "Chaoslauncher.exe"
 [1/17/2020 11:23:15 PM] ICC module loaded
+[1/17/2020 11:50:26 PM] ICC module unloaded
+[1/18/2020 8:56:05 AM] ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+[1/18/2020 8:56:05 AM] Injected into process "Chaoslauncher.exe"
+[1/18/2020 8:56:05 AM] ICC module loaded

@@ -121,7 +121,7 @@ void UnitMaker::make_units(EconTracker &econ_tracker, BaseStorage &base_storage)
         if (mode == PROPORTIONAL) {
             auto_push_overlord(econ_tracker);
         }
-        else if (make_queue.order_filled()) {
+        else if (make_queue.order_filled() && !build_order->finished()) {
             BuildItem &build_item = build_order->peek_next();
             int supply_used = Broodwar->self()->supplyUsed();
             if (build_item.build_type == BuildItem::MAKE_UNIT) {
@@ -152,7 +152,11 @@ void UnitMaker::build_order_fill_queue() {
     while (!build_order->finished()) {
         BuildItem &build_item = build_order->peek_next();
         if (build_item.build_type == BuildItem::MAKE_UNIT) {
-            unit_types.push_back(build_item.make_type);
+            int count = 0;
+            while (count < build_item.count) {
+                unit_types.push_back(build_item.make_type);
+                ++count;
+            }
             build_order->next();
         }
         else {
@@ -162,5 +166,6 @@ void UnitMaker::build_order_fill_queue() {
     make_queue.take_exact_order(unit_types);
 }
 
-// unit maker and building maker both know what op codes they use, and
-// they wait until the build order counter reaches the next item they can handle
+MakeQueue &UnitMaker::get_make_queue() {
+    return make_queue;
+}

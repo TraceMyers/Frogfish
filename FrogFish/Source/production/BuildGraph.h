@@ -110,6 +110,8 @@ private:
 
 public:
 
+    bool               graph_ready;
+
     enum               DIRECTIONS {RIGHT, UP, LEFT, DOWN};
 
     // A BuildGraph is tied to a Zerg base. The base can't be reassigned.

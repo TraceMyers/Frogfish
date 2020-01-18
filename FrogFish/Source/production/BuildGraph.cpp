@@ -72,6 +72,7 @@ void BuildGraph::init(FBase _base) {
     end_chunk = 100000;
     CHUNK_SIZE = 20;
     base = _base;
+    graph_ready = false;
     resource_blocking_angles = FrogMath::get_buffered_resource_angles(base);
     for (auto & hatch : base->get_resource_depots()) {
         seed_creep(hatch);
@@ -86,6 +87,9 @@ FBase BuildGraph::get_base() {
 void BuildGraph::on_frame_update() {
     int nodes_size = nodes.size();
     if (nodes_size > 0) {
+        if (nodes_size > 30) {
+            graph_ready = true;
+        }
         if (end_chunk > nodes_size) {
             if (start_chunk >= nodes_size) {
                 start_chunk = 0;

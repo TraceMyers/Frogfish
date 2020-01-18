@@ -18,8 +18,8 @@ class ConstructionStorage {
 private:
 
     static const int MAX_BUILD = 100;
-    static const int _100_PERCENT = 10;
-    static const int NEAR_ENOUGH = 256;
+    static const int _100_PERCENT = 38;
+    static const int NEAR_ENOUGH = 128;
 
     enum SET_TARGET_CODE {
         SUCCESS,
@@ -29,7 +29,6 @@ private:
 
     enum STATUS {
         NONE,
-        WAIT,
         EN_ROUTE,
         AT_SITE,
         UNDER_CONSTR,
@@ -43,7 +42,6 @@ private:
     int build_IDs[MAX_BUILD];
     STATUS status[MAX_BUILD];
     std::vector<BWAPI::Position> paths[MAX_BUILD];
-    BWTimer depart_timers[MAX_BUILD];
     int build_ct;
 
     void add_extractor(FUnit extractor, TilePosition target_node, int build_ID);
@@ -64,8 +62,7 @@ public:
         BWAPI::UnitType build_type, 
         TilePosition target, 
         int build_ID,
-        std::vector<BWAPI::Position> _path,
-        int frames_until_depart
+        std::vector<BWAPI::Position> _path
     );
     std::vector<int> lost_IDs();
     std::vector<int> completed_IDs();

@@ -25,12 +25,6 @@ ConstructionStorage::ConstructionStorage() :
 void ConstructionStorage::on_frame_update(UnitStorage &unit_storage) {
     clear_lost_and_completed();
     for (int i = 0; i < build_ct; ++i) {
-        if (status[i] == WAIT) {
-            depart_timers[i].on_frame_update();
-            if (depart_timers[i].is_stopped()) {
-                status[i] = EN_ROUTE;
-            }
-        }
         if (status[i] == EN_ROUTE && build_units[i]->is_ready()) {
             PathFinding::move(build_units[i], paths[i], NEAR_ENOUGH);
             build_units[i]->set_cmd_delay(2);
@@ -96,8 +90,7 @@ void ConstructionStorage::add_tracker(
     BWAPI::UnitType build_type, 
     TilePosition target, 
     int build_ID,
-    std::vector<BWAPI::Position> _path,
-    int frames_until_depart
+    std::vector<BWAPI::Position> _path
 ) {
     if (build_ct < MAX_BUILD) {
         build_units[build_ct] = drone;
@@ -105,13 +98,7 @@ void ConstructionStorage::add_tracker(
         target_nodes[build_ct] = target;
         build_IDs[build_ct] = build_ID;
         paths[build_ct] = _path;
-        if (frames_until_depart > 0) {
-            status[build_ct] = WAIT;
-            depart_timers[build_ct].start(0, frames_until_depart);
-        }
-        else {
-            status[build_ct] = EN_ROUTE;
-        }
+        status[build_ct] = EN_ROUTE;
         ++build_ct;
     }
     else {
@@ -121,6 +108,7 @@ void ConstructionStorage::add_tracker(
 
 void ConstructionStorage::add_extractor(FUnit extractor, TilePosition target_node, int build_ID) {
     if (build_ct < MAX_BUILD) {
+        printf("adding extractor\n");
         build_units[build_ct] = extractor;
         build_types[build_ct] = BWAPI::UnitTypes::Zerg_Extractor;
         target_nodes[build_ct] = target_node;
@@ -131,28 +119,6 @@ void ConstructionStorage::add_extractor(FUnit extractor, TilePosition target_nod
     }
     else {
         printf("ConstructionStorage.add_extractor() build_ct == MAX_BUILD\n");
-    }
-}
-
-void ConstructionStorage::advance_status(int i) {
-    switch(status[i]) {
-        case EN_ROUTE:
-            printf("drone made it to site\n");
-            status[i] = AT_SITE;
-        break;
-        case AT_SITE:
-            // need extra logic to confirm construction is happening
-            printf("building under construction\n");
-            build_units[i]->bwapi_u()->build(build_types[i], target_nodes[i]);
-            status[i] = UNDER_CONSTR;
-            build_units[i]->set_cmd_delay(build_types[i].buildTime() + _100_PERCENT);
-        break;
-        case UNDER_CONSTR:
-            printf("structure completed\n");
-            status[i] = COMPLETED;
-        break;
-        default:
-            printf("ConstructionStorage.advance_status() got bad code %d\n", status[i]);
     }
 }
 
@@ -167,7 +133,7 @@ void ConstructionStorage::change_build_states(UnitStorage &unit_storage) {
     auto &newly_removed_units = unit_storage.get_self_newly_removed();
     for (int i = 0; i < build_ct; ++i) {
         for (auto &unit : newly_removed_units) {
-            FUnit build_unit;
+            FUnit build_unit = build_units[i];
             if (unit->get_ID() == build_unit->get_ID()) {
                 if (
                     unit->get_type() == UnitTypes::Zerg_Drone
@@ -181,16 +147,30 @@ void ConstructionStorage::change_build_states(UnitStorage &unit_storage) {
             }
         }
         BWAPI::Position target_pos = BWAPI::Position(target_nodes[i]);
-        if (
-            (status[i] == EN_ROUTE && build_units[i]->get_pos().getApproxDistance(target_pos) <= NEAR_ENOUGH)
-            ||
-            (status[i] == AT_SITE
-            && build_units[i]->get_type() == build_types[i])
-            ||
-            (status[i] == UNDER_CONSTR
-            && build_units[i]->is_ready())
+        if (status[i] == EN_ROUTE 
+            && build_units[i]->get_pos().getApproxDistance(target_pos) <= NEAR_ENOUGH
         ) {
-            advance_status(i);
+            status[i] = AT_SITE;
+            printf("Drone making %s made it to site!\n", build_types[i].c_str());
+        }
+        if (status[i] == AT_SITE) {
+            if (build_units[i]->get_type() == build_types[i]) {
+                printf("%s under construction!\n", build_types[i].c_str());
+                status[i] = UNDER_CONSTR;
+            }
+            else if (build_units[i]->is_ready()) {
+                // need backup plans here
+                printf("Drone attempting to make %s!\n", build_types[i].c_str());
+                build_units[i]->bwapi_u()->build(build_types[i], target_nodes[i]);
+                build_units[i]->set_cmd_delay(build_types[i].buildTime() + _100_PERCENT);
+            }
+        }
+        else if (
+            status[i] == UNDER_CONSTR
+            && build_units[i]->is_ready()
+        ) {
+            printf("%s completed!\n", build_types[i].c_str());
+            status[i] = COMPLETED;
         }
     }
 }

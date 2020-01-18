@@ -9,7 +9,6 @@
 class UnitMaker {
 
 private:
-
     MakeQueue make_queue;
     MorphQueue morph_queue;
     BuildOrder *build_order;
@@ -45,4 +44,6 @@ public:
     void make_units(EconTracker &econ_tracker, BaseStorage &base_storage);
 
     void build_order_fill_queue();
+
+    MakeQueue &get_make_queue();
 };

@@ -10,32 +10,22 @@
 #include <BWAPI.h>
 
 class ConstructionManager {
-
 private:
 
-    BuildOrder *build_order;
+    const int IN_BASE_TRAVEL_FRAMES = 80;
+
     ConstructionStorage construction_storage;
 
-    void remove_dead_drones(UnitStorage &unit_storage);
-
 public:
-
-    void take_build_order(
-        BaseStorage &base_storage,
-        BuildOrder *_build_order,
-        std::vector<std::vector<int>> &econ_timing_estimates
-    );
 
     void on_frame_update(
         BaseStorage &base_storage,
         UnitStorage &unit_storage
-
     );
 
-    void init_construction_default(
+    void init_builds(
         BaseStorage &base_storage,
-        std::vector<std::vector<int>> &econ_timing_estimates,
-        BuildItem &item,
-        int item_i
+        BuildOrder *build_order,
+        std::vector<std::vector<int>> &econ_time_est
     );
 };

@@ -17,4 +17,5 @@ namespace DebugDraw {
     void draw_base_info(BaseStorage &base_storage);
     void draw_make_queue(MakeQueue &make_queue);
     void draw_build_graphs();
+    void draw_bwem_data();
 }

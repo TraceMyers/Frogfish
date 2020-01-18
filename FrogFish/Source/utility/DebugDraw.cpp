@@ -214,3 +214,47 @@ void DebugDraw::draw_build_graphs() {
         }
     }
 }
+
+void DebugDraw::draw_bwem_data() {
+    // seas and lakes
+    BWAPI::WalkPosition walk_size = the_map.WalkSize();
+    for (int i = 0; i < walk_size.x; ++i) {
+        for (int j = 0; j < walk_size.y; ++j) {
+            auto &minitile = the_map.GetMiniTile(BWAPI::WalkPosition(i, j));
+            bool is_sea = minitile.Sea();
+            bool is_lake = minitile.Lake();
+            if (is_sea) {
+                Broodwar->drawLineMap(
+                    BWAPI::Position(i * 8, j * 8), 
+                    BWAPI::Position(i * 8 + 8, j * 8 + 8),
+                    BWAPI::Colors::Red
+                );
+            }
+            if (is_lake) {
+                Broodwar->drawLineMap(
+                    BWAPI::Position(i * 8 + 8, j * 8),
+                    BWAPI::Position(i * 8, j * 8 + 8),
+                    BWAPI::Colors::Purple
+                );
+            }
+        }
+    }
+    // chokepoints
+    auto &areas = the_map.Areas();
+    for (auto &area : areas) {
+        auto &chokepoints = area.ChokePoints();
+        for (auto &choke : chokepoints) {
+            BWAPI::WalkPosition p = choke->Center();
+            Broodwar->drawCircleMap(p.x, p.y, 3, BWAPI::Colors::Red);
+            Broodwar->drawCircleMap(p.x * 8, p.y * 8, 3, BWAPI::Colors::Purple);
+            const std::deque<BWAPI::WalkPosition> &geo = choke->Geometry();
+            for (unsigned i = 0; i < geo.size() - 1; ++i) {
+                Broodwar->drawLineMap(
+                    BWAPI::Position(geo[i].x * 8, geo[i].y * 8),
+                    BWAPI::Position(geo[i + 1].x * 8, geo[i + 1].y * 8),
+                    BWAPI::Colors::Blue
+                );
+            }
+        }
+    }
+}

@@ -22,4 +22,6 @@ namespace BuildPlacement {
     TilePosition get_base_geyser_tilepos(FBase base);
 
     BuildGraph *get_graphs();
+
+    bool graph_ready(FBase base);
 }

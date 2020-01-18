@@ -74,3 +74,11 @@ TilePosition BuildPlacement::get_base_geyser_tilepos(FBase base) {
 BuildGraph *BuildPlacement::get_graphs() {
     return self_graphs;
 }
+
+bool BuildPlacement::graph_ready(FBase base) {
+    for (int i = 0; i < BuildPlacement::BASELEN; ++i) {
+        if (self_bases[i] == base) {
+            return self_graphs[i].graph_ready;
+        }
+    }
+}

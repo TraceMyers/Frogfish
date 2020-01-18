@@ -1,8 +1,8 @@
 #include "ProductionCoordinator.h"
 #include "BuildPlacement.h"
 #include "EconTracker.h"
-#include "BuildOrder.h"
 #include "ConstructionManager.h"
+#include "MakeQueue.h"
 #include "../unitdata/BaseStorage.h"
 #include "../unitdata/UnitStorage.h"
 
@@ -32,16 +32,19 @@ void ProductionCoordinator::on_frame_update(BaseStorage &base_storage, UnitStora
     BuildPlacement::on_frame_update(base_storage);
     unit_maker.on_frame_update();
     construction_manager.on_frame_update(base_storage, unit_storage);
-    econ_timing_estimates = econ_tracker.build_order_sim(unit_storage, &build_order);
     test_timer.on_frame_update();
 }
 
+
 void ProductionCoordinator::produce(BaseStorage &base_storage, UnitStorage &unit_storage) {
+    MakeQueue &make_queue = unit_maker.get_make_queue();
+    econ_timing_estimates = econ_tracker.build_order_sim(
+        unit_storage, 
+        &build_order,
+        make_queue
+    );
+    construction_manager.init_builds(base_storage, &build_order, econ_timing_estimates);
     unit_maker.make_units(econ_tracker, base_storage);
-    if (test_timer.is_stopped() && !init_test) {
-        construction_manager.take_build_order(base_storage, &build_order, econ_timing_estimates);
-        init_test = true;
-    }
 }
 
 const std::vector<double> &ProductionCoordinator::get_make_proportions() {

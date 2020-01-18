@@ -20,6 +20,7 @@ private:
 public:
 
     int waypoint;
+    bool construction_reserved;
 
     enum FTASKS {
         IDLE,
@@ -50,7 +51,8 @@ public:
         f_task(FTASKS::IDLE),
         f_type(FTYPES::UNASSIGNED),
         _ID(u->getID()),
-        waypoint(0)
+        waypoint(0),
+        construction_reserved(false)
     {update();}
 
     void update() {

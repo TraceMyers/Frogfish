@@ -127,51 +127,38 @@ void MapImpl::Initialize()
 void MapImpl::LoadData()
 {
 	// Mark unwalkable minitiles (minitiles are walkable by default)
-	for (int y = 0; y < WalkSize().y; ++y)
-		for (int x = 0; x < WalkSize().x; ++x)
-			if (!bw->isWalkable(x, y)) // For each unwalkable minitile, we also mark its 8 neighbours as not walkable.
-				for (int dy = -1; dy <= +1; ++dy) // According to some tests, this prevents from wrongly pretending one Marine can go by some thin path.
-					for (int dx = -1; dx <= +1; ++dx)
-					{
-						WalkPosition w(x + dx, y + dy);
-						if (Valid(w))
-							GetMiniTile_(w, check_t::no_check).SetWalkable(false);
-					}
+	for (int y = 0 ; y < WalkSize().y ; ++y)
+	for (int x = 0 ; x < WalkSize().x ; ++x)
+		if (!bw->isWalkable(x, y))						// For each unwalkable minitile, we also mark its 8 neighbours as not walkable.
+			for (int dy = -1 ; dy <= +1 ; ++dy)			// According to some tests, this prevents from wrongly pretending one Marine can go by some thin path.
+			for (int dx = -1 ; dx <= +1 ; ++dx)
+			{
+				WalkPosition w(x+dx, y+dy);
+				if (Valid(w))
+					GetMiniTile_(w, check_t::no_check).SetWalkable(false);
+			}
 
 	// Mark buildable tiles (tiles are unbuildable by default)
-	for (int y = 0; y < Size().y; ++y)
-		for (int x = 0; x < Size().x; ++x)
+	for (int y = 0 ; y < Size().y ; ++y)
+	for (int x = 0 ; x < Size().x ; ++x)
+	{
+		TilePosition t(x, y);
+		if (bw->isBuildable(t))
 		{
-			TilePosition t(x, y);
-			auto bwapiGroundHeight = bw->getGroundHeight(t);
-			auto isBuildable = bw->isBuildable(t);
-			auto fullyWalkable = true;
+			GetTile_(t).SetBuildable();
 
-			// Add groundHeight information
-			GetTile_(t).SetGroundHeight(bwapiGroundHeight / 2);
-			if (bwapiGroundHeight % 2)
-				GetTile_(t).SetDoodad();
-
-			// Add buildable information
-			if (isBuildable)
-				GetTile_(t).SetBuildable();
-
-			// Check if tile is fully walkable if not buildable
-			if (!isBuildable)
-				for (int dy = 0; dy < 4; ++dy)
-					for (int dx = 0; dx < 4; ++dx)
-					{
-						const auto w = WalkPosition(t) + WalkPosition(dx, dy);
-						if (!bw->isWalkable(w))
-							fullyWalkable = false;
-					}
-
-			// Add walkable information
-			if (isBuildable || fullyWalkable)
-				for (int dy = 0; dy < 4; ++dy)
-					for (int dx = 0; dx < 4; ++dx)
-						GetMiniTile_(WalkPosition(t) + WalkPosition(dx, dy), check_t::no_check).SetWalkable(true);
+			// Ensures buildable ==> walkable:
+			for (int dy = 0 ; dy < 4 ; ++dy)
+			for (int dx = 0 ; dx < 4 ; ++dx)
+				GetMiniTile_(WalkPosition(t) + WalkPosition(dx, dy), check_t::no_check).SetWalkable(true);
 		}
+
+		// Add groundHeight and doodad information:
+		int bwapiGroundHeight = bw->getGroundHeight(t);
+		GetTile_(t).SetGroundHeight(bwapiGroundHeight / 2);
+		if (bwapiGroundHeight % 2)
+			GetTile_(t).SetDoodad();
+	}
 }
 
 

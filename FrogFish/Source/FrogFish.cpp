@@ -1,4 +1,3 @@
-#include "FrogFish.h"
 #include "utility/DebugDraw.h"
 #include "utility/BWTimer.h"
 #include "unitdata/UnitStorage.h"
@@ -55,7 +54,7 @@ void FrogFish::onFrame() {
 	production_coordinator.on_frame_update(base_storage, unit_storage);
 
     // PRE-LAST. draw
-    DebugDraw::draw_build_graphs();
+    // DebugDraw::draw_build_graphs();
 
     // LAST. 
     // clear storage of changes to basic data that everybody else references

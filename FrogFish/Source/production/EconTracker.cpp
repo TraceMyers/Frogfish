@@ -226,7 +226,8 @@ bool EconTracker::extend_reservation(unsigned int ID, int seconds) {
 // building finishes before the cancellation can occur.
 std::vector<std::vector<int>> EconTracker::build_order_sim(
     UnitStorage &unit_storage,
-    BuildOrder *build_order
+    BuildOrder *build_order,
+    MakeQueue &make_queue
 ) {
     std::vector<BWAPI::UnitType> making_types_in;
     std::vector<int> making_frames_left_in;
@@ -237,8 +238,8 @@ std::vector<std::vector<int>> EconTracker::build_order_sim(
             making_frames_left_in.push_back(u->bwapi_u()->getRemainingBuildTime());
         }
     }
-
     std::vector<std::vector<int>> seconds_until_make;
+    auto &make_deque = make_queue.get_queue();
     double 
         minerals = get_free_minerals(),
         gas = get_free_gas(),
@@ -255,63 +256,29 @@ std::vector<std::vector<int>> EconTracker::build_order_sim(
     int
         ID_start = build_order->cur_item,
         extractor_drone_sink = 0,
-        cur_ID_make_ct = 0;
+        cur_ID_make_ct = 0,
+        make_deque_i = 0;
     std::vector<int> making_IDs;
     std::vector<BWAPI::UnitType> making_types;
     std::vector<int> making_frames_left;
 
     int seconds_passed = 0;
-    for (cur_ID = ID_start; cur_ID < build_order->size(); ++cur_ID) {
+    for (cur_ID = ID_start; cur_ID < build_order->size(); ) {
         const BuildItem &item = build_order->get(cur_ID);
-        if (item.build_type == BuildItem::CANCEL) {
-            int cancel_ID = item.required_i;
-            auto ID_it = making_IDs.begin();
-            auto type_it = making_types.begin();
-            auto frames_it = making_frames_left.begin();
-            bool found_cancel = false;
-            for ( ; ID_it != making_IDs.end(); ++ID_it, ++type_it, ++frames_it) {
-                if (*(ID_it) == cancel_ID) {
-                    BWAPI::UnitType &cancel_type = *type_it;
-                    minerals += cancel_type.mineralPrice() * 0.75;
-                    gas += cancel_type.gasPrice() * 0.75;
-                    supply_used -= cancel_type.supplyRequired();
-
-                    making_IDs.erase(ID_it);
-                    making_types.erase(type_it);
-                    making_frames_left.erase(frames_it);
-                    found_cancel = true;
-
-                    if (item.make_type.isBuilding()) {
-                        mps += add_drone_mps;
-                    }
-                    break;
-                }
+        
+        if (
+            make_deque_i < make_deque.size()
+            || item.build_type == BuildItem::MAKE_UNIT 
+            || item.build_type == BuildItem::BUILD
+        ) {
+            BWAPI::UnitType u_type;
+            if (make_deque_i < make_deque.size()) {
+                // printf("deque_i : %d\n",make_deque_i);
+                u_type = make_deque[make_deque_i];
             }
-            if (!found_cancel) {
-                type_it = making_types_in.begin();
-                for ( ; type_it < making_types_in.end(); ++type_it) {
-                    if (item.make_type == *type_it) {
-                        const BWAPI::UnitType &cancel_type = item.make_type;
-                        minerals += cancel_type.mineralPrice() * 0.75;
-                        gas += cancel_type.gasPrice() * 0.75;
-                        supply_used -= cancel_type.supplyRequired();
-                        making_types_in.erase(type_it);
-
-                        if (item.make_type.isBuilding()) {
-                            mps += add_drone_mps;
-                            supply_used += 2;
-                        }
-                        found_cancel = true;
-                        break;
-                    }
-                }
+            else {
+               u_type = item.make_type;
             }
-            // advances to the next item even if a cancellation isn't found in order
-            // to not go into an infinite loop if a cancellation was scheduled incorrectly
-            ++cur_ID;
-        }
-        else {
-            BWAPI::UnitType u_type = item.make_type;
             int 
                 min_cost = u_type.mineralPrice(),
                 gas_cost = u_type.gasPrice(),
@@ -324,22 +291,21 @@ std::vector<std::vector<int>> EconTracker::build_order_sim(
                     break;
                 }
             }
+
             if (
-                min_cost < minerals 
-                && gas_cost < gas 
-                && supply_cost < (supply_total - supply_used)
+                min_cost <= minerals 
+                && gas_cost <= gas 
+                && supply_cost <= (supply_total - supply_used)
                 && (!from_larva || larva >= 1)
             ) {
+                // printf("seconds passed: %d\n", seconds_passed);
+                // printf("minerals: %.2lf\n", minerals);
+                // printf("gas: %.2lf\n", minerals);
+                // printf("can make %s\n", u_type.c_str());
+                // printf("id : %d\n", cur_ID);
                 minerals -= min_cost;
                 gas -= gas_cost;
                 supply_used -= supply_cost;
-                if (cur_ID_make_ct == make_ct) {
-                    cur_ID_make_ct = 0;
-                    ++cur_ID;
-                }
-                else {
-                    cur_ID_make_ct += 1;
-                }
 
                 if (u_type.isBuilding()) {
                     mps -= add_drone_mps;
@@ -351,13 +317,25 @@ std::vector<std::vector<int>> EconTracker::build_order_sim(
                 if (from_larva) {
                     --larva;
                 }
-                seconds_until_make.push_back(std::vector<int> {(int)cur_ID, seconds_passed});
+                if (make_deque_i < make_deque.size()) {
+                    ++make_deque_i;
+                }
+                else {
+                    seconds_until_make.push_back(std::vector<int> {(int)cur_ID, seconds_passed});
+                    ++cur_ID_make_ct;
+                    if (cur_ID_make_ct == make_ct) {
+                        cur_ID_make_ct = 0;
+                        ++cur_ID;
+                    }
+                }
             }
             else {
                 ++seconds_passed;
                 minerals += mps;
                 gas += gps;
                 larva += lps;
+                // printf("seconds passed: %d, minerals: %.2lf, mps: %.2lf\n", 
+                //     seconds_passed, minerals, mps);
                 auto ID_it = making_IDs.begin();
                 auto type_it = making_types.begin();
                 auto frames_it = making_frames_left.begin();
@@ -420,6 +398,56 @@ std::vector<std::vector<int>> EconTracker::build_order_sim(
                     }
                 }
             }
+        }
+        else if (item.build_type == BuildItem::CANCEL) {
+            int cancel_ID = item.required_i;
+            auto ID_it = making_IDs.begin();
+            auto type_it = making_types.begin();
+            auto frames_it = making_frames_left.begin();
+            bool found_cancel = false;
+            for ( ; ID_it != making_IDs.end(); ++ID_it, ++type_it, ++frames_it) {
+                if (*(ID_it) == cancel_ID) {
+                    BWAPI::UnitType &cancel_type = *type_it;
+                    minerals += cancel_type.mineralPrice() * 0.75;
+                    gas += cancel_type.gasPrice() * 0.75;
+                    supply_used -= cancel_type.supplyRequired();
+
+                    making_IDs.erase(ID_it);
+                    making_types.erase(type_it);
+                    making_frames_left.erase(frames_it);
+                    found_cancel = true;
+
+                    if (item.make_type.isBuilding()) {
+                        mps += add_drone_mps;
+                    }
+                    break;
+                }
+            }
+            if (!found_cancel) {
+                type_it = making_types_in.begin();
+                for ( ; type_it < making_types_in.end(); ++type_it) {
+                    if (item.make_type == *type_it) {
+                        const BWAPI::UnitType &cancel_type = item.make_type;
+                        minerals += cancel_type.mineralPrice() * 0.75;
+                        gas += cancel_type.gasPrice() * 0.75;
+                        supply_used -= cancel_type.supplyRequired();
+                        making_types_in.erase(type_it);
+
+                        if (item.make_type.isBuilding()) {
+                            mps += add_drone_mps;
+                            supply_used += 2;
+                        }
+                        found_cancel = true;
+                        break;
+                    }
+                }
+            }
+            // advances to the next item even if a cancellation isn't found in order
+            // to not go into an infinite loop if a cancellation was scheduled incorrectly
+            ++cur_ID;
+        }
+        if (seconds_passed > 360) {
+            break;
         }
     }
     return seconds_until_make;

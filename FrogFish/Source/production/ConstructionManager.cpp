@@ -14,18 +14,11 @@
 // the build order then update departure times regularly as
 // new estimates come in
 
-void ConstructionManager::take_build_order(
-    BaseStorage &base_storage,
-    BuildOrder *_build_order,
-    std::vector<std::vector<int>> &econ_timing_estimates
-) {
-    for (unsigned i = 0; i < build_order->size(); ++i) {
-        BuildItem &item = build_order->get(i);
-        if (item.build_type == BuildItem::BUILD) {
-            init_construction_default(base_storage, econ_timing_estimates, item, (int)i);
-        }
-    }
-}
+// behavior : 2 drones sent to make geyser before 1 drone sent to make pool
+// didn't have enough for pool
+
+// TOOD: once a few things sorted out, total refactor (still)
+
 void ConstructionManager::on_frame_update(
     BaseStorage &base_storage,
     UnitStorage &unit_storage
@@ -33,61 +26,72 @@ void ConstructionManager::on_frame_update(
     construction_storage.on_frame_update(unit_storage);
 }
 
-// called for all build tasks (looking ahead in build order)
-// TODO: needs to return a value saying it found a worker, keep trying
-// until that happens
-void ConstructionManager::init_construction_default(
+// assumes items are being built in-base
+// in the future, decisions will have to be made about where they're being built 
+void ConstructionManager::init_builds(
     BaseStorage &base_storage,
-    std::vector<std::vector<int>> &econ_timing_estimates,
-    BuildItem &item,
-    int item_i
+    BuildOrder *build_order,
+    std::vector<std::vector<int>> &econ_time_est
 ) {
-    // just get any old drone for now
-    bool worker_found = false;
-    for (auto &base : base_storage.get_self_bases()) {
-        for (auto &worker : base->get_workers()) {
-            if (worker->f_task == FrogUnit::MINE_MINERALS) {
-                worker_found = true;
-                worker->f_task = FrogUnit::BUILD_STRUCT;
-                // build at this base
-                TilePosition build_tp;
-                if (item.make_type == BWAPI::UnitTypes::Resource_Vespene_Geyser) {
-                    build_tp = BuildPlacement::get_base_geyser_tilepos(base);
-                }
-                else {
-                    build_tp = BuildPlacement::find_any_node_for_placement(
-                        base, item.make_type.tileWidth(), item.make_type.tileHeight()
-                    );
-                }
-                std::vector<BWAPI::Position> path = PathFinding::get_path(
-                    worker->get_pos(), BWAPI::Position(build_tp)
-                );
-                int frame_distance = PathFinding::get_approx_path_time(
-                    path,
-                    worker->get_pos(),
-                    BWAPI::UnitTypes::Zerg_Drone.topSpeed()
-                );
-                int departure_frames;
-                for (unsigned i = 0; i < econ_timing_estimates.size(); ++i) {
-                    if (econ_timing_estimates[i][0] == item_i) {
-                        departure_frames = 
-                            econ_timing_estimates[i][1] * 24 - frame_distance;
+    for (
+        unsigned i = build_order->cur_item; 
+        i < build_order->size();
+        ++i
+    ) {
+        if (
+            build_order->get(i).build_type == BuildItem::BUILD 
+            && construction_storage.get_unit(i) == nullptr
+        ) {
+            bool found_pair = false;
+            for (auto &pair : econ_time_est) {
+                if (pair[0] == i && pair[1] * 24 <= IN_BASE_TRAVEL_FRAMES) {
+                    found_pair = true;
+                    // for now, any base, any drone
+                    bool found_worker = false;
+                    for (auto &base : base_storage.get_self_bases()) {
+                        for (auto &worker : base->get_workers()) {
+                            if (worker->f_task == FrogUnit::MINE_MINERALS) {
+                                BuildItem &item = build_order->get(i);
+                                TilePosition build_tp;
+                                std::vector<BWAPI::Position> path;
+                                if (item.make_type == BWAPI::UnitTypes::Zerg_Extractor) {
+                                    build_tp = BuildPlacement::get_base_geyser_tilepos(base);
+                                    path = PathFinding::get_path_near(
+                                        worker->get_pos(), BWAPI::Position(build_tp)
+                                    );
+                                }
+                                else {
+                                    build_tp = BuildPlacement::find_any_node_for_placement(
+                                        base, item.make_type.tileWidth(), item.make_type.tileHeight()
+                                    );
+                                    path = PathFinding::get_path(
+                                        worker->get_pos(), BWAPI::Position(build_tp)
+                                    );
+                                }
+
+                                construction_storage.add_tracker(
+                                    worker,
+                                    item.make_type,
+                                    build_tp,
+                                    i,
+                                    path
+                                );
+
+                                worker->f_task = FrogUnit::BUILD_STRUCT;
+                                found_worker = true;
+                                break;
+                            }
+                        }
+                        if (found_worker) {break;}
                     }
+                    break;
                 }
-                departure_frames = (departure_frames < 0 ? 0 : departure_frames);
-                construction_storage.add_tracker(
-                    worker,
-                    item.make_type,
-                    build_tp,
-                    item_i,
-                    path,
-                    departure_frames
-                );
-                break;
+                if (found_pair) {break;}
             }
-        }
-        if (worker_found) {
-            break;
+            
+        } 
+        else if (i == build_order->cur_item && construction_storage.get_unit(i) != nullptr) {
+            build_order->next();
         }
     }
 }

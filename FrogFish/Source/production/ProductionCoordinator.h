@@ -30,6 +30,8 @@ private:
     BWTimer test_timer;
     bool init_test = false;
 
+    std::vector<BWAPI::TilePosition> build_tps;
+
 public:
 
     ProductionCoordinator();

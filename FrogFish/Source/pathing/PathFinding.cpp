@@ -96,3 +96,43 @@ std::vector<BWAPI::Position> PathFinding::get_path(
     }
     return pos_path;
 }
+
+std::vector<BWAPI::Position> PathFinding::get_path_near(
+    const BWAPI::Position &_a,
+    const BWAPI::Position &_b
+) {
+    BWAPI::WalkPosition a(_a.x / 8, _a.y / 8);
+    BWAPI::WalkPosition b(_b.x / 8, _b.y / 8);
+    int dirs[4][2] {{1, 0}, {0, -1}, {-1, 0}, {0, 1}};
+    int step_max = 1;
+    int step_counter = 0;
+    int i = 0;
+    bool found = false;
+
+    while (!found && step_max < 12) {
+        for ( ; step_max < 12; ) {
+            b = BWAPI::WalkPosition(b.x + dirs[i][0], b.y + dirs[i][1]);
+            if (b.isValid() && the_map.GetMiniTile(b).Walkable()) {
+                break;
+            }
+            ++step_counter;
+            if (step_counter == step_max) {
+                step_counter = 0;
+                ++step_max;
+                ++i;
+                if (i > 3) {
+                    i = 0;
+                }
+            }
+        }
+        found = JPS::findPath(path, the_map, a.x, a.y, b.x, b.y, 0);
+    }
+
+    std::vector<BWAPI::Position> pos_path;
+    if (found) {
+        for (auto &walk_pos : path) {
+            pos_path.push_back(BWAPI::Position(walk_pos.x * 8, walk_pos.y * 8));
+        }
+    }
+    return pos_path;
+}

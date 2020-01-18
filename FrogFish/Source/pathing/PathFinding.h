@@ -22,4 +22,8 @@ namespace PathFinding {
         const BWAPI::Position &_a, 
         const BWAPI::Position &_b
     );
+    std::vector<BWAPI::Position> get_path_near(
+        const BWAPI::Position &_a, 
+        const BWAPI::Position &_b
+    );
 }

@@ -1,12 +1,13 @@
 #pragma once
 #pragma message("including EconTracker")
 
+#include "BuildOrder.h"
+#include "MakeQueue.h"
 #include "../utility/BWTimer.h"
 #include "../unitdata/FrogUnit.h"
 #include "../unitdata/FrogBase.h"
 #include "../unitdata/BaseStorage.h"
 #include "../unitdata/UnitStorage.h"
-#include "BuildOrder.h"
 #include <BWAPI.h>
 #include <BWEM/bwem.h>
 #include <vector>
@@ -100,7 +101,8 @@ public:
     // making_frames_left_in is how many frames those units have left to finish making
     std::vector<std::vector<int>> build_order_sim(
         UnitStorage &unit_storage,
-        BuildOrder *build_order
+        BuildOrder *build_order,
+        MakeQueue &make_queue
     );
    
 };
