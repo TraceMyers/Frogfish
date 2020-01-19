@@ -29,6 +29,9 @@ void ProductionCoordinator::load_build_order(const char *race, const char *build
 
 void ProductionCoordinator::on_frame_update(BaseStorage &base_storage, UnitStorage &unit_storage) {
     econ_tracker.on_frame_update(base_storage, unit_storage);
+    // ------------
+    // problem here
+    // ------------
     BuildPlacement::on_frame_update(base_storage);
     unit_maker.on_frame_update();
     construction_manager.on_frame_update(base_storage, unit_storage);

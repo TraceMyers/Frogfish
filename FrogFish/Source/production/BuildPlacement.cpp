@@ -2,6 +2,7 @@
 #include "BuildGraph.h"
 #include "../unitdata/FrogBase.h"
 #include "../unitdata/BaseStorage.h"
+#include "../unitdata/UnitStorage.h"
 #include "BWEM/bwem.h"
 #include <vector>
 
@@ -29,6 +30,9 @@ void BuildPlacement::on_frame_update(BaseStorage &base_storage) {
             
         }
     }
+    // ------------
+    // problem here
+    // ------------
     for (unsigned int i = 0; i < BuildPlacement::BASELEN; ++i) {
         if (self_bases[i] != nullptr) {
             self_graphs[i].on_frame_update();
@@ -81,4 +85,5 @@ bool BuildPlacement::graph_ready(FBase base) {
             return self_graphs[i].graph_ready;
         }
     }
+	return false;
 }

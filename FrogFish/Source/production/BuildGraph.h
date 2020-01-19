@@ -3,6 +3,7 @@
 
 #include "../FrogFish.h"
 #include "../unitdata/FrogBase.h"
+#include "../unitdata/UnitStorage.h"
 #include "../utility/BWTimer.h"
 #include <BWEM/bwem.h>
 #include <BWAPI.h>
@@ -67,7 +68,6 @@ public:
     // Internal
     bool                             operator ==(const BuildNode &other) const;
 
-/************************************Internal************************************/
 };
 
 typedef BuildNode *                  BNode;

@@ -67,6 +67,7 @@ bool BuildNode::operator ==(const BuildNode &other) const {return this->ID == ot
 BuildGraph::BuildGraph() : base(nullptr) {}
 
 void BuildGraph::init(FBase _base) {
+	printf("base init\n");
     node_ID_counter = 0;
     start_chunk = 0;
     end_chunk = 100000;
@@ -111,6 +112,7 @@ void BuildGraph::on_frame_update() {
     for (auto & structure : base->get_structures()) {
         seed_creep(structure);
     }
+    printf("end\n");
     bg_timer.on_frame_update();
 }
 
@@ -119,9 +121,11 @@ void BuildGraph::seed_creep(FUnit structure) {
     const BWEM::Tile &_t = the_map.GetTile(structure_tilepos);
     if (
         structure_tilepos.isValid() 
+        && _t.Walkable()
         && Broodwar->hasCreep(structure_tilepos)
         && find_node_at(structure_tilepos) == nullptr
     ) {
+        printf("inside\n");
         nodes.push_back(new BuildNode(_t, structure_tilepos, node_ID_counter));
         ++node_ID_counter;
     }
@@ -229,6 +233,7 @@ void BuildGraph::try_expand() {
                 if (
                     candidate_tp
                     && cur_tp.isValid() 
+					&& the_map.GetTile(cur_tp).Walkable()
                     && Broodwar->hasCreep(cur_tp)
                 ) {
                     BNode bn = find_node_at(cur_tp);

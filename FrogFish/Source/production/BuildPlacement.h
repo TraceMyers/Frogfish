@@ -4,6 +4,7 @@
 #include "BuildGraph.h"
 #include "../unitdata/FrogBase.h"
 #include "../unitdata/BaseStorage.h"
+#include "../unitdata/UnitStorage.h"
 #include <BWEM/bwem.h>
 #include <vector>
 

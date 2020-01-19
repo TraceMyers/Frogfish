@@ -23,7 +23,6 @@ ConstructionStorage::ConstructionStorage() :
 {} 
 
 void ConstructionStorage::on_frame_update(UnitStorage &unit_storage) {
-    clear_lost_and_completed();
     for (int i = 0; i < build_ct; ++i) {
         if (status[i] == EN_ROUTE && build_units[i]->is_ready()) {
             PathFinding::move(build_units[i], paths[i], NEAR_ENOUGH);
@@ -31,6 +30,7 @@ void ConstructionStorage::on_frame_update(UnitStorage &unit_storage) {
         }
     }
     change_build_states(unit_storage);
+    clear_lost_and_completed();
 }
 
 ConstructionStorage::STATUS ConstructionStorage::get_status(int build_ID) {
@@ -106,25 +106,24 @@ void ConstructionStorage::add_tracker(
     }
 }
 
-void ConstructionStorage::add_extractor(FUnit extractor, TilePosition target_node, int build_ID) {
-    if (build_ct < MAX_BUILD) {
-        printf("adding extractor\n");
-        build_units[build_ct] = extractor;
-        build_types[build_ct] = BWAPI::UnitTypes::Zerg_Extractor;
-        target_nodes[build_ct] = target_node;
-        build_IDs[build_ct] = build_ID;
-        status[build_ct] = UNDER_CONSTR;
-        ++build_ct;
-        extractor->set_cmd_delay(BWAPI::UnitTypes::Zerg_Extractor.buildTime() + _100_PERCENT);
-    }
-    else {
-        printf("ConstructionStorage.add_extractor() build_ct == MAX_BUILD\n");
-    }
+void ConstructionStorage::add_extractor(
+    FUnit extractor, 
+    TilePosition target_node, 
+    int build_ID,
+    int index
+) {
+    printf("adding extractor to construction storage, ID %d\n", build_ID);
+    build_units[index] = extractor;
+    build_types[index] = BWAPI::UnitTypes::Zerg_Extractor;
+    target_nodes[index] = target_node;
+    build_IDs[index] = build_ID;
+    status[index] = AT_SITE;
+    extractor->set_cmd_delay(BWAPI::UnitTypes::Zerg_Extractor.buildTime() + _100_PERCENT);
 }
 
 void ConstructionStorage::change_build_states(UnitStorage &unit_storage) {
-    std::vector<FUnit> extractors_started;
     auto &newly_stored_units = unit_storage.get_self_newly_stored();
+    std::vector<FUnit> extractors_started;
     for (auto &unit : newly_stored_units) {
         if (unit->get_type() == BWAPI::UnitTypes::Zerg_Extractor) {
             extractors_started.push_back(unit);
@@ -134,18 +133,21 @@ void ConstructionStorage::change_build_states(UnitStorage &unit_storage) {
     for (int i = 0; i < build_ct; ++i) {
         for (auto &unit : newly_removed_units) {
             FUnit build_unit = build_units[i];
-            if (unit->get_ID() == build_unit->get_ID()) {
-                if (
-                    unit->get_type() == UnitTypes::Zerg_Drone
-                    && build_types[i] == UnitTypes::Zerg_Extractor
-                    && extractors_started.size() > 0
-                ) {
-                    add_extractor(extractors_started[0], target_nodes[i], build_IDs[i]);
-                    extractors_started.erase(extractors_started.begin());
-                }
-                status[i] = LOST;
+            if (
+                unit->get_ID() == build_unit->get_ID()
+                && extractors_started.size() > 0
+                && build_types[i] == UnitTypes::Zerg_Extractor
+            ) {
+                add_extractor(
+                    extractors_started[0], 
+                    target_nodes[i], 
+                    build_IDs[i], 
+                    i
+                );
+                extractors_started.erase(extractors_started.begin());
             }
         }
+        
         BWAPI::Position target_pos = BWAPI::Position(target_nodes[i]);
         if (status[i] == EN_ROUTE 
             && build_units[i]->get_pos().getApproxDistance(target_pos) <= NEAR_ENOUGH
@@ -156,13 +158,16 @@ void ConstructionStorage::change_build_states(UnitStorage &unit_storage) {
         if (status[i] == AT_SITE) {
             if (build_units[i]->get_type() == build_types[i]) {
                 printf("%s under construction!\n", build_types[i].c_str());
+                build_units[i]->set_cmd_delay(build_types[i].buildTime() + _100_PERCENT);
                 status[i] = UNDER_CONSTR;
             }
             else if (build_units[i]->is_ready()) {
                 // need backup plans here
-                printf("Drone attempting to make %s!\n", build_types[i].c_str());
-                build_units[i]->bwapi_u()->build(build_types[i], target_nodes[i]);
-                build_units[i]->set_cmd_delay(build_types[i].buildTime() + _100_PERCENT);
+                // if (i != index_waiting_on_extractor) {
+                    printf("Drone attempting to make %s!\n", build_types[i].c_str());
+                    build_units[i]->bwapi_u()->build(build_types[i], target_nodes[i]);
+                    build_units[i]->set_cmd_delay(7);
+                // }
             }
         }
         else if (

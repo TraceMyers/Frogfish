@@ -102,6 +102,18 @@ public:
 
     const std::vector<EBase> &get_enemy_newly_removed() {return enemy_newly_removed;}
 
+    void immediately_remove_struct_from_all_bases(FUnit unit) {
+        for (auto &base : self_bases) {
+            for (auto &structure : base->get_structures()) {
+                if (structure == unit) {
+                    base->remove_structure(unit);
+                    base->remove_resource_depot(unit);
+                    break;
+                }
+            }
+        }
+    }
+
     // Only called by FrogFish::onEnd()
     void free_data() {
         while (self_bases.size() > 0) {

@@ -88,8 +88,23 @@ void ConstructionManager::init_builds(
                 }
                 if (found_pair) {break;}
             }
-            
         } 
+        else if (
+            i == build_order->cur_item 
+            && build_order->get(i).build_type == BuildItem::CANCEL
+            && build_order->get(i).supply_target == Broodwar->self()->supplyUsed()
+        ) {
+            // currently only handles extractor
+            int cancel_id = build_order->get(i).required_i;
+            if (construction_storage.get_status(cancel_id) == construction_storage.UNDER_CONSTR) {
+                FUnit cancel_unit = construction_storage.get_unit(cancel_id);
+                if (cancel_unit->get_type() == BWAPI::UnitTypes::Zerg_Extractor){
+                    cancel_unit->bwapi_u()->cancelConstruction();
+                    base_storage.immediately_remove_struct_from_all_bases(cancel_unit);
+                }
+                build_order->next();
+            }
+        }
         else if (i == build_order->cur_item && construction_storage.get_unit(i) != nullptr) {
             build_order->next();
         }

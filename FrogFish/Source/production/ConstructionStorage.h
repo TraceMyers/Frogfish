@@ -18,16 +18,30 @@ class ConstructionStorage {
 private:
 
     static const int MAX_BUILD = 100;
-    static const int _100_PERCENT = 38;
-    static const int NEAR_ENOUGH = 128;
+    static const int _100_PERCENT = 30;
+    static const int NEAR_ENOUGH = 200;
 
-    enum SET_TARGET_CODE {
+    const enum SET_TARGET_CODE { 
         SUCCESS,
         BAD_STATUS,
         NOT_FOUND
     };
 
-    enum STATUS {
+    FUnit build_units[MAX_BUILD];
+    BWAPI::UnitType build_types[MAX_BUILD];
+    TilePosition target_nodes[MAX_BUILD];
+    int build_IDs[MAX_BUILD];
+    std::vector<BWAPI::Position> paths[MAX_BUILD];
+    int build_ct;
+
+    void add_extractor(FUnit extractor, TilePosition target_node, int build_ID, int index);
+    void advance_status(int i);
+    void change_build_states(UnitStorage &unit_storage);
+    void clear_lost_and_completed();
+
+public:
+
+    const enum STATUS {
         NONE,
         EN_ROUTE,
         AT_SITE,
@@ -36,20 +50,7 @@ private:
         LOST
     };
 
-    FUnit build_units[MAX_BUILD];
-    BWAPI::UnitType build_types[MAX_BUILD];
-    TilePosition target_nodes[MAX_BUILD];
-    int build_IDs[MAX_BUILD];
     STATUS status[MAX_BUILD];
-    std::vector<BWAPI::Position> paths[MAX_BUILD];
-    int build_ct;
-
-    void add_extractor(FUnit extractor, TilePosition target_node, int build_ID);
-    void advance_status(int i);
-    void change_build_states(UnitStorage &unit_storage);
-    void clear_lost_and_completed();
-
-public:
 
     ConstructionStorage();
     void on_frame_update(UnitStorage &unit_storage);

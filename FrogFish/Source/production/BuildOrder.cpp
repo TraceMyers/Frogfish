@@ -91,7 +91,8 @@ void BuildOrder::load(const char *_race, const char *build_name) {
     race = _race;
     name = build_name;
     std::ifstream in_file;
-    in_file.open("bwapi-data\\read\\BuildOrders.txt");
+    in_file.open("C:\\ProgramData\\bwapi\\starcraft\\bwapi-data\\read\\BuildOrders.txt");
+// C:\ProgramData\bwapi\starcraft\bwapi-data
     if (!in_file) {
         printf("not able to read build order file\n");
     }

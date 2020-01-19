@@ -51,10 +51,15 @@ void FrogFish::onFrame() {
     BaseOwnership::update_base_data(base_storage, unit_storage);
 
     // 2. update production data
+    // ------------
+    // problem here
+    // ------------
 	production_coordinator.on_frame_update(base_storage, unit_storage);
 
     // PRE-LAST. draw
     // DebugDraw::draw_build_graphs();
+    // DebugDraw::draw_units(unit_storage);
+    // DebugDraw::draw_base_info(base_storage);
 
     // LAST. 
     // clear storage of changes to basic data that everybody else references
@@ -111,6 +116,7 @@ void FrogFish::onUnitHide(BWAPI::Unit unit) {
 void FrogFish::onUnitCreate(BWAPI::Unit unit) {
     unit_storage.queue_store(unit);
     if (unit->getType() == BWAPI::UnitTypes::Resource_Vespene_Geyser) {
+        unit_storage.queue_remove(unit);
         the_map.OnGeyserNoticed(unit);
     }
 }
@@ -125,6 +131,7 @@ void FrogFish::onUnitDestroy(BWAPI::Unit unit) {
 void FrogFish::onUnitMorph(BWAPI::Unit unit) {
     unit_storage.queue_store(unit);
     if (unit->getType() == BWAPI::UnitTypes::Resource_Vespene_Geyser) {
+        unit_storage.queue_remove(unit);
         the_map.OnGeyserNoticed(unit);
     }
 }

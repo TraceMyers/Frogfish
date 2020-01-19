@@ -343,7 +343,6 @@ std::vector<std::vector<int>> EconTracker::build_order_sim(
                     *(frames_it) -= 24;
                     if (*(frames_it) <= 0) {
                         BWAPI::UnitType &finished_type = *(type_it);
-                        int finished_ID = *(ID_it);
 
                         supply_total += finished_type.supplyProvided();
                         if (finished_type == BWAPI::UnitTypes::Zerg_Extractor) {

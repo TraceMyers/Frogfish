@@ -122,6 +122,7 @@ void UnitMaker::make_units(EconTracker &econ_tracker, BaseStorage &base_storage)
             auto_push_overlord(econ_tracker);
         }
         else if (make_queue.order_filled() && !build_order->finished()) {
+            // printf("heeeey ya~\n");
             BuildItem &build_item = build_order->peek_next();
             int supply_used = Broodwar->self()->supplyUsed();
             if (build_item.build_type == BuildItem::MAKE_UNIT) {
@@ -154,6 +155,7 @@ void UnitMaker::build_order_fill_queue() {
         if (build_item.build_type == BuildItem::MAKE_UNIT) {
             int count = 0;
             while (count < build_item.count) {
+                printf("adding %s to make queue\n", build_item.make_type.c_str());
                 unit_types.push_back(build_item.make_type);
                 ++count;
             }

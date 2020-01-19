@@ -4,4 +4,8 @@ terran 9_pool
 1:  supply,   9,  build,  1, spawning_pool, null
 2:  supply,   8,  make,   1, drone,         null
 3:  supply,   9,  build,  1, extractor,     null
+4:  supply,   8,  make,   1, drone,         null
+5:  supply,   9,  cancel, 1, extractor,        3
+6:  supply,   10, make,   1, overlord,      null
+7:  finished, 0,  make,   6, zergling,         0
 ------------------------------------------------
