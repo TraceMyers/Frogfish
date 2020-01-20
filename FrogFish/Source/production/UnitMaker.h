@@ -5,6 +5,7 @@
 #include "MorphQueue.h"
 #include "EconTracker.h"
 #include "BuildOrder.h"
+#include "../unitdata/TechStorage.h"
 
 class UnitMaker {
 
@@ -23,7 +24,11 @@ private:
     
     void auto_push_overlord(EconTracker &econ_tracker);
 
-    void spend_down(BaseStorage &base_storage, EconTracker &econ_Tracker);
+    void spend_down(
+        BaseStorage &base_storage, 
+        EconTracker &econ_tracker,
+        TechStorage &tech_storage
+    );
 
 public:
 
@@ -41,7 +46,11 @@ public:
 
     void take_build_order(BuildOrder *_build_order);
 
-    void make_units(EconTracker &econ_tracker, BaseStorage &base_storage);
+    void make_units(
+        EconTracker &econ_tracker, 
+        BaseStorage &base_storage,
+        TechStorage &tech_storage
+    );
 
     void build_order_fill_queue();
 

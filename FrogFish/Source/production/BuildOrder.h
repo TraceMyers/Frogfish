@@ -5,6 +5,12 @@
 #include <fstream>
 #include <thread>
 
+namespace TypeAndName {
+    extern const int ZERG_TYPE_CT;
+    extern const char *ZERG_NAMES[28];
+    extern const BWAPI::UnitType ZERG_TYPES[28];
+}
+
 class BuildItem {
 
 public:

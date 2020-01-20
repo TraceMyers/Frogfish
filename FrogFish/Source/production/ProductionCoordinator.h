@@ -8,6 +8,7 @@
 #include "ConstructionManager.h"
 #include "../unitdata/BaseStorage.h"
 #include "../unitdata/UnitStorage.h"
+#include "../unitdata/TechStorage.h"
 #include "../utility/BWTimer.h"
 
 // has the ability to switch between build orders and real-time plans
@@ -42,7 +43,11 @@ public:
 
     void on_frame_update(BaseStorage &base_storage, UnitStorage &unit_storage);
 
-    void produce(BaseStorage &base_storage, UnitStorage &unit_storage);
+    void produce(
+        BaseStorage &base_storage, 
+        UnitStorage &unit_storage, 
+        TechStorage &tech_storage
+    );
 
     const std::vector<double> &get_make_proportions();
 

@@ -29,25 +29,31 @@ void ProductionCoordinator::load_build_order(const char *race, const char *build
 
 void ProductionCoordinator::on_frame_update(BaseStorage &base_storage, UnitStorage &unit_storage) {
     econ_tracker.on_frame_update(base_storage, unit_storage);
-    // ------------
-    // problem here
-    // ------------
     BuildPlacement::on_frame_update(base_storage);
     unit_maker.on_frame_update();
-    construction_manager.on_frame_update(base_storage, unit_storage);
+    construction_manager.on_frame_update(base_storage, unit_storage, econ_tracker);
     test_timer.on_frame_update();
 }
 
 
-void ProductionCoordinator::produce(BaseStorage &base_storage, UnitStorage &unit_storage) {
+void ProductionCoordinator::produce(
+    BaseStorage &base_storage, 
+    UnitStorage &unit_storage,
+    TechStorage &tech_storage
+) {
     MakeQueue &make_queue = unit_maker.get_make_queue();
     econ_timing_estimates = econ_tracker.build_order_sim(
         unit_storage, 
         &build_order,
         make_queue
     );
-    construction_manager.init_builds(base_storage, &build_order, econ_timing_estimates);
-    unit_maker.make_units(econ_tracker, base_storage);
+    construction_manager.init_builds(
+        base_storage, 
+        &build_order, 
+        econ_tracker, 
+        econ_timing_estimates
+    );
+    unit_maker.make_units(econ_tracker, base_storage, tech_storage);
 }
 
 const std::vector<double> &ProductionCoordinator::get_make_proportions() {

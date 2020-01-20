@@ -1,57 +1,72 @@
-Date : 2020-01-12 10:38:33
+Date : 2020-01-19 10:38:05
 Directory : c:\Users\Trace\BWAPI\FrogFish\Source
-Total : 28 files,  2322 codes, 212 comments, 462 blanks, all 2996 lines
+Total : 43 files,  3891 codes, 231 comments, 635 blanks, all 4757 lines
 
 Languages
 +----------+------------+------------+------------+------------+------------+
 | language | files      | code       | comment    | blank      | total      |
 +----------+------------+------------+------------+------------+------------+
-| C++      |         28 |      2,322 |        212 |        462 |      2,996 |
+| C++      |         43 |      3,891 |        231 |        635 |      4,757 |
 +----------+------------+------------+------------+------------+------------+
 
 Directories
-+-------------------------------------------------------------------------+------------+------------+------------+------------+------------+
-| path                                                                    | files      | code       | comment    | blank      | total      |
-+-------------------------------------------------------------------------+------------+------------+------------+------------+------------+
-| .                                                                       |         28 |      2,322 |        212 |        462 |      2,996 |
-| control                                                                 |          2 |         22 |          1 |          4 |         27 |
-| data                                                                    |          8 |        744 |         95 |        217 |      1,056 |
-| datamgmt                                                                |          4 |        371 |         11 |         23 |        405 |
-| production                                                              |          7 |        657 |         89 |        132 |        878 |
-| utility                                                                 |          4 |        325 |          2 |         42 |        369 |
-+-------------------------------------------------------------------------+------------+------------+------------+------------+------------+
++---------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                      | files      | code       | comment    | blank      | total      |
++---------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                         |         43 |      3,891 |        231 |        635 |      4,757 |
+| control                                                                   |          2 |         25 |          1 |          4 |         30 |
+| pathing                                                                   |          2 |        152 |          0 |         15 |        167 |
+| production                                                                |         19 |      2,001 |        160 |        286 |      2,447 |
+| unitdata                                                                  |         11 |      1,059 |         28 |        245 |      1,332 |
+| utility                                                                   |          6 |        483 |         11 |         45 |        539 |
++---------------------------------------------------------------------------+------------+------------+------------+------------+------------+
 
 Files
-+-------------------------------------------------------------------------+----------+------------+------------+------------+------------+
-| filename                                                                | language | code       | comment    | blank      | total      |
-+-------------------------------------------------------------------------+----------+------------+------------+------------+------------+
-| c:\Users\Trace\BWAPI\FrogFish\Source\Dll.cpp                            | C++      |         16 |          0 |          4 |         20 |
-| c:\Users\Trace\BWAPI\FrogFish\Source\FrogFish.cpp                       | C++      |        131 |         12 |         28 |        171 |
-| c:\Users\Trace\BWAPI\FrogFish\Source\FrogFish.h                         | C++      |         56 |          2 |         12 |         70 |
-| c:\Users\Trace\BWAPI\FrogFish\Source\control\WorkerControl.cpp          | C++      |         19 |          1 |          2 |         22 |
-| c:\Users\Trace\BWAPI\FrogFish\Source\control\WorkerControl.h            | C++      |          3 |          0 |          2 |          5 |
-| c:\Users\Trace\BWAPI\FrogFish\Source\data\BaseStorage.h                 | C++      |         97 |          1 |         21 |        119 |
-| c:\Users\Trace\BWAPI\FrogFish\Source\data\EconTracker.h                 | C++      |        104 |         76 |         16 |        196 |
-| c:\Users\Trace\BWAPI\FrogFish\Source\data\EnemyBase.h                   | C++      |         77 |          4 |         35 |        116 |
-| c:\Users\Trace\BWAPI\FrogFish\Source\data\EnemyUnit.h                   | C++      |         81 |          1 |         32 |        114 |
-| c:\Users\Trace\BWAPI\FrogFish\Source\data\FrogBase.h                    | C++      |         86 |          9 |         39 |        134 |
-| c:\Users\Trace\BWAPI\FrogFish\Source\data\FrogUnit.h                    | C++      |         90 |          2 |         36 |        128 |
-| c:\Users\Trace\BWAPI\FrogFish\Source\data\Resources.cpp                 | C++      |          6 |          0 |          4 |         10 |
-| c:\Users\Trace\BWAPI\FrogFish\Source\data\UnitStorage.h                 | C++      |        203 |          2 |         34 |        239 |
-| c:\Users\Trace\BWAPI\FrogFish\Source\datamgmt\BaseAssets.cpp            | C++      |        176 |          4 |          6 |        186 |
-| c:\Users\Trace\BWAPI\FrogFish\Source\datamgmt\BaseAssets.h              | C++      |          9 |          0 |          3 |         12 |
-| c:\Users\Trace\BWAPI\FrogFish\Source\datamgmt\BaseOwnership.cpp         | C++      |        155 |          7 |         11 |        173 |
-| c:\Users\Trace\BWAPI\FrogFish\Source\datamgmt\BaseOwnership.h           | C++      |         31 |          0 |          3 |         34 |
-| c:\Users\Trace\BWAPI\FrogFish\Source\production\BuildGraph.cpp          | C++      |        320 |         29 |         33 |        382 |
-| c:\Users\Trace\BWAPI\FrogFish\Source\production\BuildGraph.h            | C++      |         65 |         21 |         42 |        128 |
-| c:\Users\Trace\BWAPI\FrogFish\Source\production\BuildQueue.h            | C++      |         11 |          0 |          6 |         17 |
-| c:\Users\Trace\BWAPI\FrogFish\Source\production\MakeQueue.h             | C++      |        116 |         37 |         25 |        178 |
-| c:\Users\Trace\BWAPI\FrogFish\Source\production\MorphQueue.h            | C++      |         11 |          0 |          6 |         17 |
-| c:\Users\Trace\BWAPI\FrogFish\Source\production\ProductionCoordinator.h | C++      |         20 |          0 |          8 |         28 |
-| c:\Users\Trace\BWAPI\FrogFish\Source\production\UnitMaker.h             | C++      |        114 |          2 |         12 |        128 |
-| c:\Users\Trace\BWAPI\FrogFish\Source\utility\BWEMBaseArray.h            | C++      |         61 |          1 |         15 |         77 |
-| c:\Users\Trace\BWAPI\FrogFish\Source\utility\BWTimer.h                  | C++      |         88 |          1 |         14 |        103 |
-| c:\Users\Trace\BWAPI\FrogFish\Source\utility\DebugDraw.cpp              | C++      |        164 |          0 |         11 |        175 |
-| c:\Users\Trace\BWAPI\FrogFish\Source\utility\DebugDraw.h                | C++      |         12 |          0 |          2 |         14 |
-| Total                                                                   |          |      2,322 |        212 |        462 |      2,996 |
-+-------------------------------------------------------------------------+----------+------------+------------+------------+------------+
++---------------------------------------------------------------------------+----------+------------+------------+------------+------------+
+| filename                                                                  | language | code       | comment    | blank      | total      |
++---------------------------------------------------------------------------+----------+------------+------------+------------+------------+
+| c:\Users\Trace\BWAPI\FrogFish\Source\Dll.cpp                              | C++      |         16 |          0 |          4 |         20 |
+| c:\Users\Trace\BWAPI\FrogFish\Source\FrogFish.cpp                         | C++      |        101 |         29 |         25 |        155 |
+| c:\Users\Trace\BWAPI\FrogFish\Source\FrogFish.h                           | C++      |         54 |          2 |         11 |         67 |
+| c:\Users\Trace\BWAPI\FrogFish\Source\control\WorkerControl.cpp            | C++      |         19 |          1 |          2 |         22 |
+| c:\Users\Trace\BWAPI\FrogFish\Source\control\WorkerControl.h              | C++      |          6 |          0 |          2 |          8 |
+| c:\Users\Trace\BWAPI\FrogFish\Source\pathing\PathFinding.cpp              | C++      |        127 |          0 |         11 |        138 |
+| c:\Users\Trace\BWAPI\FrogFish\Source\pathing\PathFinding.h                | C++      |         25 |          0 |          4 |         29 |
+| c:\Users\Trace\BWAPI\FrogFish\Source\production\BuildGraph.cpp            | C++      |        307 |         11 |         38 |        356 |
+| c:\Users\Trace\BWAPI\FrogFish\Source\production\BuildGraph.h              | C++      |         72 |         42 |         23 |        137 |
+| c:\Users\Trace\BWAPI\FrogFish\Source\production\BuildOrder.cpp            | C++      |        220 |          1 |         19 |        240 |
+| c:\Users\Trace\BWAPI\FrogFish\Source\production\BuildOrder.h              | C++      |         52 |          3 |         11 |         66 |
+| c:\Users\Trace\BWAPI\FrogFish\Source\production\BuildPlacement.cpp        | C++      |         78 |          3 |          8 |         89 |
+| c:\Users\Trace\BWAPI\FrogFish\Source\production\BuildPlacement.h          | C++      |         18 |          0 |         11 |         29 |
+| c:\Users\Trace\BWAPI\FrogFish\Source\production\ConstructionManager.cpp   | C++      |         94 |         11 |          7 |        112 |
+| c:\Users\Trace\BWAPI\FrogFish\Source\production\ConstructionManager.h     | C++      |         24 |          0 |          7 |         31 |
+| c:\Users\Trace\BWAPI\FrogFish\Source\production\ConstructionStorage.cpp   | C++      |        194 |          7 |         16 |        217 |
+| c:\Users\Trace\BWAPI\FrogFish\Source\production\ConstructionStorage.h     | C++      |         55 |          4 |         12 |         71 |
+| c:\Users\Trace\BWAPI\FrogFish\Source\production\EconTracker.cpp           | C++      |        380 |         37 |         36 |        453 |
+| c:\Users\Trace\BWAPI\FrogFish\Source\production\EconTracker.h             | C++      |         76 |         17 |         15 |        108 |
+| c:\Users\Trace\BWAPI\FrogFish\Source\production\MakeQueue.cpp             | C++      |        105 |          7 |         15 |        127 |
+| c:\Users\Trace\BWAPI\FrogFish\Source\production\MakeQueue.h               | C++      |         43 |          7 |         12 |         62 |
+| c:\Users\Trace\BWAPI\FrogFish\Source\production\MorphQueue.h              | C++      |         12 |          0 |          6 |         18 |
+| c:\Users\Trace\BWAPI\FrogFish\Source\production\ProductionCoordinator.cpp | C++      |         48 |          3 |          8 |         59 |
+| c:\Users\Trace\BWAPI\FrogFish\Source\production\ProductionCoordinator.h   | C++      |         31 |          4 |         15 |         50 |
+| c:\Users\Trace\BWAPI\FrogFish\Source\production\UnitMaker.cpp             | C++      |        158 |          3 |         12 |        173 |
+| c:\Users\Trace\BWAPI\FrogFish\Source\production\UnitMaker.h               | C++      |         34 |          0 |         15 |         49 |
+| c:\Users\Trace\BWAPI\FrogFish\Source\unitdata\BWEMBaseArray.h             | C++      |         62 |          1 |         15 |         78 |
+| c:\Users\Trace\BWAPI\FrogFish\Source\unitdata\BaseAssets.cpp              | C++      |        164 |          4 |          6 |        174 |
+| c:\Users\Trace\BWAPI\FrogFish\Source\unitdata\BaseAssets.h                | C++      |          7 |          0 |          5 |         12 |
+| c:\Users\Trace\BWAPI\FrogFish\Source\unitdata\BaseOwnership.cpp           | C++      |        139 |          5 |          8 |        152 |
+| c:\Users\Trace\BWAPI\FrogFish\Source\unitdata\BaseOwnership.h             | C++      |         24 |          0 |          9 |         33 |
+| c:\Users\Trace\BWAPI\FrogFish\Source\unitdata\BaseStorage.h               | C++      |        108 |          1 |         23 |        132 |
+| c:\Users\Trace\BWAPI\FrogFish\Source\unitdata\EnemyBase.h                 | C++      |         78 |          4 |         35 |        117 |
+| c:\Users\Trace\BWAPI\FrogFish\Source\unitdata\EnemyUnit.h                 | C++      |         82 |          1 |         31 |        114 |
+| c:\Users\Trace\BWAPI\FrogFish\Source\unitdata\FrogBase.h                  | C++      |         93 |          9 |         41 |        143 |
+| c:\Users\Trace\BWAPI\FrogFish\Source\unitdata\FrogUnit.h                  | C++      |         98 |          2 |         38 |        138 |
+| c:\Users\Trace\BWAPI\FrogFish\Source\unitdata\UnitStorage.h               | C++      |        204 |          1 |         34 |        239 |
+| c:\Users\Trace\BWAPI\FrogFish\Source\utility\BWTimer.cpp                  | C++      |         57 |          0 |          8 |         65 |
+| c:\Users\Trace\BWAPI\FrogFish\Source\utility\BWTimer.h                    | C++      |         20 |          1 |          7 |         28 |
+| c:\Users\Trace\BWAPI\FrogFish\Source\utility\DebugDraw.cpp                | C++      |        245 |          2 |         13 |        260 |
+| c:\Users\Trace\BWAPI\FrogFish\Source\utility\DebugDraw.h                  | C++      |         18 |          0 |          3 |         21 |
+| c:\Users\Trace\BWAPI\FrogFish\Source\utility\FrogMath.cpp                 | C++      |        124 |          8 |         10 |        142 |
+| c:\Users\Trace\BWAPI\FrogFish\Source\utility\FrogMath.h                   | C++      |         19 |          0 |          4 |         23 |
+| Total                                                                     |          |      3,891 |        231 |        635 |      4,757 |
++---------------------------------------------------------------------------+----------+------------+------------+------------+------------+

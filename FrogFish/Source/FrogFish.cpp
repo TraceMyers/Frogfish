@@ -2,6 +2,7 @@
 #include "utility/BWTimer.h"
 #include "unitdata/UnitStorage.h"
 #include "unitdata/BaseStorage.h"
+#include "unitdata/TechStorage.h"
 #include "unitdata/BaseOwnership.h"
 #include "production/ProductionCoordinator.h"
 #include "control/WorkerControl.h"
@@ -24,6 +25,7 @@ using namespace Filter;
 
 UnitStorage unit_storage;
 BaseStorage base_storage;
+TechStorage tech_storage;
 ProductionCoordinator production_coordinator;
 BWTimer timer;
 
@@ -38,7 +40,7 @@ void FrogFish::onStart() {
     onStart_init_bwem();
     base_storage.init();
     production_coordinator.init();
-    production_coordinator.load_build_order("terran", "9_pool");
+    production_coordinator.load_build_order("protoss", "12_hatch");
     timer.start(10,0);
 }
 
@@ -49,17 +51,15 @@ void FrogFish::onFrame() {
     // 1. update basic data that everything else references
     unit_storage.update();
     BaseOwnership::update_base_data(base_storage, unit_storage);
+    tech_storage.on_frame_update(base_storage);
 
     // 2. update production data
-    // ------------
-    // problem here
-    // ------------
 	production_coordinator.on_frame_update(base_storage, unit_storage);
 
     // PRE-LAST. draw
-    // DebugDraw::draw_build_graphs();
-    // DebugDraw::draw_units(unit_storage);
-    // DebugDraw::draw_base_info(base_storage);
+    DebugDraw::draw_build_graphs();
+    DebugDraw::draw_units(unit_storage);
+    DebugDraw::draw_base_info(base_storage);
 
     // LAST. 
     // clear storage of changes to basic data that everybody else references
@@ -69,7 +69,7 @@ void FrogFish::onFrame() {
 
     if (Broodwar->getFrameCount() % Broodwar->getLatencyFrames() != 0) {return;}
     // RUN COMMANDS -----------------------------------------------------------------
-    production_coordinator.produce(base_storage, unit_storage);
+    production_coordinator.produce(base_storage, unit_storage, tech_storage);
     WorkerControl::send_idle_workers_to_mine(base_storage);
 }
 

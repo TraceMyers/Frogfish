@@ -132,6 +132,8 @@
     <ClCompile Include="Source\production\UnitMaker.cpp" />
     <ClCompile Include="Source\unitdata\BaseAssets.cpp" />
     <ClCompile Include="Source\unitdata\BaseOwnership.cpp" />
+    <ClCompile Include="Source\unitdata\Requirements.cpp" />
+    <ClCompile Include="Source\unitdata\TechStorage.cpp" />
     <ClCompile Include="Source\utility\BWTimer.cpp" />
     <ClCompile Include="Source\utility\DebugDraw.cpp" />
     <ClCompile Include="Source\utility\FrogMath.cpp" />
@@ -176,6 +178,8 @@
     <ClInclude Include="Source\unitdata\EnemyUnit.h" />
     <ClInclude Include="Source\unitdata\FrogBase.h" />
     <ClInclude Include="Source\unitdata\FrogUnit.h" />
+    <ClInclude Include="Source\unitdata\Requirements.h" />
+    <ClInclude Include="Source\unitdata\TechStorage.h" />
     <ClInclude Include="Source\unitdata\UnitStorage.h" />
     <ClInclude Include="Source\utility\BWTimer.h" />
     <ClInclude Include="Source\utility\DebugDraw.h" />

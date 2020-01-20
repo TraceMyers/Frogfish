@@ -84,7 +84,6 @@ FBase BuildGraph::get_base() {
     return base;
 }
 
-// TODO: check base for new hatcheries & creep colonies, set creep seed
 void BuildGraph::on_frame_update() {
     int nodes_size = nodes.size();
     if (nodes_size > 0) {
@@ -112,7 +111,6 @@ void BuildGraph::on_frame_update() {
     for (auto & structure : base->get_structures()) {
         seed_creep(structure);
     }
-    printf("end\n");
     bg_timer.on_frame_update();
 }
 
@@ -125,7 +123,6 @@ void BuildGraph::seed_creep(FUnit structure) {
         && Broodwar->hasCreep(structure_tilepos)
         && find_node_at(structure_tilepos) == nullptr
     ) {
-        printf("inside\n");
         nodes.push_back(new BuildNode(_t, structure_tilepos, node_ID_counter));
         ++node_ID_counter;
     }

@@ -30,9 +30,6 @@ void BuildPlacement::on_frame_update(BaseStorage &base_storage) {
             
         }
     }
-    // ------------
-    // problem here
-    // ------------
     for (unsigned int i = 0; i < BuildPlacement::BASELEN; ++i) {
         if (self_bases[i] != nullptr) {
             self_graphs[i].on_frame_update();

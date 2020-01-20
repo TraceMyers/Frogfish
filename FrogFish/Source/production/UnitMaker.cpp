@@ -10,7 +10,7 @@
 #include <deque>
 
 #define CHANGE_MAGIC_NUMBER 40
-#define EXTRA_DELAY_FRAMES 50
+#define EXTRA_DELAY_FRAMES 40
 #define OVERLORD_TIMER_CT 20
 #define OVERLORD_SUPPLY_PROVIDED 16
 #define OVERLORD_MAKE_SEC 48.0
@@ -54,7 +54,11 @@ void UnitMaker::auto_push_overlord(EconTracker &econ_tracker) {
 
 // for now, just make anywhere
 // probably very temp
-void UnitMaker::spend_down(BaseStorage &base_storage, EconTracker &econ_tracker) {
+void UnitMaker::spend_down(
+    BaseStorage &base_storage, 
+    EconTracker &econ_tracker,
+    TechStorage &tech_storage
+) {
     bool still_spending = true;
     for (auto &base : base_storage.get_self_bases()) {
         for (auto &larva : base->get_larva()) {
@@ -63,11 +67,14 @@ void UnitMaker::spend_down(BaseStorage &base_storage, EconTracker &econ_tracker)
                 break;
             }
             BWAPI::UnitType next_unit = make_queue.front();
-            if (next_unit.mineralPrice() <= econ_tracker.get_free_minerals()
+            if (
+                tech_storage.self_can_make(next_unit)
+                && next_unit.mineralPrice() <= econ_tracker.get_free_minerals()
                 && next_unit.gasPrice() <= econ_tracker.get_free_gas()
                 && Broodwar->self()->supplyUsed() + next_unit.supplyRequired()
-                <= Broodwar->self()->supplyTotal()
+                - next_unit.supplyProvided() <= Broodwar->self()->supplyTotal()
             ) {
+                printf("making %s\n", next_unit.c_str());
                 larva->set_cmd_delay(next_unit.buildTime() + EXTRA_DELAY_FRAMES);
                 larva->bwapi_u()->morph(next_unit);
                 make_queue.pop();
@@ -116,13 +123,16 @@ void UnitMaker::take_build_order(BuildOrder *_build_order) {
     build_order = _build_order;
 }
 
-void UnitMaker::make_units(EconTracker &econ_tracker, BaseStorage &base_storage) {
+void UnitMaker::make_units(
+    EconTracker &econ_tracker, 
+    BaseStorage &base_storage,
+    TechStorage &tech_storage
+) {
     if (mode != PAUSED) {
         if (mode == PROPORTIONAL) {
             auto_push_overlord(econ_tracker);
         }
         else if (make_queue.order_filled() && !build_order->finished()) {
-            // printf("heeeey ya~\n");
             BuildItem &build_item = build_order->peek_next();
             int supply_used = Broodwar->self()->supplyUsed();
             if (build_item.build_type == BuildItem::MAKE_UNIT) {
@@ -143,7 +153,7 @@ void UnitMaker::make_units(EconTracker &econ_tracker, BaseStorage &base_storage)
             }
         }
         if (!make_queue.order_filled()) {
-            spend_down(base_storage, econ_tracker);
+            spend_down(base_storage, econ_tracker, tech_storage);
         }
     }
 }

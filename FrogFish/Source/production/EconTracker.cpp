@@ -18,7 +18,7 @@ EconTracker::EconTracker() :
     reserved_minerals(0),
     reserved_gas(0),
     larva_ct(0),
-    reserved_resource_ID(0),
+    reserved_resource_ID(1),
     minerals_per_frame(0.0),
     gas_per_frame(0.0),
     larva_per_frame(0.0),
@@ -156,6 +156,7 @@ int EconTracker::get_free_gas() {return self->gas() - reserved_gas;}
 // returns reference ID
 // allows current resources - reserved resources to go negative
 unsigned int EconTracker::make_reservation(int minerals, int gas, int reservation_seconds) {
+    printf("reservation for %d minerals made\n", minerals);
     reserved_minerals += minerals;
     reserved_gas += gas;
     BWTimer *reserve_timer = new BWTimer();
@@ -183,6 +184,7 @@ bool EconTracker::end_reservation(unsigned int ID) {
     auto it_rid = reservation_IDs.begin();
     for (;it_rr != reserved_resources.end(); ++it_rr, ++it_rt, ++it_rid) {
         if (*it_rid == ID) {
+            printf("reservation for %d minerals canceled\n", (*it_rr)[0]);
             reserved_minerals -= (*it_rr)[0];
             reserved_gas -= (*it_rr)[1];
             delete *it_rr;
@@ -291,11 +293,12 @@ std::vector<std::vector<int>> EconTracker::build_order_sim(
                     break;
                 }
             }
+            
 
             if (
                 min_cost <= minerals 
                 && gas_cost <= gas 
-                && supply_cost <= (supply_total - supply_used)
+                && (supply_cost == 0 || supply_cost <= (supply_total - supply_used))
                 && (!from_larva || larva >= 1)
             ) {
                 // printf("seconds passed: %d\n", seconds_passed);
@@ -321,6 +324,12 @@ std::vector<std::vector<int>> EconTracker::build_order_sim(
                     ++make_deque_i;
                 }
                 else {
+                    if (
+                        u_type == BWAPI::UnitTypes::Zerg_Hatchery 
+                        || u_type == BWAPI::UnitTypes::Zerg_Spawning_Pool
+                    ) {
+                        printf("%s: %d seconds passed\n", u_type.c_str(), seconds_passed);    
+                    }
                     seconds_until_make.push_back(std::vector<int> {(int)cur_ID, seconds_passed});
                     ++cur_ID_make_ct;
                     if (cur_ID_make_ct == make_ct) {

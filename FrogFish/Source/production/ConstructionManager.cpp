@@ -14,16 +14,14 @@
 // the build order then update departure times regularly as
 // new estimates come in
 
-// behavior : 2 drones sent to make geyser before 1 drone sent to make pool
-// didn't have enough for pool
-
 // TOOD: once a few things sorted out, total refactor (still)
 
 void ConstructionManager::on_frame_update(
     BaseStorage &base_storage,
-    UnitStorage &unit_storage
+    UnitStorage &unit_storage,
+    EconTracker &econ_tracker
 ) {
-    construction_storage.on_frame_update(unit_storage);
+    construction_storage.on_frame_update(unit_storage, econ_tracker);
 }
 
 // assumes items are being built in-base
@@ -31,6 +29,7 @@ void ConstructionManager::on_frame_update(
 void ConstructionManager::init_builds(
     BaseStorage &base_storage,
     BuildOrder *build_order,
+    EconTracker &econ_tracker,
     std::vector<std::vector<int>> &econ_time_est
 ) {
     for (
@@ -68,13 +67,18 @@ void ConstructionManager::init_builds(
                                         worker->get_pos(), BWAPI::Position(build_tp)
                                     );
                                 }
-
+                                int reservation_ID = econ_tracker.make_reservation(
+                                    item.make_type.mineralPrice(),
+                                    item.make_type.gasPrice(),
+                                    1000
+                                );
                                 construction_storage.add_tracker(
                                     worker,
                                     item.make_type,
                                     build_tp,
                                     i,
-                                    path
+                                    path,
+                                    reservation_ID
                                 );
 
                                 worker->f_task = FrogUnit::BUILD_STRUCT;
@@ -94,12 +98,12 @@ void ConstructionManager::init_builds(
             && build_order->get(i).build_type == BuildItem::CANCEL
             && build_order->get(i).supply_target == Broodwar->self()->supplyUsed()
         ) {
-            // currently only handles extractor
+            // currently only handles extractor?
             int cancel_id = build_order->get(i).required_i;
             if (construction_storage.get_status(cancel_id) == construction_storage.UNDER_CONSTR) {
                 FUnit cancel_unit = construction_storage.get_unit(cancel_id);
+                cancel_unit->bwapi_u()->cancelConstruction();
                 if (cancel_unit->get_type() == BWAPI::UnitTypes::Zerg_Extractor){
-                    cancel_unit->bwapi_u()->cancelConstruction();
                     base_storage.immediately_remove_struct_from_all_bases(cancel_unit);
                 }
                 build_order->next();

@@ -2,6 +2,7 @@
 #pragma message("including ConstructionStorage")
 
 #include "BuildGraph.h"
+#include "EconTracker.h"
 #include "../utility/BWTimer.h"
 #include "../unitdata/FrogUnit.h"
 #include "../unitdata/UnitStorage.h"
@@ -32,11 +33,13 @@ private:
     TilePosition target_nodes[MAX_BUILD];
     int build_IDs[MAX_BUILD];
     std::vector<BWAPI::Position> paths[MAX_BUILD];
+    int reservation_IDs[MAX_BUILD];
+    bool res_canceled[MAX_BUILD];
     int build_ct;
 
     void add_extractor(FUnit extractor, TilePosition target_node, int build_ID, int index);
     void advance_status(int i);
-    void change_build_states(UnitStorage &unit_storage);
+    void change_build_states(UnitStorage &unit_storage, EconTracker &econ_tracker);
     void clear_lost_and_completed();
 
 public:
@@ -53,7 +56,7 @@ public:
     STATUS status[MAX_BUILD];
 
     ConstructionStorage();
-    void on_frame_update(UnitStorage &unit_storage);
+    void on_frame_update(UnitStorage &unit_storage, EconTracker &econ_tracker);
     STATUS get_status(int build_ID);
     FUnit get_unit(int build_ID);
     TilePosition get_target_node(int build_ID);
@@ -63,7 +66,8 @@ public:
         BWAPI::UnitType build_type, 
         TilePosition target, 
         int build_ID,
-        std::vector<BWAPI::Position> _path
+        std::vector<BWAPI::Position> _path,
+        int reservation_ID
     );
     std::vector<int> lost_IDs();
     std::vector<int> completed_IDs();

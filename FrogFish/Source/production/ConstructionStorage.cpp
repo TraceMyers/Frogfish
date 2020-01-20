@@ -1,4 +1,5 @@
 #include "ConstructionStorage.h"
+#include "EconTracker.h"
 #include "../pathing/PathFinding.h"
 #include "../unitdata/FrogUnit.h"
 #include "../unitdata/UnitStorage.h"
@@ -19,17 +20,19 @@ ConstructionStorage::ConstructionStorage() :
     build_IDs(),
     status(),
     build_ct(0),
+    reservation_IDs(),
+    res_canceled(),
     paths()
 {} 
 
-void ConstructionStorage::on_frame_update(UnitStorage &unit_storage) {
+void ConstructionStorage::on_frame_update(UnitStorage &unit_storage, EconTracker &econ_tracker) {
     for (int i = 0; i < build_ct; ++i) {
         if (status[i] == EN_ROUTE && build_units[i]->is_ready()) {
             PathFinding::move(build_units[i], paths[i], NEAR_ENOUGH);
             build_units[i]->set_cmd_delay(2);
         }
     }
-    change_build_states(unit_storage);
+    change_build_states(unit_storage, econ_tracker);
     clear_lost_and_completed();
 }
 
@@ -90,7 +93,8 @@ void ConstructionStorage::add_tracker(
     BWAPI::UnitType build_type, 
     TilePosition target, 
     int build_ID,
-    std::vector<BWAPI::Position> _path
+    std::vector<BWAPI::Position> _path,
+    int reservation_ID
 ) {
     if (build_ct < MAX_BUILD) {
         build_units[build_ct] = drone;
@@ -99,6 +103,8 @@ void ConstructionStorage::add_tracker(
         build_IDs[build_ct] = build_ID;
         paths[build_ct] = _path;
         status[build_ct] = EN_ROUTE;
+        reservation_IDs[build_ct] = reservation_ID;
+        res_canceled[build_ct] = false;
         ++build_ct;
     }
     else {
@@ -121,7 +127,10 @@ void ConstructionStorage::add_extractor(
     extractor->set_cmd_delay(BWAPI::UnitTypes::Zerg_Extractor.buildTime() + _100_PERCENT);
 }
 
-void ConstructionStorage::change_build_states(UnitStorage &unit_storage) {
+void ConstructionStorage::change_build_states(
+    UnitStorage &unit_storage,
+    EconTracker &econ_tracker
+) {
     auto &newly_stored_units = unit_storage.get_self_newly_stored();
     std::vector<FUnit> extractors_started;
     for (auto &unit : newly_stored_units) {
@@ -162,20 +171,20 @@ void ConstructionStorage::change_build_states(UnitStorage &unit_storage) {
                 status[i] = UNDER_CONSTR;
             }
             else if (build_units[i]->is_ready()) {
-                // need backup plans here
-                // if (i != index_waiting_on_extractor) {
-                    printf("Drone attempting to make %s!\n", build_types[i].c_str());
-                    build_units[i]->bwapi_u()->build(build_types[i], target_nodes[i]);
-                    build_units[i]->set_cmd_delay(7);
-                // }
+                printf("Drone attempting to make %s!\n", build_types[i].c_str());
+                build_units[i]->bwapi_u()->build(build_types[i], target_nodes[i]);
+                build_units[i]->set_cmd_delay(7);
             }
         }
-        else if (
-            status[i] == UNDER_CONSTR
-            && build_units[i]->is_ready()
-        ) {
-            printf("%s completed!\n", build_types[i].c_str());
-            status[i] = COMPLETED;
+        else if (status[i] == UNDER_CONSTR) {
+            if (!res_canceled[i]) {
+                econ_tracker.end_reservation(reservation_IDs[i]);
+                res_canceled[i] = true;
+            }
+            if (build_units[i]->is_ready()) {
+                printf("%s completed!\n", build_types[i].c_str());
+                status[i] = COMPLETED;
+            }
         }
     }
 }

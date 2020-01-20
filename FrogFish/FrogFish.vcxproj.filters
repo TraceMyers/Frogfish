@@ -70,6 +70,8 @@
     <ClCompile Include="Source\pathing\PathFinding.cpp" />
     <ClCompile Include="Source\production\MakeQueue.cpp" />
     <ClCompile Include="Source\production\BuildOrder.cpp" />
+    <ClCompile Include="Source\unitdata\TechStorage.cpp" />
+    <ClCompile Include="Source\unitdata\Requirements.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\BWEM\area.h">
@@ -199,6 +201,12 @@
       <Filter>headers</Filter>
     </ClInclude>
     <ClInclude Include="Source\FrogFish.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\unitdata\TechStorage.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\unitdata\Requirements.h">
       <Filter>headers</Filter>
     </ClInclude>
   </ItemGroup>
