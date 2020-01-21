@@ -5,6 +5,7 @@
 #include "unitdata/TechStorage.h"
 #include "unitdata/BaseOwnership.h"
 #include "production/ProductionCoordinator.h"
+#include "production/BuildPlacement.h"
 #include "control/WorkerControl.h"
 #include "unitdata/BWEMBaseArray.h"
 #include <BWAPI.h>
@@ -37,8 +38,9 @@ void FrogFish::onStart() {
     Broodwar->setCommandOptimizationLevel(2);
     onStart_alloc_debug_console();
     onStart_send_workers_to_mine();
-    onStart_init_bwem();
+    onStart_init_bwem_and_bweb();
     base_storage.init();
+    BuildPlacement::init_base_ground_distances(base_storage);
     production_coordinator.init();
     production_coordinator.load_build_order("protoss", "12_hatch");
     timer.start(10,0);
@@ -57,9 +59,9 @@ void FrogFish::onFrame() {
 	production_coordinator.on_frame_update(base_storage, unit_storage);
 
     // PRE-LAST. draw
-    DebugDraw::draw_build_graphs();
-    DebugDraw::draw_units(unit_storage);
-    DebugDraw::draw_base_info(base_storage);
+    // DebugDraw::draw_build_graphs();
+    // DebugDraw::draw_units(unit_storage);
+    // DebugDraw::draw_base_info(base_storage);
 
     // LAST. 
     // clear storage of changes to basic data that everybody else references
@@ -99,6 +101,7 @@ void FrogFish::onUnitDiscover(BWAPI::Unit unit) {
     if (unit->getType() == BWAPI::UnitTypes::Resource_Vespene_Geyser) {
         the_map.OnGeyserNoticed(unit);
     }
+    BWEB::Map::onUnitDiscover(unit);
 }
 
 void FrogFish::onUnitEvade(BWAPI::Unit unit) {
@@ -126,6 +129,7 @@ void FrogFish::onUnitDestroy(BWAPI::Unit unit) {
     // TODO: doesn't catch cases where destroyed out of vision!
     if (unit->getType().isMineralField()) {the_map.OnMineralDestroyed(unit);}
     else if (unit->getType().isSpecialBuilding()) {the_map.OnStaticBuildingDestroyed(unit);}
+    BWEB::Map::onUnitDestroy(unit);
 }
 
 void FrogFish::onUnitMorph(BWAPI::Unit unit) {
@@ -134,6 +138,7 @@ void FrogFish::onUnitMorph(BWAPI::Unit unit) {
         unit_storage.queue_remove(unit);
         the_map.OnGeyserNoticed(unit);
     }
+    BWEB::Map::onUnitMorph(unit);
 }
 
 void FrogFish::onUnitRenegade(BWAPI::Unit unit) {

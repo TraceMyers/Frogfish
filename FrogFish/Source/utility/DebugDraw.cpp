@@ -181,7 +181,7 @@ void DebugDraw::draw_make_queue(MakeQueue &make_queue) {
 
 void DebugDraw::draw_build_graphs() {
     BuildGraph *build_graphs = BuildPlacement::get_graphs();
-    for (int i = 0; i < BuildPlacement::BASELEN; ++i) {
+    for (int i = 0; i < BuildPlacement::MAX_BASES; ++i) {
         BuildGraph &build_graph = build_graphs[i];
         if (build_graph.get_base() != nullptr) {
             auto &nodes = build_graph.get_nodes();

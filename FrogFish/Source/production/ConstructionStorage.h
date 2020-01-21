@@ -8,6 +8,7 @@
 #include "../unitdata/UnitStorage.h"
 #include <deque>
 #include <BWAPI.h>
+#include <BWEB/BWEB.h>
 
 // TODO: After pathing is in, store path here and make a function that
 // quickly approximates time left on route based on how many waypoints
@@ -32,7 +33,7 @@ private:
     BWAPI::UnitType build_types[MAX_BUILD];
     TilePosition target_nodes[MAX_BUILD];
     int build_IDs[MAX_BUILD];
-    std::vector<BWAPI::Position> paths[MAX_BUILD];
+    BWEB::Path paths[MAX_BUILD];
     int reservation_IDs[MAX_BUILD];
     bool res_canceled[MAX_BUILD];
     int build_ct;
@@ -61,12 +62,12 @@ public:
     FUnit get_unit(int build_ID);
     TilePosition get_target_node(int build_ID);
     SET_TARGET_CODE set_target_node(int build_ID, TilePosition target);
-    void add_tracker(
+    bool add_tracker(
         FUnit drone, 
         BWAPI::UnitType build_type, 
         TilePosition target, 
+        BWEB::Path path,
         int build_ID,
-        std::vector<BWAPI::Position> _path,
         int reservation_ID
     );
     std::vector<int> lost_IDs();

@@ -72,6 +72,21 @@
     <ClCompile Include="Source\production\BuildOrder.cpp" />
     <ClCompile Include="Source\unitdata\TechStorage.cpp" />
     <ClCompile Include="Source\unitdata\Requirements.cpp" />
+    <ClCompile Include="..\include\BWEB\Block.cpp">
+      <Filter>BWEB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\BWEB\BWEB.cpp">
+      <Filter>BWEB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\BWEB\PathFind.cpp">
+      <Filter>BWEB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\BWEB\Station.cpp">
+      <Filter>BWEB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\BWEB\Wall.cpp">
+      <Filter>BWEB</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\BWEM\area.h">
@@ -209,6 +224,24 @@
     <ClInclude Include="Source\unitdata\Requirements.h">
       <Filter>headers</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\BWEB\Block.h">
+      <Filter>BWEB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\BWEB\BWEB.h">
+      <Filter>BWEB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\BWEB\JPS.h">
+      <Filter>BWEB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\BWEB\PathFind.h">
+      <Filter>BWEB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\BWEB\Station.h">
+      <Filter>BWEB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\BWEB\Wall.h">
+      <Filter>BWEB</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="BWEM">
@@ -216,6 +249,9 @@
     </Filter>
     <Filter Include="headers">
       <UniqueIdentifier>{af541815-0e90-4165-b794-6a9fa4f090f5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="BWEB">
+      <UniqueIdentifier>{d7e7bb3f-8f44-47d8-a41e-b64732df4625}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

@@ -44,6 +44,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>$(IncludePath)</IncludePath>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>C:\Users\Trace\BWAPI\include;$(IncludePath)</IncludePath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
@@ -57,7 +60,7 @@
       <WarningLevel>Level4</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/Zc:threadSafeInit- %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/Zc:threadSafeInit- /std:c++17 %(AdditionalOptions)</AdditionalOptions>
       <TreatWarningAsError>false</TreatWarningAsError>
     </ClCompile>
     <PreLinkEvent />
@@ -100,6 +103,11 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\include\BWEB\Block.cpp" />
+    <ClCompile Include="..\include\BWEB\BWEB.cpp" />
+    <ClCompile Include="..\include\BWEB\PathFind.cpp" />
+    <ClCompile Include="..\include\BWEB\Station.cpp" />
+    <ClCompile Include="..\include\BWEB\Wall.cpp" />
     <ClCompile Include="..\include\BWEM\area.cpp" />
     <ClCompile Include="..\include\BWEM\base.cpp" />
     <ClCompile Include="..\include\BWEM\bwapiExt.cpp" />
@@ -139,6 +147,12 @@
     <ClCompile Include="Source\utility\FrogMath.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\include\BWEB\Block.h" />
+    <ClInclude Include="..\include\BWEB\BWEB.h" />
+    <ClInclude Include="..\include\BWEB\JPS.h" />
+    <ClInclude Include="..\include\BWEB\PathFind.h" />
+    <ClInclude Include="..\include\BWEB\Station.h" />
+    <ClInclude Include="..\include\BWEB\Wall.h" />
     <ClInclude Include="..\include\BWEM\area.h" />
     <ClInclude Include="..\include\BWEM\base.h" />
     <ClInclude Include="..\include\BWEM\bwapiExt.h" />

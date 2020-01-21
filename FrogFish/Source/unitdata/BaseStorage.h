@@ -15,6 +15,7 @@ class BaseStorage {
 
 private:
 
+    BWEMBaseArray all_bases;
     BWEMBaseArray neutral_bases;
     std::vector<FBase> self_bases;
     std::vector<EBase> enemy_bases;
@@ -33,6 +34,7 @@ public:
             const std::vector<BWEM::Base> &bases = area.Bases();
             for (unsigned int i = 0; i < bases.size(); ++i) {
                 neutral_bases.add(&bases[i]);
+                all_bases.add(&bases[i]);
                 j++;
             }
         }
@@ -88,6 +90,35 @@ public:
         enemy_newly_removed.clear();
     }
 
+    bool base_is_self(const BWEM::Base *b) {
+        for (FBase &f_base : self_bases) {
+            if (f_base->get_center() == b->Center()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    bool base_is_enemy(const BWEM::Base *b) {
+        for (EBase &e_base : enemy_bases) {
+            if (e_base->get_center() == b->Center()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    bool base_is_neutral(const BWEM::Base *b) {
+        for (int i = 0; i < neutral_bases.length(); ++i) {
+            if (neutral_bases[i]->Center() == b->Center()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    const BWEMBaseArray &get_all_bases() {return all_bases;}
+
     const std::vector<FBase> &get_self_bases() {return self_bases;}
 
     const std::vector<EBase> &get_enemy_bases() {return enemy_bases;}
@@ -128,5 +159,6 @@ public:
             delete e_base;
         }
         neutral_bases.free_data();
+        all_bases.free_data();
     }
 };

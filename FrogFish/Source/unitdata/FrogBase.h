@@ -124,6 +124,8 @@ public:
 
     // BWEM
 
+    const BWEM::Base *get_bwem_base() {return bwem_base;}
+
     bool is_starting() {return bwem_base->Starting();}
 
     const BWEM::Area *get_area() {return bwem_base->GetArea();}

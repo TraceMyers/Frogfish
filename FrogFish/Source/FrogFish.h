@@ -2,6 +2,7 @@
 
 #include <BWAPI.h>
 #include <BWEM/bwem.h>
+#include <BWEB/BWEB.h>
 #include <windows.h>
 #include <stdio.h>
 #include <assert.h>
@@ -29,7 +30,7 @@ private:
         }
     }
 
-    void onStart_init_bwem() {
+    void onStart_init_bwem_and_bweb() {
         try {
             Broodwar << "Map init..." << std::endl;
             the_map.Initialize();
@@ -40,6 +41,8 @@ private:
         catch (const std::exception e) {
             Broodwar << "EXCEPTION: " << e.what() << std::endl;
         }
+        BWEB::Map::onStart();
+        BWEB::Blocks::findBlocks();
     }
 
 public:

@@ -219,15 +219,6 @@ public:
 
 	virtual								~Map() = default;
 
-    // FrogFish:
-    inline bool operator()(unsigned x, unsigned y) const {
-        BWAPI::WalkPosition wp(x, y);
-        BWAPI::TilePosition tp(x/4, y/4);
-        if (Valid(wp)) {
-            return GetMiniTile(wp).Walkable() && GetTile(tp).GetNeutral() == nullptr;
-        }
-        return false;
-    }
 
 protected:
 										Map() = default;

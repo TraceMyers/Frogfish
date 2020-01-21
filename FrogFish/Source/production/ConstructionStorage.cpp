@@ -8,10 +8,8 @@
 #include <BWAPI.h>
 
 
-// TODO: After pathing is in, store path here and make a function that
-// quickly approximates time left on route based on how many waypoint_ctrs
-// have been cleared, or just store the path here and do calculation at
-// construction manager, probably
+// TODO: connect with other logic determining safeness of routes, and for
+// handling reservations once EN_ROUTE
 
 ConstructionStorage::ConstructionStorage() :
     build_units(),
@@ -88,12 +86,12 @@ ConstructionStorage::SET_TARGET_CODE ConstructionStorage::set_target_node(
     return NOT_FOUND;
 }
 
-void ConstructionStorage::add_tracker(
+bool ConstructionStorage::add_tracker(
     FUnit drone, 
     BWAPI::UnitType build_type, 
     TilePosition target, 
+    BWEB::Path path,
     int build_ID,
-    std::vector<BWAPI::Position> _path,
     int reservation_ID
 ) {
     if (build_ct < MAX_BUILD) {
@@ -101,14 +99,16 @@ void ConstructionStorage::add_tracker(
         build_types[build_ct] = build_type;
         target_nodes[build_ct] = target;
         build_IDs[build_ct] = build_ID;
-        paths[build_ct] = _path;
         status[build_ct] = EN_ROUTE;
         reservation_IDs[build_ct] = reservation_ID;
         res_canceled[build_ct] = false;
+        paths[build_ct] = path;
         ++build_ct;
+        return true;
     }
     else {
         printf("ConstructionStorage.add_order() build_ct == MAX_BUILD\n");
+        return false;
     }
 }
 

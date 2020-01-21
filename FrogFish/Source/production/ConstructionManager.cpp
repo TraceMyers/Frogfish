@@ -6,6 +6,7 @@
 #include "../unitdata/BaseStorage.h"
 #include "../unitdata/UnitStorage.h"
 #include "../unitdata/FrogUnit.h"
+#include <BWEB/BWEB.h>
 #include <BWAPI.h>
 #include <assert.h>
 
@@ -37,53 +38,67 @@ void ConstructionManager::init_builds(
         i < build_order->size();
         ++i
     ) {
-        if (
-            build_order->get(i).build_type == BuildItem::BUILD 
-            && construction_storage.get_unit(i) == nullptr
+		if (
+			build_order->get(i).build_type == BuildItem::BUILD
+			&& construction_storage.get_unit(i) == nullptr
         ) {
             bool found_pair = false;
             for (auto &pair : econ_time_est) {
-                if (pair[0] == i && pair[1] * 24 <= IN_BASE_TRAVEL_FRAMES) {
+                if (pair[0] == i) {
                     found_pair = true;
                     // for now, any base, any drone
                     bool found_worker = false;
                     for (auto &base : base_storage.get_self_bases()) {
                         for (auto &worker : base->get_workers()) {
                             if (worker->f_task == FrogUnit::MINE_MINERALS) {
+                                found_worker = true;
                                 BuildItem &item = build_order->get(i);
                                 TilePosition build_tp;
-                                std::vector<BWAPI::Position> path;
-                                if (item.make_type == BWAPI::UnitTypes::Zerg_Extractor) {
-                                    build_tp = BuildPlacement::get_base_geyser_tilepos(base);
-                                    path = PathFinding::get_path_near(
-                                        worker->get_pos(), BWAPI::Position(build_tp)
+                                BWEB::Path path;
+                                if (item.make_type == BWAPI::UnitTypes::Zerg_Hatchery) {
+                                    build_tp = BuildPlacement::find_expansion_tilepos(
+                                        base_storage, 
+                                        base
                                     );
+                                }
+                                else if (item.make_type == BWAPI::UnitTypes::Zerg_Extractor) {
+                                    build_tp = BuildPlacement::get_base_geyser_tilepos(base);
                                 }
                                 else {
                                     build_tp = BuildPlacement::find_any_node_for_placement(
                                         base, item.make_type.tileWidth(), item.make_type.tileHeight()
                                     );
-                                    path = PathFinding::get_path(
-                                        worker->get_pos(), BWAPI::Position(build_tp)
-                                    );
                                 }
-                                int reservation_ID = econ_tracker.make_reservation(
-                                    item.make_type.mineralPrice(),
-                                    item.make_type.gasPrice(),
-                                    1000
+                                path.createUnitPath(
+                                    worker->get_pos(),
+                                    BWAPI::Position(build_tp)
                                 );
-                                construction_storage.add_tracker(
-                                    worker,
-                                    item.make_type,
-                                    build_tp,
-                                    i,
-                                    path,
-                                    reservation_ID
-                                );
+                                if (path.isReachable()) {
+                                    int travel_time = 
+                                        path.getDistance() / BWAPI::UnitTypes::Zerg_Drone.topSpeed();
+                                    if (pair[1] * 24 - travel_time <= 0) {
+                                        int reservation_ID = econ_tracker.make_reservation(
+                                            item.make_type.mineralPrice(),
+                                            item.make_type.gasPrice(),
+                                            travel_time * 3
+                                        );
+                                        construction_storage.add_tracker(
+                                            worker,
+                                            item.make_type,
+                                            build_tp,
+                                            path,
+                                            i,
+                                            reservation_ID
+                                        );
 
-                                worker->f_task = FrogUnit::BUILD_STRUCT;
-                                found_worker = true;
-                                break;
+                                        worker->f_task = FrogUnit::BUILD_STRUCT;
+                                        break;
+                                    }
+                                }
+                                else {
+                                    // panic
+                                    printf("path not reachable for: %s\n", item.make_type);
+                                }
                             }
                         }
                         if (found_worker) {break;}
