@@ -7,6 +7,9 @@
 #include "BWEM/bwem.h"
 #include <vector>
 
+// TODO: in init, search around geyser, map each geyser to a pathable
+// tileposition
+
 namespace BuildPlacement {
     FBase self_bases[MAX_BASES] {nullptr};
     BuildGraph self_graphs[MAX_BASES];

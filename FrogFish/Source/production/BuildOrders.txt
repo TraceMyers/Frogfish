@@ -19,3 +19,13 @@ protoss 12_hatch
 5:  supply,   10, make,   4,  drone,         null
 6:  finished, 14, make,   2,  zergling,      3
 -------------------------------------------------
+
+terran 3_hatch_pool
+0:  supply,   4,  make,   5,  drone,         null
+1:  supply,   9,  make,   1,  overlord,      null
+2:  supply,   9,  make,   3,  drone,         null
+3:  supply,   12, build,  1,  hatchery,      null
+4:  supply,   11, make,   3,  drone,         null
+5:  supply,   14, build,  1,  hatchery,      null
+6:  supply,   13, build,  1,  spawning_pool, null
+-------------------------------------------------

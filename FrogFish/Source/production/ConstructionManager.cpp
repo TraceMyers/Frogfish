@@ -97,7 +97,7 @@ void ConstructionManager::init_builds(
                                 }
                                 else {
                                     // panic
-                                    printf("path not reachable for: %s\n", item.make_type);
+                                    printf("path not reachable for: %s\n", item.make_type.c_str());
                                 }
                             }
                         }

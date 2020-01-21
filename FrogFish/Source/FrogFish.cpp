@@ -42,7 +42,7 @@ void FrogFish::onStart() {
     base_storage.init();
     BuildPlacement::init_base_ground_distances(base_storage);
     production_coordinator.init();
-    production_coordinator.load_build_order("protoss", "12_hatch");
+    production_coordinator.load_build_order("terran", "9_pool");
     timer.start(10,0);
 }
 
@@ -84,7 +84,7 @@ void FrogFish::onReceiveText(BWAPI::Player player, std::string text) {
 }
 
 void FrogFish::onPlayerLeft(BWAPI::Player player) {
-    Broodwar->sendText("Goodbye %s!", player->getName().c_str());
+    Broodwar->sendText("Farewell %s!", player->getName().c_str());
 }
 
 void FrogFish::onNukeDetect(BWAPI::Position target) {
