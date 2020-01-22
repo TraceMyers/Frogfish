@@ -31,3 +31,20 @@
 1/21/2020 5:48:24 PM 7940 Init GUI
 1/21/2020 5:48:24 PM 7940 Get Starcraftversions
 1/21/2020 5:48:24 PM 7940 Init complete
+1/21/2020 8:35:12 PM 7940 Startbutton
+1/21/2020 8:35:12 PM 7940 Starting Game Starcraft 1.16.1 C:\ProgramData\bwapi\starcraft\StarCraft.exe
+1/21/2020 8:35:12 PM 7940 BWAPI 4.4.0 Injector [DEBUG] Version  Compatible
+1/21/2020 8:35:12 PM 7940 W-MODE 1.02 Version 1.0.2 Compatible
+1/21/2020 8:35:12 PM 7940 Obtained DebugPrivilege
+1/21/2020 8:35:12 PM 7940 CreateProcess
+1/21/2020 8:35:12 PM 7940 Call ScSuspended for all active Plugins
+1/21/2020 8:35:12 PM 7940 ApplyPatchSuspended for BWAPI 4.4.0 Injector [DEBUG]
+1/21/2020 8:35:12 PM 7940 ApplyPatchSuspended for W-MODE 1.02
+1/21/2020 8:35:12 PM 7940 ResumeThread
+1/21/2020 8:35:12 PM 7940 WaitForInputIdle
+1/21/2020 8:35:12 PM 7940 Call ScWindowCreated for all active Plugins
+1/21/2020 8:35:12 PM 7940 ApplyPatch for BWAPI 4.4.0 Injector [DEBUG]
+1/21/2020 8:35:12 PM 7940 ApplyPatch for W-MODE 1.02
+1/21/2020 8:35:12 PM 7940 Starting Starcraft completed
+1/21/2020 8:53:17 PM 7940 Startbutton
+1/21/2020 8:53:17 PM 7940 Exception at: Global ExceptionHandler class: Exception msg: Starcraft is already running

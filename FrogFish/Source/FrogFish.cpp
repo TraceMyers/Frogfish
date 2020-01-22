@@ -59,6 +59,9 @@ void FrogFish::onFrame() {
     // 2. update production data
 	production_coordinator.on_frame_update(base_storage, unit_storage);
 
+    // 3. issue commands that require newly assigned lists
+    WorkerControl::send_mineral_workers_to_gas(base_storage, unit_storage);
+
     // PRE-LAST. draw
     // DebugDraw::draw_build_graphs();
     // DebugDraw::draw_units(unit_storage);
