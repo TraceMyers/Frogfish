@@ -30,6 +30,7 @@ TechStorage tech_storage;
 ProductionCoordinator production_coordinator;
 BWTimer timer;
 
+// todo print fish puns every now and again
 
 void FrogFish::onStart() {
     Broodwar->sendText("Hello Sailor!");
@@ -40,9 +41,9 @@ void FrogFish::onStart() {
     onStart_send_workers_to_mine();
     onStart_init_bwem_and_bweb();
     base_storage.init();
-    BuildPlacement::init_base_ground_distances(base_storage);
+    BuildPlacement::init(base_storage);
     production_coordinator.init();
-    production_coordinator.load_build_order("terran", "9_pool");
+    production_coordinator.load_build_order("protoss", "2_hatch_hydra");
     timer.start(10,0);
 }
 

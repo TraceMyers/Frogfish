@@ -1,5 +1,6 @@
 #include "ProductionCoordinator.h"
 #include "BuildPlacement.h"
+#include "TechManager.h"
 #include "EconTracker.h"
 #include "ConstructionManager.h"
 #include "MakeQueue.h"
@@ -52,6 +53,11 @@ void ProductionCoordinator::produce(
         &build_order, 
         econ_tracker, 
         econ_timing_estimates
+    );
+    tech_manager.init_upgrades(
+        base_storage,
+        &build_order,
+        econ_tracker
     );
     unit_maker.make_units(econ_tracker, base_storage, tech_storage);
 }

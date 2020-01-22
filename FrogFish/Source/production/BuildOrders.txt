@@ -29,3 +29,19 @@ terran 3_hatch_pool
 5:  supply,   14, build,  1,  hatchery,      null
 6:  supply,   13, build,  1,  spawning_pool, null
 -------------------------------------------------
+
+protoss 2_hatch_hydra
+0:  supply,   4,  make,    5,  drone,             null
+1:  supply,   9,  make,    1,  overlord,          null
+2:  supply,   9,  make,    3,  drone,             null
+3:  supply,   12, build,   1,  hatchery,          null
+4:  supply,   11, build,   1,  spawning_pool,     null
+5:  supply,   10, make,    3,  drone,             null
+6:  supply,   13, build,   1,  extractor,         null
+7:  finished, 12, build,   1,  hydralisk_den,     null
+8:  supply,   11, make,    5,  drone,             null
+9:  supply,   16, make,    1,  overlord,          null
+10: supply,   16, upgrade, 1,  grooved_spines,    null
+11: supply,   16, make,    6,  hydralisk,         null
+12: supply,   28, upgrade, 1,  muscular_augments, null
+------------------------------------------------------

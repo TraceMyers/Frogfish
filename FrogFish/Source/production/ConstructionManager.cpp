@@ -60,19 +60,30 @@ void ConstructionManager::init_builds(
                                         base_storage, 
                                         base
                                     );
+                                    path.createUnitPath(
+                                        worker->get_pos(),
+                                        BWAPI::Position(build_tp)
+                                    );
                                 }
                                 else if (item.make_type == BWAPI::UnitTypes::Zerg_Extractor) {
                                     build_tp = BuildPlacement::get_base_geyser_tilepos(base);
+                                    BWAPI::TilePosition path_tp = 
+                                        BuildPlacement::get_pathable_geyser_tilepos(build_tp);
+                                    path.createUnitPath(
+                                        worker->get_pos(),
+                                        BWAPI::Position(path_tp)
+                                    );
                                 }
                                 else {
                                     build_tp = BuildPlacement::find_any_node_for_placement(
                                         base, item.make_type.tileWidth(), item.make_type.tileHeight()
                                     );
+                                    path.createUnitPath(
+                                        worker->get_pos(),
+                                        BWAPI::Position(build_tp)
+                                    );
                                 }
-                                path.createUnitPath(
-                                    worker->get_pos(),
-                                    BWAPI::Position(build_tp)
-                                );
+                                
                                 if (path.isReachable()) {
                                     int travel_time = 
                                         path.getDistance() / BWAPI::UnitTypes::Zerg_Drone.topSpeed();

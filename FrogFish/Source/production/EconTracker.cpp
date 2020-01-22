@@ -210,8 +210,8 @@ bool EconTracker::extend_reservation(unsigned int ID, int seconds) {
 }
 
 // TODO: 
-//      - if using reservations, need to factor them here
 //      - upgrades
+//      - refactor so it's not so redundant, and a little more split up
 
 // Assumes:
     // - things are made immediately when they can be
@@ -267,34 +267,57 @@ std::vector<std::vector<int>> EconTracker::build_order_sim(
     int seconds_passed = 0;
     for (cur_ID = ID_start; cur_ID < build_order->size(); ) {
         const BuildItem &item = build_order->get(cur_ID);
-        
         if (
             make_deque_i < make_deque.size()
-            || item.build_type == BuildItem::MAKE_UNIT 
-            || item.build_type == BuildItem::BUILD
+            || item.build_type != BuildItem::CANCEL 
         ) {
-            BWAPI::UnitType u_type;
-            if (make_deque_i < make_deque.size()) {
-                // printf("deque_i : %d\n",make_deque_i);
-                u_type = make_deque[make_deque_i];
-            }
-            else {
-               u_type = item.make_type;
-            }
+            BWAPI::UnitType u_type = BWAPI::UnitTypes::None;
             int 
-                min_cost = u_type.mineralPrice(),
-                gas_cost = u_type.gasPrice(),
-                supply_cost = u_type.supplyRequired(),
-                make_ct = item.count;
+                min_cost = 0,
+                gas_cost = 0,
+                supply_cost = 0,
+                make_ct = 0;
             bool from_larva = false;
-            for (int i = 0; i < MakeQueue::MKQ_UNIT_TYPE_CT; ++i) {
-                if (u_type == MakeQueue::types[i]) {
-                    from_larva = true;
-                    break;
+
+            if (
+                item.build_type == BuildItem::MAKE_UNIT 
+                || item.build_type == BuildItem::BUILD
+                || make_deque_i < make_deque.size()
+            ) { 
+                if (make_deque_i < make_deque.size()) {
+                    // printf("deque_i : %d\n",make_deque_i);
+                    u_type = make_deque[make_deque_i];
+                }
+                else {
+                    u_type = item.make_type;
+                }
+                min_cost = u_type.mineralPrice();
+                gas_cost = u_type.gasPrice();
+                supply_cost = u_type.supplyRequired();
+                make_ct = item.count;
+
+                for (int i = 0; i < MakeQueue::MKQ_UNIT_TYPE_CT; ++i) {
+                    if (u_type == MakeQueue::types[i]) {
+                        from_larva = true;
+                        break;
+                    }
                 }
             }
-            
+            else if (item.build_type == BuildItem::TECH) {
+                BWAPI::TechType tech_type = item.tech_type;
+                min_cost = tech_type.mineralPrice();
+                gas_cost = tech_type.gasPrice(); 
+            }
 
+            else if (item.build_type == BuildItem::UPGRADE) {
+                BWAPI::UpgradeType upgrade_type = item.upgrade_type;
+                min_cost = upgrade_type.mineralPrice();
+                gas_cost = upgrade_type.gasPrice(); 
+            }
+            else {
+                printf("EconTracker.sim: got bad build_type in sim\n");
+            }
+            
             if (
                 min_cost <= minerals 
                 && gas_cost <= gas 
@@ -308,34 +331,37 @@ std::vector<std::vector<int>> EconTracker::build_order_sim(
                 // printf("id : %d\n", cur_ID);
                 minerals -= min_cost;
                 gas -= gas_cost;
-                supply_used -= supply_cost;
 
-                if (u_type.isBuilding()) {
-                    mps -= add_drone_mps;
-                    supply_used -= 2;
-                }
-                making_IDs.push_back(cur_ID);
-                making_types.push_back(u_type);
-                making_frames_left.push_back(u_type.buildTime() + FINISH_TIME);
-                if (from_larva) {
-                    --larva;
-                }
-                if (make_deque_i < make_deque.size()) {
-                    ++make_deque_i;
+                if (
+                    item.build_type == BuildItem::MAKE_UNIT 
+                    || item.build_type == BuildItem::BUILD
+                    || make_deque_i < make_deque.size()
+                ) {
+                    supply_used -= supply_cost;
+                    if (u_type.isBuilding()) {
+                        mps -= add_drone_mps;
+                        supply_used -= 2;
+                    }
+                    making_IDs.push_back(cur_ID);
+                    making_types.push_back(u_type);
+                    making_frames_left.push_back(u_type.buildTime() + FINISH_TIME);
+                    if (from_larva) {
+                        --larva;
+                    }
+                    if (make_deque_i < make_deque.size()) {
+                        ++make_deque_i;
+                    }
+                    else {
+                        seconds_until_make.push_back(std::vector<int> {(int)cur_ID, seconds_passed});
+                        ++cur_ID_make_ct;
+                        if (cur_ID_make_ct == make_ct) {
+                            cur_ID_make_ct = 0;
+                            ++cur_ID;
+                        }
+                    }
                 }
                 else {
-                    if (
-                        u_type == BWAPI::UnitTypes::Zerg_Hatchery 
-                        || u_type == BWAPI::UnitTypes::Zerg_Spawning_Pool
-                    ) {
-                        printf("%s: %d seconds passed\n", u_type.c_str(), seconds_passed);    
-                    }
-                    seconds_until_make.push_back(std::vector<int> {(int)cur_ID, seconds_passed});
-                    ++cur_ID_make_ct;
-                    if (cur_ID_make_ct == make_ct) {
-                        cur_ID_make_ct = 0;
-                        ++cur_ID;
-                    }
+                    ++cur_ID;
                 }
             }
             else {
@@ -451,7 +477,7 @@ std::vector<std::vector<int>> EconTracker::build_order_sim(
                 }
             }
             // advances to the next item even if a cancellation isn't found in order
-            // to not go into an infinite loop if a cancellation was scheduled incorrectly
+            // to avoid worse predictions than otherwise
             ++cur_ID;
         }
         if (seconds_passed > 360) {

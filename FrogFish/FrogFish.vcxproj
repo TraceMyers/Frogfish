@@ -137,6 +137,7 @@
     <ClCompile Include="Source\production\EconTracker.cpp" />
     <ClCompile Include="Source\production\MakeQueue.cpp" />
     <ClCompile Include="Source\production\ProductionCoordinator.cpp" />
+    <ClCompile Include="Source\production\TechManager.cpp" />
     <ClCompile Include="Source\production\UnitMaker.cpp" />
     <ClCompile Include="Source\unitdata\BaseAssets.cpp" />
     <ClCompile Include="Source\unitdata\BaseOwnership.cpp" />
@@ -183,6 +184,7 @@
     <ClInclude Include="Source\production\MakeQueue.h" />
     <ClInclude Include="Source\production\MorphQueue.h" />
     <ClInclude Include="Source\production\ProductionCoordinator.h" />
+    <ClInclude Include="Source\production\TechManager.h" />
     <ClInclude Include="Source\production\UnitMaker.h" />
     <ClInclude Include="Source\unitdata\BaseAssets.h" />
     <ClInclude Include="Source\unitdata\BaseOwnership.h" />

@@ -87,6 +87,7 @@
     <ClCompile Include="..\include\BWEB\Wall.cpp">
       <Filter>BWEB</Filter>
     </ClCompile>
+    <ClCompile Include="Source\production\TechManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\BWEM\area.h">
@@ -241,6 +242,9 @@
     </ClInclude>
     <ClInclude Include="..\include\BWEB\Wall.h">
       <Filter>BWEB</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\production\TechManager.h">
+      <Filter>headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

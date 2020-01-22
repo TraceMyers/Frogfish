@@ -12,7 +12,7 @@ namespace BuildPlacement {
 
     const int MAX_BASES = 20;
 
-    void init_base_ground_distances(BaseStorage &base_storage);
+    void init(BaseStorage &base_storage);
 
     void on_frame_update(BaseStorage &base_storage);
 
@@ -25,6 +25,8 @@ namespace BuildPlacement {
     TilePosition find_expansion_tilepos(BaseStorage &base_storage, FBase base);
 
     TilePosition get_base_geyser_tilepos(FBase base);
+
+    TilePosition get_pathable_geyser_tilepos(TilePosition geyser_tp);
 
     BuildGraph *get_graphs();
 

@@ -6,6 +6,7 @@
 #include "EconTracker.h"
 #include "UnitMaker.h"
 #include "ConstructionManager.h"
+#include "TechManager.h"
 #include "../unitdata/BaseStorage.h"
 #include "../unitdata/UnitStorage.h"
 #include "../unitdata/TechStorage.h"
@@ -23,6 +24,7 @@ private:
     EconTracker econ_tracker;
     UnitMaker unit_maker;
     ConstructionManager construction_manager;
+    TechManager tech_manager;
 
     std::vector<double> make_proportions;
     std::vector<bool> make_priorities;
