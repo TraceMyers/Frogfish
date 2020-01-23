@@ -182,7 +182,6 @@
     <ClInclude Include="Source\production\ConstructionStorage.h" />
     <ClInclude Include="Source\production\EconTracker.h" />
     <ClInclude Include="Source\production\MakeQueue.h" />
-    <ClInclude Include="Source\production\MorphQueue.h" />
     <ClInclude Include="Source\production\ProductionCoordinator.h" />
     <ClInclude Include="Source\production\TechManager.h" />
     <ClInclude Include="Source\production\UnitMaker.h" />

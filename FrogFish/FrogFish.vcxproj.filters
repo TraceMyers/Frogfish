@@ -159,9 +159,6 @@
     <ClInclude Include="Source\production\MakeQueue.h">
       <Filter>headers</Filter>
     </ClInclude>
-    <ClInclude Include="Source\production\MorphQueue.h">
-      <Filter>headers</Filter>
-    </ClInclude>
     <ClInclude Include="Source\production\ProductionCoordinator.h">
       <Filter>headers</Filter>
     </ClInclude>

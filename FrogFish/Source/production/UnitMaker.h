@@ -2,7 +2,6 @@
 #pragma message("including UnitMaker")
 
 #include "MakeQueue.h"
-#include "MorphQueue.h"
 #include "EconTracker.h"
 #include "BuildOrder.h"
 #include "../unitdata/TechStorage.h"
@@ -11,7 +10,6 @@ class UnitMaker {
 
 private:
     MakeQueue make_queue;
-    MorphQueue morph_queue;
     BuildOrder *build_order;
     std::vector<BWTimer> overlord_making_timers;
     bool finished_init_droning = false;

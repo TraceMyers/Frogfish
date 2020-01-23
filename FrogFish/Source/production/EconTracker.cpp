@@ -281,6 +281,7 @@ std::vector<std::vector<int>> EconTracker::build_order_sim(
 
             if (
                 item.build_type == BuildItem::MAKE_UNIT 
+                || item.build_type == BuildItem::MORPH_UNIT
                 || item.build_type == BuildItem::BUILD
                 || make_deque_i < make_deque.size()
             ) { 
@@ -334,6 +335,7 @@ std::vector<std::vector<int>> EconTracker::build_order_sim(
 
                 if (
                     item.build_type == BuildItem::MAKE_UNIT 
+                    || item.build_type == BuildItem::MORPH_UNIT
                     || item.build_type == BuildItem::BUILD
                     || make_deque_i < make_deque.size()
                 ) {

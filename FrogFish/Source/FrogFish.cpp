@@ -15,6 +15,9 @@
 
 using namespace Filter;
 // TODO:
+//  - near total refactor with neat namespaces, better task organization; generally
+//  in need of an organization style
+//      - DELETE 500+ lines
 //  - need to expand the features of pathfinding beyond simply providing paths.
 //  - pathfinding needs to solve problems like: getting a unit from point a
 //  to point b while avoiding potential and known danger. This would mean things like
