@@ -33,7 +33,7 @@ public:
 
     ETYPE e_type;
 
-    EnemyUnit(const Unit u) {
+    EnemyUnit(Unit u) {
         bwapi_unit = u;
         ID = u->getID();
         update();
@@ -67,7 +67,7 @@ public:
         }
     }
 
-    const Unit bwapi_u() {return bwapi_unit;}
+    Unit bwapi_u() {return bwapi_unit;}
 
     int get_ID() {return ID;}
 

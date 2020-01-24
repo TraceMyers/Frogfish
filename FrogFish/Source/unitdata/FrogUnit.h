@@ -45,7 +45,7 @@ public:
     FTYPES f_type;
     FTASKS f_task;
 
-    FrogUnit(const BWAPI::Unit u) : 
+    FrogUnit(BWAPI::Unit u) : 
         bwapi_unit(u),
         cmd_ready(true),
         f_task(FTASKS::IDLE),
@@ -82,7 +82,7 @@ public:
         }
     }
 
-    const BWAPI::Unit bwapi_u() {return bwapi_unit;}
+    BWAPI::Unit bwapi_u() {return bwapi_unit;}
 
     int get_ID() {return _ID;}
 

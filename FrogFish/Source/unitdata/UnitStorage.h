@@ -25,7 +25,7 @@ private:
     std::vector<EUnit> enemy_newly_changed_type;
     std::vector<EUnit> enemy_newly_changed_pos;
 
-    void self_store(const BWAPI::Unit u) {
+    void self_store(BWAPI::Unit u) {
         FUnit f_unit;
         int ID = u->getID();
 
@@ -36,7 +36,7 @@ private:
         }
     }
 
-    void enemy_store(const BWAPI::Unit u) {
+    void enemy_store(BWAPI::Unit u) {
         EUnit e_unit;
         int ID = u->getID();
 
@@ -47,7 +47,7 @@ private:
         }
     }
 
-    void self_remove(const BWAPI::Unit u) {
+    void self_remove(BWAPI::Unit u) {
         FUnit f_unit;
         int ID = u->getID();
 
@@ -60,7 +60,7 @@ private:
         }
     }
 
-    void enemy_remove(const BWAPI::Unit u) {
+    void enemy_remove(BWAPI::Unit u) {
         EUnit e_unit;
         int ID = u->getID();
 
@@ -75,7 +75,6 @@ private:
 
 public:
 
-
     void update() {
         store_queued();
         remove_queued();
@@ -83,7 +82,7 @@ public:
         update_enemy_units();
     }
 
-    void queue_store(const Unit u) {
+    void queue_store(Unit u) {
         std::vector<Unit>::iterator it = 
             std::find(store_buff.begin(), store_buff.end(), u);
         bool unit_in_buff = (it != store_buff.end());
@@ -92,7 +91,7 @@ public:
         }
     }
 
-    void queue_remove(const Unit u) {
+    void queue_remove(Unit u) {
         std::vector<Unit>::iterator it = 
             std::find(remove_buff.begin(), remove_buff.end(), u);
         bool unit_in_buff = (it != remove_buff.end());
@@ -102,7 +101,7 @@ public:
     }
 
     void store_queued() {
-        register BWAPI::Unit u;
+        BWAPI::Unit u;
         for (unsigned int i = 0; i < store_buff.size(); i++) {
             u = store_buff[i];
             if (u->getPlayer() == Broodwar->self()) {
@@ -116,7 +115,7 @@ public:
     }
 
     void remove_queued() {
-        register BWAPI::Unit u;
+        BWAPI::Unit u;
         for (unsigned int i = 0; i < remove_buff.size(); i++) {
             u = remove_buff[i];
             if (u->getPlayer() == Broodwar->self()) {
@@ -147,8 +146,8 @@ public:
     }
 
     void update_self_units() {
-        register std::map<int, FUnit>::iterator fu_it;
-        register FUnit f_unit;
+        std::map<int, FUnit>::iterator fu_it;
+        FUnit f_unit;
         for (fu_it = self_ID_2_funit.begin(); fu_it != self_ID_2_funit.end(); ++fu_it) {
             f_unit = fu_it->second;
             if (f_unit->get_type() != f_unit->bwapi_u()->getType()) {
@@ -160,9 +159,9 @@ public:
     }
 
     void update_enemy_units() {
-        register std::map<int, EUnit>::iterator eu_it;
-        register EUnit e_unit;
-        register Unit u;
+        std::map<int, EUnit>::iterator eu_it;
+        EUnit e_unit;
+        Unit u;
         for (eu_it = enemy_ID_2_eunit.begin(); eu_it != enemy_ID_2_eunit.end(); ++eu_it) {
             e_unit = eu_it->second;
             u = e_unit->bwapi_u();
