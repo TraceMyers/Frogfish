@@ -1,37 +1,14 @@
-#pragma once
-#pragma message("including BaseStorage")
+#include "Bases.h"
 
-#include "../FrogFish.h"
-#include "FrogBase.h"
-#include "EnemyBase.h"
-#include "../unitdata/BWEMBaseArray.h"
-#include <BWEM/bwem.h>
-#include <BWAPI.h>
-#include <vector>
-
-using namespace BWAPI;
-
-class BaseStorage {
-
-private:
-
-    BWEMBaseArray all_bases;
-    BWEMBaseArray neutral_bases;
-    std::vector<FBase> self_bases;
-    std::vector<EBase> enemy_bases;
-
-    std::vector<FBase> self_newly_stored;
-    std::vector<FBase> self_newly_removed;
-    std::vector<EBase> enemy_newly_stored;
-    std::vector<EBase> enemy_newly_removed;
-
-public:
+namespace Basic::Bases {
 
     void init() {
         const std::vector<BWEM::Area> &areas = the_map.Areas();
         int j = 0;
         for (auto &area : areas) {
             const std::vector<BWEM::Base> &bases = area.Bases();
+            std::vector<BWEM::Base *> check;
+            check.push_back(&bases[0]);
             for (unsigned int i = 0; i < bases.size(); ++i) {
                 neutral_bases.add(&bases[i]);
                 all_bases.add(&bases[i]);
@@ -65,7 +42,7 @@ public:
         enemy_newly_removed.push_back(e_base);
     }
 
-    void clear_newly_assigned() {
+    void clear_just_added_and_removed() {
         self_newly_stored.clear();
         while (self_newly_removed.size() > 0) {
             FBase f_base = self_newly_removed.back();
@@ -90,7 +67,7 @@ public:
         enemy_newly_removed.clear();
     }
 
-    bool base_is_self(const BWEM::Base *b) {
+    bool is_self(const BWEM::Base *b) {
         for (FBase &f_base : self_bases) {
             if (f_base->get_center() == b->Center()) {
                 return true;
@@ -99,7 +76,7 @@ public:
         return false;
     }
 
-    bool base_is_enemy(const BWEM::Base *b) {
+    bool is_enemy(const BWEM::Base *b) {
         for (EBase &e_base : enemy_bases) {
             if (e_base->get_center() == b->Center()) {
                 return true;
@@ -108,7 +85,7 @@ public:
         return false;
     }
 
-    bool base_is_neutral(const BWEM::Base *b) {
+    bool is_neutral(const BWEM::Base *b) {
         for (int i = 0; i < neutral_bases.length(); ++i) {
             if (neutral_bases[i]->Center() == b->Center()) {
                 return true;
@@ -145,20 +122,15 @@ public:
         }
     }
 
-    // Only called by FrogFish::onEnd()
-    void free_data() {
-        while (self_bases.size() > 0) {
+    namespace {
+        std::vector<const BWEM::Base *> all_bases;
+        std::vector<const BWEM::Base *> neutral_bases;
+        std::vector<const BWEM::Base *> self_bases;
+        std::vector<const BWEM::Base *> enemy_bases;
 
-            FBase f_base = self_bases.back();
-            self_bases.pop_back();
-            delete f_base;
-        }
-        while (enemy_bases.size() > 0) {
-            EBase e_base = enemy_bases.back();
-            enemy_bases.pop_back();
-            delete e_base;
-        }
-        neutral_bases.free_data();
-        all_bases.free_data();
+        std::vector<const BWEM::Base *> self_newly_stored;
+        std::vector<const BWEM::Base *> self_newly_removed;
+        std::vector<const BWEM::Base *> enemy_newly_stored;
+        std::vector<const BWEM::Base *> enemy_newly_removed;
     }
-};
+}

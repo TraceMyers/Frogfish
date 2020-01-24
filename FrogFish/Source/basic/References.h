@@ -1,13 +1,36 @@
-#include "Requirements.h"
+#pragma once
+#pragma message("including References")
+
 #include <BWAPI.h>
 #include <map>
 
-namespace ZergRequirements {
+using namespace BWAPI;
+using namespace BWAPI::UnitTypes;
 
-    using namespace BWAPI;
-    using namespace BWAPI::UnitTypes;
+namespace Basic::Refs {
 
-    std::map<UnitType, UnitType> ZERG_UNIT_REQ = {
+static const enum UTASK {
+    IDLE,
+    MINERALS,
+    GAS,
+    TRANSFER,
+    BUILD,
+    MORPH,
+    ATTACK,
+    SCOUT
+};
+
+static const enum UTYPE {
+    UNASSIGNED,
+    EGG,
+    LARVA,
+    WORKER,
+    ARMY,
+    STRUCT
+};
+
+namespace ZergReqs {
+    static const std::map<UnitType, UnitType> ZERG_UNIT_REQ = {
         {Zerg_Drone, None},
         {Zerg_Zergling, Zerg_Spawning_Pool},
         {Zerg_Hydralisk, Zerg_Hydralisk_Den},
@@ -37,4 +60,6 @@ namespace ZergRequirements {
         {Zerg_Ultralisk_Cavern, Zerg_Hive},
         {Zerg_Defiler_Mound, Zerg_Hive}
     };
+}
+
 }
