@@ -6,7 +6,7 @@ namespace UnitData {
 
     public:
 
-        void add(const BWAPI::UnitInterface *u) {
+        void add(const BWAPI::Unit *u) {
             array[_size] = u;
         }
 
@@ -15,14 +15,14 @@ namespace UnitData {
         const int UNITARRAY_INIT_SIZE = 50;
         const int UNITARRAY_RESIZE_CONST = 100;
 
-        const BWAPI::UnitInterface **array = 
-            new const BWAPI::UnitInterface *[UNITARRAY_INIT_SIZE];
+        const BWAPI::Unit *array = 
+            new const BWAPI::Unit [UNITARRAY_INIT_SIZE];
         int internal_size = UNITARRAY_INIT_SIZE;
         int _size = 0;
 
         void resize() {
-            const BWAPI::UnitInterface **temp 
-                = new const BWAPI::UnitInterface *[internal_size + UNITARRAY_RESIZE_CONST];
+            const BWAPI::Unit *temp 
+                = new const BWAPI::Unit [internal_size + UNITARRAY_RESIZE_CONST];
             memcpy((void *)temp, array, sizeof(const BWAPI::Unit) * internal_size);
             delete array; 
             array = temp;
