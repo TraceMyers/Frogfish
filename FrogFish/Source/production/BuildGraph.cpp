@@ -1,6 +1,8 @@
 #include "BuildGraph.h"
 #include "../unitdata/FrogBase.h"
+#include "../unitdata/EnemyBase.h"
 #include "../unitdata/FrogUnit.h"
+#include "../unitdata/EnemyUnit.h"
 #include "../utility/FrogMath.h"
 #include <BWAPI.h>
 #include <BWEM/bwem.h>
@@ -61,60 +63,48 @@ bool BuildNode::operator ==(const BuildNode &other) const {return this->ID == ot
 ///                                BuildGraph                                   //
 //////////////////////////////////////////////////////////////////////////////////
 
-// TODO: template <class BaseT>
-// TODO: Integrate with BuildPlacement, have a good system in place
-// to simplify placement decisionmaking. 
-BuildGraph::BuildGraph() : base(nullptr) {}
+namespace BuildGraph {
 
-void BuildGraph::init(FBase _base) {
-	printf("base init\n");
-    node_ID_counter = 0;
-    start_chunk = 0;
-    end_chunk = 100000;
-    CHUNK_SIZE = 20;
-    base = _base;
-    graph_ready = false;
-    resource_blocking_angles = FrogMath::get_buffered_resource_angles(base);
-    for (auto & hatch : base->get_resource_depots()) {
-        seed_creep(hatch);
+namespace {
+    static const int    MAX_BASES = 30;
+    const BWEM::Base *  bases[MAX_BASES];
+    std::vector<BNode>  build_nodes[MAX_BASES];
+    std::vector<BNode>  geyser_nodes[MAX_BASES];
+    bool                base_has_creep[MAX_BASES] {false};
+
+    long long           node_ID_counter = 0;
+    int                 base_update_index = 0;
+    std::vector<BNode>  remove_queue {nullptr};
+
+    std::vector<double> resource_blocking_angles[MAX_BASES];
+    enum                DIRECTIONS {RIGHT, UP, LEFT, DOWN};
+}
+
+void init(BaseStorage &base_storage) {
+    auto &all_bases = base_storage.get_all_bases();
+    for (int i = 0; i < all_bases.length(); ++i) {
+        const BWEM::Base *base = all_bases[i];
+        bases[i] = all_bases[i];
+        resource_blocking_angles[i] = FrogMath::get_buffered_resource_angles(base);
     }
 }
 
-FBase BuildGraph::get_base() {
-    return base;
-}
-
-void BuildGraph::on_frame_update() {
-    int nodes_size = nodes.size();
+void on_frame_update(BaseStorage &base_storage) {
+    if (build_nodes[base_update_index] == nullptr)
     if (nodes_size > 0) {
-        if (nodes_size > 30) {
-            graph_ready = true;
-        }
-        if (end_chunk > nodes_size) {
-            if (start_chunk >= nodes_size) {
-                start_chunk = 0;
-                end_chunk = (CHUNK_SIZE > nodes_size ? nodes_size : CHUNK_SIZE);
-            }
-            else {
-                end_chunk = nodes_size;
-            }
-        }
         update_chunk();
         try_expand();
         if (resource_blocking_angles[0] >= 0) {
             flag_resource_blocking_nodes();
         }
         remove_dead_nodes();
-        start_chunk += CHUNK_SIZE;
-        end_chunk += CHUNK_SIZE;
     }
     for (auto & structure : base->get_structures()) {
         seed_creep(structure);
     }
-    bg_timer.on_frame_update();
 }
 
-void BuildGraph::seed_creep(FUnit structure) {
+void seed_creep(FUnit structure) {
     TilePosition structure_tilepos = structure->get_tilepos();
     const BWEM::Tile &_t = the_map.GetTile(structure_tilepos);
     if (
@@ -128,7 +118,7 @@ void BuildGraph::seed_creep(FUnit structure) {
     }
 }
 
-void BuildGraph::update_chunk() {
+void update_chunk() {
     int path[11] {LEFT, DOWN, RIGHT, RIGHT, UP, RIGHT, DOWN, DOWN, LEFT, LEFT, LEFT};
     for (int check_i = start_chunk; check_i < end_chunk; ++check_i) {
         BNode check_node = nodes[check_i];
@@ -151,7 +141,7 @@ void BuildGraph::update_chunk() {
         for (auto &hatch : hatches) {
             hatch_tilepositions.push_back(hatch->get_tilepos());
         }
-        bool below_hatch = node_below_hatch(check_node, hatch_tilepositions);
+        bool below_hatch = node_near_hatch(check_node, hatch_tilepositions);
         if (below_hatch) {
             continue;
         }
@@ -192,9 +182,14 @@ void BuildGraph::update_chunk() {
     }
 }
 
-bool BuildGraph::node_below_hatch(BNode node, std::vector<BWAPI::TilePosition> hatch_tilepositions) {
+bool node_near_hatch(BNode node, std::vector<BWAPI::TilePosition> hatch_tilepositions) {
     TilePosition node_tilepos = node->get_tilepos();
-    int path[16][2] {{0, -3}, {1, 0}, {1, 0}, {0, 1}, {0, 1}, {0, 1}, {0, -3}, {-3, 0}, {-1, 0}, {-1, 0}, {-1, 0}, {0, 1}, {0, 1}, {0, 1}, {0, 1}};
+    int path[16][2] {
+        {0, -3}, {1, 0}, {1, 0}, {0, 1}, 
+        {0, 1}, {0, 1}, {0, -3}, {-3, 0}, 
+        {-1, 0}, {-1, 0}, {-1, 0}, {0, 1}, 
+        {0, 1}, {0, 1}, {0, 1}
+    };
     for (int i = 0; i < 16; ++i) {
         node_tilepos.x += path[i][0];
         node_tilepos.y += path[i][1];
@@ -209,7 +204,7 @@ bool BuildGraph::node_below_hatch(BNode node, std::vector<BWAPI::TilePosition> h
     return false;
 }
 
-void BuildGraph::try_expand() {
+void try_expand() {
     for (int check_i = start_chunk; check_i < end_chunk; ++check_i) {
         BNode cur_node = nodes[check_i];
         BWAPI::TilePosition tp = cur_node->get_tilepos();
@@ -270,7 +265,7 @@ void BuildGraph::try_expand() {
     }
 }
 
-void BuildGraph::flag_resource_blocking_nodes() {
+void flag_resource_blocking_nodes() {
     BWAPI::Position base_center = base->get_center();
     for (int check_i = start_chunk; check_i < end_chunk; ++check_i) {
         auto &node = nodes[check_i];
@@ -289,9 +284,9 @@ void BuildGraph::flag_resource_blocking_nodes() {
     }
 }
 
-const std::vector<BNode> &BuildGraph::get_nodes() {return nodes;}
+const std::vector<BNode> &get_nodes() {return nodes;}
 
-bool BuildGraph::tilepos_buildable(TilePosition &tilepos) {
+bool tilepos_buildable(TilePosition &tilepos) {
     if (tilepos.isValid()) {
         auto node = find_if(
             nodes.begin(), 
@@ -307,7 +302,7 @@ bool BuildGraph::tilepos_buildable(TilePosition &tilepos) {
     return false;
 }
 
-BNode BuildGraph::find_node_at(TilePosition &tilepos) {
+BNode find_node_at(TilePosition &tilepos) {
     if (tilepos.isValid()) {
         auto node = find_if(
             nodes.begin(), 
@@ -323,7 +318,7 @@ BNode BuildGraph::find_node_at(TilePosition &tilepos) {
     return nullptr;
 }
 
-void BuildGraph::remove_dead_nodes() {
+void remove_dead_nodes() {
     BNode edge;
     for (auto node : remove_queue) {
         if((edge = node->get_edge(RIGHT)) != nullptr) edge->set_edge(LEFT, nullptr);
@@ -339,15 +334,17 @@ void BuildGraph::remove_dead_nodes() {
     remove_queue.clear();
 }
 
-void BuildGraph::clear() {
+void clear() {
     free_data();
     nodes.clear();
     base = nullptr;
 }
 
 // called @ owner base when owner base destroyed
-void BuildGraph::free_data() {
+void free_data() {
     for (auto &node : nodes) {
         delete node;
     }
+}
+
 }

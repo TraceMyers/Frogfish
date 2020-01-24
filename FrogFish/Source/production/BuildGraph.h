@@ -3,11 +3,30 @@
 
 #include "../FrogFish.h"
 #include "../unitdata/FrogBase.h"
+#include "../unitdata/BaseStorage.h"
 #include "../unitdata/UnitStorage.h"
 #include "../utility/BWTimer.h"
 #include <BWEM/bwem.h>
 #include <BWAPI.h>
 
+////////////////////////////////////////+/////////////////////////////////////////
+///                                BuildGraph                                   //
+//////////////////////////////////////////////////////////////////////////////////
+// Create a BuildGraph to generate a creep build graph that automatically updates
+// when creep spreads. Requires a pointer to an instance of type T1 to be 
+// passed in, where T1 implements a member function named get_resource_depots(). 
+// The function should return a const std::vector<T2 *> of hatcheries in the base. 
+// T2 (the resource depot) needs a member function called get_tilepos() that 
+// returns its TilePosition.
+
+namespace BuildGraph {
+    void                       init(BaseStorage &base_storage);
+    void                       on_frame_update(BaseStorage &base_storage);
+    const std::vector<BNode> & get_nodes();
+    bool                       tilepos_buildable(TilePosition &tilepos);
+    void                       clear();
+    void                       free_data();
+};
 
 /*******************************************************************************
  * For regularly updating creep tiling at Zerg bases to aid building placement *
@@ -73,65 +92,3 @@ public:
 typedef BuildNode *                  BNode;
 
 
-////////////////////////////////////////+/////////////////////////////////////////
-///                                BuildGraph                                   //
-//////////////////////////////////////////////////////////////////////////////////
-// Create a BuildGraph to generate a creep build graph that automatically updates
-// when creep spreads. Requires a pointer to an instance of type T1 to be 
-// passed in, where T1 implements a member function named get_resource_depots(). 
-// The function should return a const std::vector<T2 *> of hatcheries in the base. 
-// T2 (the resource depot) needs a member function called get_tilepos() that 
-// returns its TilePosition.
-
-class BuildGraph {
-
-private:
-
-    FBase               base;
-    std::vector<BNode>  nodes;
-    std::vector<BNode>  geyser_nodes;
-    int                 node_ID_counter;
-    int                 start_chunk;
-    int                 end_chunk;
-    int                 CHUNK_SIZE;
-    std::vector<BNode>  remove_queue;
-    std::vector<double> resource_blocking_angles;
-    BWTimer             bg_timer;
-
-    void                       populate_graph(FUnit structure);
-    void                       connect_nodes();
-    void                       update_occupied_tilepositions();
-    void                       update_chunk();
-    void                       try_expand();
-    bool                       node_below_hatch(BNode node, std::vector<BWAPI::TilePosition>);
-    BNode                      find_node_at(TilePosition &tilepos);
-    void                       remove_dead_nodes();
-    void                       seed_creep(FUnit structure);
-
-public:
-
-    bool               graph_ready;
-
-    enum               DIRECTIONS {RIGHT, UP, LEFT, DOWN};
-
-    // A BuildGraph is tied to a Zerg base. The base can't be reassigned.
-    BuildGraph();
-    // Called when creep has already started growing at the base
-    void                       init(FBase base);
-    // Called in onFrame only after init()
-    // Iterates over nodes, setting the size of building which can be placed at
-    // each of them, if at all. Also expands the creep. Processes shouldn't
-    // add any noticeable overhead, since they are updated in small chunks per
-    // frame.
-    void                       on_frame_update();
-    //
-    const std::vector<BNode> & get_nodes();
-    // Checks whether the node at the TilePosition is buildable
-    bool                       tilepos_buildable(TilePosition &tilepos);
-    FBase                      get_base();
-    void                       flag_resource_blocking_nodes();
-    // For keeping the Graph around when its Base is gone, and reusing the graph
-    void                       clear();
-    // Called at owner when no longer using this graph
-    void                       free_data();
-};

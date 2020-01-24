@@ -1,4 +1,4 @@
-#include "WorkerControl.h"
+#include "WorkerController.h"
 #include "../unitdata/BaseStorage.h"
 #include "../unitdata/UnitStorage.h"
 #include "../unitdata/FrogBase.h"
@@ -6,12 +6,14 @@
 #include <BWEM/bwem.h>
 #include <BWAPI.h>
 
-namespace WorkerControl {
+namespace Control::Workers {
+
+namespace {
     std::vector<FUnit> making_extractors;
 }
 
 // TODO: centralize task setting
-void WorkerControl::send_idle_workers_to_mine(BaseStorage &base_storage) {
+void send_idle_workers_to_mine(BaseStorage &base_storage) {
     const std::vector<FBase> &self_bases = base_storage.get_self_bases();
     for (auto base : self_bases) {
         const std::vector<FUnit> &workers = base->get_workers();
@@ -29,7 +31,7 @@ void WorkerControl::send_idle_workers_to_mine(BaseStorage &base_storage) {
 // TODO: 
 //      - make it so an extractor always auto gets 3 even if not enough in the base 
 // also... make better
-void WorkerControl::send_mineral_workers_to_gas(
+void send_mineral_workers_to_gas(
     BaseStorage &base_storage,
     UnitStorage &unit_storage
 ) {
@@ -72,4 +74,6 @@ void WorkerControl::send_mineral_workers_to_gas(
             }
         }
     }
+}
+
 }

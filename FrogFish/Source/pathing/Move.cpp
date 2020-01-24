@@ -1,12 +1,13 @@
+#include "Move.h"
 #include "../FrogFish.h"
-#include "PathFinding.h"
-#include <jps.hh>
 #include "../unitdata/FrogUnit.h"
 #include <BWAPI.h>
 #include <vector>
 #include <assert.h>
 
-bool PathFinding::move(FUnit unit, BWEB::Path &path, int close_enough) {
+namespace Pathing {
+
+bool move(FUnit unit, BWEB::Path &path, int close_enough) {
     int waypoint = unit->waypoint;
     std::vector<TilePosition> &path_tiles = path.getTiles();
     int path_size = path_tiles.size();
@@ -28,7 +29,7 @@ bool PathFinding::move(FUnit unit, BWEB::Path &path, int close_enough) {
     }
 }
 
-bool PathFinding::attack_move(FUnit unit, BWEB::Path &path, int close_enough) {
+bool attack_move(FUnit unit, BWEB::Path &path, int close_enough) {
     int waypoint = unit->waypoint;
     std::vector<TilePosition> &path_tiles = path.getTiles();
     int path_size = path_tiles.size();
@@ -48,4 +49,6 @@ bool PathFinding::attack_move(FUnit unit, BWEB::Path &path, int close_enough) {
     else {
         return true;
     }
+}
+
 }

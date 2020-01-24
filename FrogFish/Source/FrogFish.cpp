@@ -6,7 +6,7 @@
 #include "unitdata/BaseOwnership.h"
 #include "production/ProductionCoordinator.h"
 #include "production/BuildPlacement.h"
-#include "control/WorkerControl.h"
+#include "control/WorkerController.h"
 #include "unitdata/BWEMBaseArray.h"
 #include <BWAPI.h>
 #include <iostream>
@@ -63,7 +63,7 @@ void FrogFish::onFrame() {
 	production_coordinator.on_frame_update(base_storage, unit_storage);
 
     // 3. issue commands that require newly assigned lists
-    WorkerControl::send_mineral_workers_to_gas(base_storage, unit_storage);
+    Control::Workers::send_mineral_workers_to_gas(base_storage, unit_storage);
 
     // PRE-LAST. draw
     // DebugDraw::draw_build_graphs();
@@ -79,7 +79,7 @@ void FrogFish::onFrame() {
     if (Broodwar->getFrameCount() % Broodwar->getLatencyFrames() != 0) {return;}
     // RUN COMMANDS -----------------------------------------------------------------
     production_coordinator.produce(base_storage, unit_storage, tech_storage);
-    WorkerControl::send_idle_workers_to_mine(base_storage);
+    Control::Workers::send_idle_workers_to_mine(base_storage);
 }
 
 void FrogFish::onSendText(std::string text) {

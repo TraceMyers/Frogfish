@@ -2,12 +2,10 @@
 #pragma message("including PathFinding")
 
 #include "../unitdata/FrogUnit.h"
-#include <jps.hh>
 #include <BWAPI.h>
-#include <BWEM/bwem.h>
-#include <vector>
+#include <BWEB/BWEB.h>
 
-namespace PathFinding {
+namespace Pathing {
     void init();
     bool move(FUnit unit, BWEB::Path &path, int close_enough);
     bool attack_move(FUnit unit, BWEB::Path &path, int close_enough);

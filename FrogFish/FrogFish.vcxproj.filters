@@ -54,7 +54,6 @@
     <ClCompile Include="..\include\BWEM\winutils.cpp">
       <Filter>BWEM</Filter>
     </ClCompile>
-    <ClCompile Include="Source\control\WorkerControl.cpp" />
     <ClCompile Include="Source\utility\DebugDraw.cpp" />
     <ClCompile Include="Source\production\BuildGraph.cpp" />
     <ClCompile Include="Source\production\BuildPlacement.cpp" />
@@ -88,6 +87,7 @@
       <Filter>BWEB</Filter>
     </ClCompile>
     <ClCompile Include="Source\production\TechManager.cpp" />
+    <ClCompile Include="Source\control\WorkerController.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\BWEM\area.h">
@@ -143,9 +143,6 @@
     </ClInclude>
     <ClInclude Include="..\include\BWEM\winutils.h">
       <Filter>BWEM</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\control\WorkerControl.h">
-      <Filter>headers</Filter>
     </ClInclude>
     <ClInclude Include="Source\production\BuildGraph.h">
       <Filter>headers</Filter>
@@ -241,6 +238,9 @@
       <Filter>BWEB</Filter>
     </ClInclude>
     <ClInclude Include="Source\production\TechManager.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\control\WorkerController.h">
       <Filter>headers</Filter>
     </ClInclude>
   </ItemGroup>
