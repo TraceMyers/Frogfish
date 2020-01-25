@@ -1,5 +1,4 @@
 #include "Units.h"
-#include "References.h"
 #include "../FrogFish.h"
 #include <unordered_map>
 
@@ -11,79 +10,6 @@ using namespace Basic;
 using namespace Basic::Refs;
 
 namespace Basic::Units {
-
-void on_frame_update() {
-    store_queued();
-    schedule_removals();
-    update_self_units();
-    update_enemy_units();
-}
-
-void queue_store(const BWAPI::Unit u) {
-    bool unit_in_buff = (store_buff.find(u) != -1);
-    if (!unit_in_buff) {
-        store_buff.add(u);
-    }
-}
-
-void queue_remove(const BWAPI::Unit u) {
-    bool unit_in_buff = (remove_buff.find(u) != -1);
-    if (!unit_in_buff) {
-        remove_buff.add(u);
-    }
-}
-
-void clear_newly_stored_and_removed() {
-    _self_just_stored.clear();
-    for (int i = 0; i < _self_scheduled_for_removal.size(); ++i) {
-        int ID = _self_scheduled_for_removal[i]->getID();
-        ID_to_data.erase(ID);
-    }
-    _self_scheduled_for_removal.clear();
-    _self_just_changed_type.clear();
-    _enemy_just_stored.clear();
-    for (int i = 0; i < _enemy_scheduled_for_removal.size(); ++i) {
-        int ID = _enemy_scheduled_for_removal[i]->getID();
-        ID_to_data.erase(ID);
-    }
-    _enemy_scheduled_for_removal.clear();
-    _enemy_just_changed_type.clear();
-    _enemy_just_moved.clear();
-}
-
-// only for self units
-void set_utask(BWAPI::Unit u, UTASK task) {
-    int ID = u->getID();
-    ID_to_data[ID].u_task = task;
-}
-
-const UnitArray &self_units() {
-    return _self_units;
-}
-
-const UnitArray &enemy_units() {
-    return _enemy_units;
-}
-
-const UnitData &data(BWAPI::Unit u) {return ID_to_data[u->getID()];}
-
-const UnitArray &self_just_stored() {return _self_just_stored;}
-
-const UnitArray &self_just_destroyed() {return _self_scheduled_for_removal;}
-
-const UnitArray &self_just_changed_type() {return _self_just_changed_type;}
-
-const UnitArray &enemy_just_stored() {return _enemy_just_stored;}
-
-const UnitArray &enemy_just_destroyed() {return _enemy_scheduled_for_removal;}
-
-const UnitArray &enemy_just_changed_type() {return _enemy_just_changed_type;}
-
-const UnitArray &enemy_just_moved() {return _enemy_just_moved;}
-
-/**********************************************************************************************
- ----------------------------------------- Internal -------------------------------------------
- *********************************************************************************************/
 
 namespace {
 
@@ -250,28 +176,77 @@ namespace {
         }
     }
 
-    UTYPE get_utype(BWAPI::Unit u) {
-        BWAPI::UnitType type = u->getType();
-        if (type.isBuilding()) {
-            return UTYPE::STRUCT;
-        }
-        else if (type.isWorker()) {
-            return UTYPE::WORKER;
-        }
-        else if (
-            type.canAttack() 
-            || type.isSpellcaster() 
-            || type.isFlyer()
-        ) {
-            return UTYPE::ARMY;
-        }
-        else if (u->isMorphing()) {
-            return UTYPE::EGG;
-        }
-        else {
-            return UTYPE::LARVA;
-        }
+    
+}
+
+void on_frame_update() {
+    store_queued();
+    schedule_removals();
+    update_self_units();
+    update_enemy_units();
+}
+
+void queue_store(const BWAPI::Unit u) {
+    bool unit_in_buff = (store_buff.find(u) != -1);
+    if (!unit_in_buff) {
+        store_buff.add(u);
     }
 }
+
+void queue_remove(const BWAPI::Unit u) {
+    bool unit_in_buff = (remove_buff.find(u) != -1);
+    if (!unit_in_buff) {
+        remove_buff.add(u);
+    }
+}
+
+void clear_newly_stored_and_removed() {
+    _self_just_stored.clear();
+    for (int i = 0; i < _self_scheduled_for_removal.size(); ++i) {
+        int ID = _self_scheduled_for_removal[i]->getID();
+        ID_to_data.erase(ID);
+    }
+    _self_scheduled_for_removal.clear();
+    _self_just_changed_type.clear();
+    _enemy_just_stored.clear();
+    for (int i = 0; i < _enemy_scheduled_for_removal.size(); ++i) {
+        int ID = _enemy_scheduled_for_removal[i]->getID();
+        ID_to_data.erase(ID);
+    }
+    _enemy_scheduled_for_removal.clear();
+    _enemy_just_changed_type.clear();
+    _enemy_just_moved.clear();
+}
+
+// only for self units
+void set_utask(BWAPI::Unit u, UTASK task) {
+    int ID = u->getID();
+    ID_to_data[ID].u_task = task;
+}
+
+const UnitArray &self_units() {
+    return _self_units;
+}
+
+const UnitArray &enemy_units() {
+    return _enemy_units;
+}
+
+const UnitData &data(BWAPI::Unit u) {return ID_to_data[u->getID()];}
+
+const UnitArray &self_just_stored() {return _self_just_stored;}
+
+const UnitArray &self_just_destroyed() {return _self_scheduled_for_removal;}
+
+const UnitArray &self_just_changed_type() {return _self_just_changed_type;}
+
+const UnitArray &enemy_just_stored() {return _enemy_just_stored;}
+
+const UnitArray &enemy_just_destroyed() {return _enemy_scheduled_for_removal;}
+
+const UnitArray &enemy_just_changed_type() {return _enemy_just_changed_type;}
+
+const UnitArray &enemy_just_moved() {return _enemy_just_moved;}
+
 
 }

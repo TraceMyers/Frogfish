@@ -37,7 +37,7 @@ bool Basic::UnitArray::remove_at(int i) {
     return false;
 }
 
-int Basic::UnitArray::size() {return _size;}
+int Basic::UnitArray::size() const {return _size;}
 
 int Basic::UnitArray::find(const BWAPI::Unit u) const {
     for (int i = 0; i < _size; ++i) {

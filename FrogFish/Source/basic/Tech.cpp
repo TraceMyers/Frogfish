@@ -1,10 +1,7 @@
-#include "TechStorage.h"
-#include "FrogUnit.h"
-#include "FrogBase.h"
-#include "EnemyUnit.h"
+#include "Tech.h"
 #include "EnemyBase.h"
-#include "BaseStorage.h"
-#include "Requirements.h"
+#include "Bases.h"
+#include "References.h"
 #include "../production/BuildOrder.h"
 #include <BWAPI.h>
 

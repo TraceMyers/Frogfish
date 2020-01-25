@@ -1,8 +1,7 @@
-#include "FrogUnit.h"
 #pragma once
-#pragma message("including TechStorage")
+#pragma message("including Tech")
 
-#include "BaseStorage.h"
+#include "Bases.h"
 #include <BWAPI.h>
 
 // TODO: implement enemy as well

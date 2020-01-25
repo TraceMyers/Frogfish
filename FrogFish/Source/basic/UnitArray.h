@@ -13,7 +13,7 @@ namespace Basic {
         void              add(const BWAPI::Unit u);
         bool              remove(const BWAPI::Unit u);
         bool              remove_at(int i);
-        int               size();
+        int               size() const;
         int               find(const BWAPI::Unit u) const;
         const BWAPI::Unit get_by_ID(int ID) const;
         bool              remove_by_ID(int ID);

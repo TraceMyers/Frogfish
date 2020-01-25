@@ -1,7 +1,4 @@
-#include "BaseAssets.h"
 #include "../FrogFish.h"
-#include "../unitdata/BaseStorage.h"
-#include "../unitdata/UnitStorage.h"
 #include <BWEM/bwem.h>
 
 template <class UnitT, class BaseT>
