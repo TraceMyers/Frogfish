@@ -2,7 +2,6 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="Source\Dll.cpp" />
-    <ClCompile Include="Source\FrogFish.cpp" />
     <ClCompile Include="..\include\BWEM\area.cpp">
       <Filter>BWEM</Filter>
     </ClCompile>
@@ -54,23 +53,6 @@
     <ClCompile Include="..\include\BWEM\winutils.cpp">
       <Filter>BWEM</Filter>
     </ClCompile>
-    <ClCompile Include="Source\utility\DebugDraw.cpp" />
-    <ClCompile Include="Source\production\BuildGraph.cpp" />
-    <ClCompile Include="Source\production\BuildPlacement.cpp" />
-    <ClCompile Include="Source\unitdata\BaseAssets.cpp" />
-    <ClCompile Include="Source\unitdata\BaseOwnership.cpp" />
-    <ClCompile Include="Source\production\ProductionCoordinator.cpp" />
-    <ClCompile Include="Source\production\UnitMaker.cpp" />
-    <ClCompile Include="Source\production\ConstructionManager.cpp" />
-    <ClCompile Include="Source\utility\BWTimer.cpp" />
-    <ClCompile Include="Source\production\EconTracker.cpp" />
-    <ClCompile Include="Source\utility\FrogMath.cpp" />
-    <ClCompile Include="Source\production\ConstructionStorage.cpp" />
-    <ClCompile Include="Source\pathing\PathFinding.cpp" />
-    <ClCompile Include="Source\production\MakeQueue.cpp" />
-    <ClCompile Include="Source\production\BuildOrder.cpp" />
-    <ClCompile Include="Source\unitdata\TechStorage.cpp" />
-    <ClCompile Include="Source\unitdata\Requirements.cpp" />
     <ClCompile Include="..\include\BWEB\Block.cpp">
       <Filter>BWEB</Filter>
     </ClCompile>
@@ -86,8 +68,12 @@
     <ClCompile Include="..\include\BWEB\Wall.cpp">
       <Filter>BWEB</Filter>
     </ClCompile>
-    <ClCompile Include="Source\production\TechManager.cpp" />
-    <ClCompile Include="Source\control\WorkerController.cpp" />
+    <ClCompile Include="Source\FrogFish.cpp" />
+    <ClCompile Include="Source\basic\Units.cpp" />
+    <ClCompile Include="Source\utility\BWTimer.cpp" />
+    <ClCompile Include="Source\basic\References.cpp" />
+    <ClCompile Include="Source\basic\UnitArray.cpp" />
+    <ClCompile Include="Source\basic\UnitData.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\BWEM\area.h">
@@ -144,81 +130,6 @@
     <ClInclude Include="..\include\BWEM\winutils.h">
       <Filter>BWEM</Filter>
     </ClInclude>
-    <ClInclude Include="Source\production\BuildGraph.h">
-      <Filter>headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\production\BuildPlacement.h">
-      <Filter>headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\production\EconTracker.h">
-      <Filter>headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\production\MakeQueue.h">
-      <Filter>headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\production\ProductionCoordinator.h">
-      <Filter>headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\unitdata\BaseAssets.h">
-      <Filter>headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\unitdata\BaseOwnership.h">
-      <Filter>headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\unitdata\BaseStorage.h">
-      <Filter>headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\unitdata\BWEMBaseArray.h">
-      <Filter>headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\unitdata\EnemyBase.h">
-      <Filter>headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\unitdata\EnemyUnit.h">
-      <Filter>headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\unitdata\FrogBase.h">
-      <Filter>headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\unitdata\FrogUnit.h">
-      <Filter>headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\unitdata\UnitStorage.h">
-      <Filter>headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\utility\BWTimer.h">
-      <Filter>headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\utility\DebugDraw.h">
-      <Filter>headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\production\UnitMaker.h">
-      <Filter>headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\production\ConstructionManager.h">
-      <Filter>headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\production\BuildOrder.h">
-      <Filter>headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\utility\FrogMath.h">
-      <Filter>headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\production\ConstructionStorage.h">
-      <Filter>headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\pathing\PathFinding.h">
-      <Filter>headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\FrogFish.h">
-      <Filter>headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\unitdata\TechStorage.h">
-      <Filter>headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\unitdata\Requirements.h">
-      <Filter>headers</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\BWEB\Block.h">
       <Filter>BWEB</Filter>
     </ClInclude>
@@ -237,10 +148,22 @@
     <ClInclude Include="..\include\BWEB\Wall.h">
       <Filter>BWEB</Filter>
     </ClInclude>
-    <ClInclude Include="Source\production\TechManager.h">
+    <ClInclude Include="Source\FrogFish.h">
       <Filter>headers</Filter>
     </ClInclude>
-    <ClInclude Include="Source\control\WorkerController.h">
+    <ClInclude Include="Source\basic\Units.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\utility\BWTimer.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\basic\UnitData.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\basic\UnitArray.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\basic\References.h">
       <Filter>headers</Filter>
     </ClInclude>
   </ItemGroup>

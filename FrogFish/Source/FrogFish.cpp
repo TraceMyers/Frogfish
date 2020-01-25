@@ -1,5 +1,6 @@
 #include "FrogFish.h"
 #include "utility/BWTimer.h"
+#include "utility/DebugDraw.h"
 #include "basic/Units.h"
 #include <BWAPI.h>
 #include <iostream>
@@ -55,8 +56,8 @@ void FrogFish::onFrame() {
     // send mineral workers to gas
 
     // PRE-LAST. draw
+    Utility::DebugDraw::draw_units();
     // DebugDraw::draw_build_graphs();
-    // DebugDraw::draw_units(unit_storage);
     // DebugDraw::draw_base_info(base_storage);
 
     // LAST. 

@@ -252,7 +252,7 @@ namespace {
         auto &units = (who == SELF ? Units::self_units() : Units::enemy_units());
         for (int i = 0; i < units.size(); ++i) {
             const BWAPI::Unit &unit = units[i];
-            const Units::UnitData unit_data = Units::data(unit);
+            const Units::UnitData &unit_data = Units::data(unit);
             if (
                 unit_data.u_type == UTYPE::WORKER
                 || unit_data.u_type == UTYPE::STRUCT
