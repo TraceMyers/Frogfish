@@ -1,21 +1,32 @@
 #include "Tech.h"
-#include "EnemyBase.h"
 #include "Bases.h"
+#include "Units.h"
 #include "References.h"
 #include "../production/BuildOrder.h"
 #include <BWAPI.h>
 
 // TODO: implement enemy as well
+using namespace Basic;
+using namespace Basic::Refs;
 
-void TechStorage::on_frame_update(BaseStorage &base_storage) {
+namespace Basic::Tech {
+
+namespace {
+    std::map<BWAPI::UnitType, bool> _self_can_make;
+    std::vector<BWAPI::UpgradeType> self_upgrades;
+    std::vector<BWAPI::TechType> self_techs;
+}
+
+void on_frame_update() {
     std::vector<BWAPI::UnitType> struct_types;
-	struct_types.push_back(BWAPI::UnitTypes::Zerg_Larva);
-
-    for (auto &base : base_storage.get_self_bases()) {
-        for (auto &structure : base->get_structures()) {
+    auto &self_bases = Bases::self_bases(); 
+    for (auto &base : self_bases) {
+        auto &structures = Bases::structures(base);
+        for (auto &structure : structures) {
             bool recorded = false;
-			if (structure->is_ready()) {
-				const BWAPI::UnitType &this_type = structure->get_type();
+            auto &unit_data = Units::data(structure);
+			if (unit_data.cmd_ready) {
+				const BWAPI::UnitType &this_type = unit_data.type;
 				for (auto &type : struct_types) {
 					if (this_type == type) {
 						recorded = true;
@@ -28,15 +39,15 @@ void TechStorage::on_frame_update(BaseStorage &base_storage) {
         }
     }
 
-    _self_can_make.clear();
     for (int i = 0; i < TypeAndName::ZERG_TYPE_CT; ++i) {
-        const BWAPI::UnitType &this_type = TypeAndName::ZERG_TYPES[i];
-        BWAPI::UnitType immediate_requirement = 
-            ZergRequirements::ZERG_UNIT_REQ[this_type];
-
+        auto &this_type = TypeAndName::ZERG_TYPES[i];
+        auto &immediate_requirement = ZergReqs::ZERG_UNIT_REQ[this_type];
         bool requirement_met = false;
         for (auto & structure : struct_types) {
-            if (structure == immediate_requirement || immediate_requirement == BWAPI::UnitTypes::None) {
+            if (
+                structure == immediate_requirement 
+                || immediate_requirement == BWAPI::UnitTypes::None
+            ) {
                 requirement_met = true;
                 break;
             }
@@ -67,6 +78,8 @@ void TechStorage::on_frame_update(BaseStorage &base_storage) {
     }
 }
 
-bool TechStorage::self_can_make(BWAPI::UnitType &ut) {
+bool self_can_make(BWAPI::UnitType &ut) {
     return _self_can_make[ut];
+}
+
 }

@@ -1,13 +1,6 @@
-#include "utility/DebugDraw.h"
 #include "utility/BWTimer.h"
-#include "unitdata/UnitStorage.h"
-#include "unitdata/BaseStorage.h"
-#include "unitdata/TechStorage.h"
-#include "unitdata/BaseOwnership.h"
-#include "production/ProductionCoordinator.h"
-#include "production/BuildPlacement.h"
-#include "control/WorkerController.h"
-#include "unitdata/BWEMBaseArray.h"
+#include "basic/Units.h"
+#include "basic/Bases.h"
 #include <BWAPI.h>
 #include <iostream>
 #include <string>
@@ -27,10 +20,6 @@ using namespace Filter;
 //  - For now, pathing just needs to handle moving units from a to b with either
 //  attacking or not attacking in mind
 
-UnitStorage unit_storage;
-BaseStorage base_storage;
-TechStorage tech_storage;
-ProductionCoordinator production_coordinator;
 BWTimer timer;
 
 // todo print fish puns every now and again
@@ -43,10 +32,10 @@ void FrogFish::onStart() {
     onStart_alloc_debug_console();
     onStart_send_workers_to_mine();
     onStart_init_bwem_and_bweb();
-    base_storage.init();
-    BuildPlacement::init(base_storage);
-    production_coordinator.init();
-    production_coordinator.load_build_order("protoss", "2_hatch_hydra");
+    // init bases
+    // init build placement
+    // init prod coord
+    // load build order
     timer.start(10,0);
 }
 
@@ -55,15 +44,15 @@ void FrogFish::onFrame() {
     timer.on_frame_update();
 
     // 1. update basic data that everything else references
-    unit_storage.update();
-    BaseOwnership::update_base_data(base_storage, unit_storage);
-    tech_storage.on_frame_update(base_storage);
+    // update unit storage
+    // update base assets/ownership
+    // update tech
 
     // 2. update production data
-	production_coordinator.on_frame_update(base_storage, unit_storage);
+    // update production coordinator
 
     // 3. issue commands that require newly assigned lists
-    Control::Workers::send_mineral_workers_to_gas(base_storage, unit_storage);
+    // send mineral workers to gas
 
     // PRE-LAST. draw
     // DebugDraw::draw_build_graphs();
@@ -71,15 +60,13 @@ void FrogFish::onFrame() {
     // DebugDraw::draw_base_info(base_storage);
 
     // LAST. 
-    // clear storage of changes to basic data that everybody else references
-    // once others have had a chance to use that info
-    unit_storage.clear_newly_assigned();
-    base_storage.clear_newly_assigned();
+    // clear unit storage stuff
+    // clear base storage stuff
 
     if (Broodwar->getFrameCount() % Broodwar->getLatencyFrames() != 0) {return;}
     // RUN COMMANDS -----------------------------------------------------------------
-    production_coordinator.produce(base_storage, unit_storage, tech_storage);
-    Control::Workers::send_idle_workers_to_mine(base_storage);
+    // produce
+    // send idle workers to mine minerals
 }
 
 void FrogFish::onSendText(std::string text) {
@@ -104,7 +91,7 @@ void FrogFish::onNukeDetect(BWAPI::Position target) {
 }
 
 void FrogFish::onUnitDiscover(BWAPI::Unit unit) {
-    unit_storage.queue_store(unit);
+    // store unit
     if (unit->getType() == BWAPI::UnitTypes::Resource_Vespene_Geyser) {
         the_map.OnGeyserNoticed(unit);
     }
@@ -124,15 +111,15 @@ void FrogFish::onUnitHide(BWAPI::Unit unit) {
 }
 
 void FrogFish::onUnitCreate(BWAPI::Unit unit) {
-    unit_storage.queue_store(unit);
+    // store unit
     if (unit->getType() == BWAPI::UnitTypes::Resource_Vespene_Geyser) {
-        unit_storage.queue_remove(unit);
+        // remove unit
         the_map.OnGeyserNoticed(unit);
     }
 }
 
 void FrogFish::onUnitDestroy(BWAPI::Unit unit) {
-    unit_storage.queue_remove(unit);
+    // remove unit
     // TODO: doesn't catch cases where destroyed out of vision!
     if (unit->getType().isMineralField()) {the_map.OnMineralDestroyed(unit);}
     else if (unit->getType().isSpecialBuilding()) {the_map.OnStaticBuildingDestroyed(unit);}
@@ -140,9 +127,9 @@ void FrogFish::onUnitDestroy(BWAPI::Unit unit) {
 }
 
 void FrogFish::onUnitMorph(BWAPI::Unit unit) {
-    unit_storage.queue_store(unit);
+    // store unit
     if (unit->getType() == BWAPI::UnitTypes::Resource_Vespene_Geyser) {
-        unit_storage.queue_remove(unit);
+        // remove unit
         the_map.OnGeyserNoticed(unit);
     }
     BWEB::Map::onUnitMorph(unit);
@@ -162,6 +149,6 @@ void FrogFish::onUnitComplete(Unit unit) {
 
 void FrogFish::onEnd(bool isWinner) {
     FreeConsole();
-    unit_storage.free_data();
-    base_storage.free_data();
+    // free unit data
+    // free base data
 }

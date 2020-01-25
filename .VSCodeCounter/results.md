@@ -1,26 +1,26 @@
 # Summary
 
-Date : 2020-01-22 20:57:11
+Date : 2020-01-25 02:03:19
 
 Directory c:\Users\Trace\BWAPI\FrogFish\Source
 
-Total : 50 files,  4597 codes, 248 comments, 710 blanks, all 5555 lines
+Total : 43 files,  4237 codes, 201 comments, 546 blanks, all 4984 lines
 
 [details](details.md)
 
 ## Languages
 | language | files | code | comment | blank | total |
 | :--- | ---: | ---: | ---: | ---: | ---: |
-| C++ | 50 | 4,597 | 248 | 710 | 5,555 |
+| C++ | 43 | 4,237 | 201 | 546 | 4,984 |
 
 ## Directories
 | path | files | code | comment | blank | total |
 | :--- | ---: | ---: | ---: | ---: | ---: |
-| . | 50 | 4,597 | 248 | 710 | 5,555 |
-| control | 2 | 79 | 4 | 8 | 91 |
-| pathing | 2 | 61 | 0 | 5 | 66 |
-| production | 22 | 2,575 | 172 | 339 | 3,086 |
-| unitdata | 15 | 1,216 | 30 | 272 | 1,518 |
+| . | 43 | 4,237 | 201 | 546 | 4,984 |
+| basic | 10 | 1,027 | 14 | 139 | 1,180 |
+| control | 2 | 81 | 4 | 8 | 93 |
+| pathing | 2 | 60 | 0 | 6 | 66 |
+| production | 20 | 2,403 | 139 | 307 | 2,849 |
 | utility | 6 | 483 | 11 | 45 | 539 |
 
 [details](details.md)

@@ -1,4 +1,5 @@
 #pragma once
+#pragma message("including UnitData")
 
 #include <BWAPI.h>
 #include "../utility/BWTimer.h"
@@ -8,26 +9,28 @@ using namespace Basic::Refs;
 
 namespace Basic::Units {
 
-UTYPE get_utype(BWAPI::Unit u) {
-    BWAPI::UnitType type = u->getType();
-    if (type.isBuilding()) {
-        return UTYPE::STRUCT;
-    }
-    else if (type.isWorker()) {
-        return UTYPE::WORKER;
-    }
-    else if (
-        type.canAttack() 
-        || type.isSpellcaster() 
-        || type.isFlyer()
-    ) {
-        return UTYPE::ARMY;
-    }
-    else if (u->isMorphing()) {
-        return UTYPE::EGG;
-    }
-    else {
-        return UTYPE::LARVA;
+namespace {
+    UTYPE get_utype(BWAPI::Unit u) {
+        BWAPI::UnitType type = u->getType();
+        if (type.isBuilding()) {
+            return UTYPE::STRUCT;
+        }
+        else if (type.isWorker()) {
+            return UTYPE::WORKER;
+        }
+        else if (
+            type.canAttack() 
+            || type.isSpellcaster() 
+            || type.isFlyer()
+        ) {
+            return UTYPE::ARMY;
+        }
+        else if (u->isMorphing()) {
+            return UTYPE::EGG;
+        }
+        else {
+            return UTYPE::LARVA;
+        }
     }
 }
 
