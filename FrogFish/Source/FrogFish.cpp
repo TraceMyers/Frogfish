@@ -1,6 +1,6 @@
+#include "FrogFish.h"
 #include "utility/BWTimer.h"
 #include "basic/Units.h"
-#include "basic/Bases.h"
 #include <BWAPI.h>
 #include <iostream>
 #include <string>
@@ -44,7 +44,7 @@ void FrogFish::onFrame() {
     timer.on_frame_update();
 
     // 1. update basic data that everything else references
-    // update unit storage
+    Basic::Units::on_frame_update();
     // update base assets/ownership
     // update tech
 
