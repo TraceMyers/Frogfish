@@ -37,7 +37,7 @@ void FrogFish::onStart() {
     // init build placement
     // init prod coord
     // load build order
-    timer.start(10,0);
+    timer.start(1,0);
 }
 
 void FrogFish::onFrame() {
@@ -61,7 +61,7 @@ void FrogFish::onFrame() {
     // DebugDraw::draw_base_info(base_storage);
 
     // LAST. 
-    // clear unit storage stuff
+    Basic::Units::clear_newly_stored_and_removed();
     // clear base storage stuff
 
     if (Broodwar->getFrameCount() % Broodwar->getLatencyFrames() != 0) {return;}
@@ -92,9 +92,11 @@ void FrogFish::onNukeDetect(BWAPI::Position target) {
 }
 
 void FrogFish::onUnitDiscover(BWAPI::Unit unit) {
-    // store unit
     if (unit->getType() == BWAPI::UnitTypes::Resource_Vespene_Geyser) {
         the_map.OnGeyserNoticed(unit);
+    }
+    else {
+        Basic::Units::queue_store(unit);
     }
     BWEB::Map::onUnitDiscover(unit);
 }
@@ -112,26 +114,27 @@ void FrogFish::onUnitHide(BWAPI::Unit unit) {
 }
 
 void FrogFish::onUnitCreate(BWAPI::Unit unit) {
-    // store unit
+    Basic::Units::queue_store(unit);
     if (unit->getType() == BWAPI::UnitTypes::Resource_Vespene_Geyser) {
-        // remove unit
+        Basic::Units::queue_remove(unit);
         the_map.OnGeyserNoticed(unit);
     }
 }
 
 void FrogFish::onUnitDestroy(BWAPI::Unit unit) {
-    // remove unit
-    // TODO: doesn't catch cases where destroyed out of vision!
+    Basic::Units::queue_remove(unit);
     if (unit->getType().isMineralField()) {the_map.OnMineralDestroyed(unit);}
     else if (unit->getType().isSpecialBuilding()) {the_map.OnStaticBuildingDestroyed(unit);}
     BWEB::Map::onUnitDestroy(unit);
 }
 
 void FrogFish::onUnitMorph(BWAPI::Unit unit) {
-    // store unit
     if (unit->getType() == BWAPI::UnitTypes::Resource_Vespene_Geyser) {
-        // remove unit
+        Basic::Units::queue_remove(unit);
         the_map.OnGeyserNoticed(unit);
+    }
+    else {
+        Basic::Units::queue_store(unit);
     }
     BWEB::Map::onUnitMorph(unit);
 }

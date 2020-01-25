@@ -132,6 +132,7 @@
     <ClCompile Include="Source\Dll.cpp" />
     <ClCompile Include="Source\FrogFish.cpp" />
     <ClCompile Include="Source\utility\BWTimer.cpp" />
+    <ClCompile Include="Source\utility\DebugDraw.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\BWEB\Block.h" />
@@ -164,6 +165,7 @@
     <ClInclude Include="Source\basic\Units.h" />
     <ClInclude Include="Source\FrogFish.h" />
     <ClInclude Include="Source\utility\BWTimer.h" />
+    <ClInclude Include="Source\utility\DebugDraw.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -74,6 +74,7 @@
     <ClCompile Include="Source\basic\References.cpp" />
     <ClCompile Include="Source\basic\UnitArray.cpp" />
     <ClCompile Include="Source\basic\UnitData.cpp" />
+    <ClCompile Include="Source\utility\DebugDraw.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\BWEM\area.h">
@@ -164,6 +165,9 @@
       <Filter>headers</Filter>
     </ClInclude>
     <ClInclude Include="Source\basic\References.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\utility\DebugDraw.h">
       <Filter>headers</Filter>
     </ClInclude>
   </ItemGroup>

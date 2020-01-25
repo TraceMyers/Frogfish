@@ -38,7 +38,7 @@ namespace {
             u = store_buff[i];
             if (u->getPlayer() == Broodwar->self()) {
                 int ID = u->getID();
-                if (std::find(self_IDs.begin(), self_IDs.end(), ID) != self_IDs.end()) {
+                if (std::find(self_IDs.begin(), self_IDs.end(), ID) == self_IDs.end()) {
                     self_IDs.push_back(ID);
                     _self_units.add(u);
                     ID_to_data[ID] = new UnitData(u);
@@ -47,7 +47,7 @@ namespace {
             }
             else if (u->getPlayer() == Broodwar->enemy()) {
                 int ID = u->getID();
-                if (std::find(enemy_IDs.begin(), enemy_IDs.end(), ID) != enemy_IDs.end()) {
+                if (std::find(enemy_IDs.begin(), enemy_IDs.end(), ID) == enemy_IDs.end()) {
                     enemy_IDs.push_back(ID);
                     _enemy_units.add(u);
                     ID_to_data[ID] = new UnitData(u);
@@ -170,7 +170,6 @@ namespace {
         } 
     }
 
-    
 }
 
 void on_frame_update() {
@@ -243,6 +242,5 @@ const UnitArray &enemy_just_destroyed() {return _enemy_scheduled_for_removal;}
 const UnitArray &enemy_just_changed_type() {return _enemy_just_changed_type;}
 
 const UnitArray &enemy_just_moved() {return _enemy_just_moved;}
-
 
 }

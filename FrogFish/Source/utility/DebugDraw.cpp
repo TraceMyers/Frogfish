@@ -37,6 +37,7 @@ void draw_debug_text() {
 
 void draw_units() {
     auto &self_units = Units::self_units();
+    // std::cout << "self: " << self_units.size() << std::endl;
     for (int i = 0; i < self_units.size(); ++i) {
         const BWAPI::Unit &unit = self_units[i];
         const Units::UnitData &unit_data = Units::data(unit);
@@ -65,6 +66,7 @@ void draw_units() {
 
     
     auto &enemy_units = Units::enemy_units();
+    // std::cout << "enemy: " << enemy_units.size() << std::endl;
     for (int i = 0; i < enemy_units.size(); ++i) {
         const BWAPI::Unit &unit = enemy_units[i];
         const Units::UnitData &unit_data = Units::data(unit);
