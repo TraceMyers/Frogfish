@@ -39,9 +39,9 @@ void on_frame_update() {
         }
     }
 
-    for (int i = 0; i < TypeAndName::ZERG_TYPE_CT; ++i) {
-        auto &this_type = TypeAndName::ZERG_TYPES[i];
-        auto &immediate_requirement = ZergReqs::ZERG_UNIT_REQ[this_type];
+    for (int i = 0; i < Zerg::TYPE_CT; ++i) {
+        auto &this_type = Zerg::TYPES[i];
+        auto &immediate_requirement = Zerg::UNIT_REQ[this_type];
         bool requirement_met = false;
         for (auto & structure : struct_types) {
             if (

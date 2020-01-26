@@ -2,6 +2,8 @@
 #include "utility/BWTimer.h"
 #include "utility/DebugDraw.h"
 #include "basic/Units.h"
+#include "basic/Bases.h"
+#include "basic/Tech.h"
 #include <BWAPI.h>
 #include <iostream>
 #include <string>
@@ -33,7 +35,7 @@ void FrogFish::onStart() {
     onStart_alloc_debug_console();
     onStart_send_workers_to_mine();
     onStart_init_bwem_and_bweb();
-    // init bases
+    Basic::Bases::init();
     // init build placement
     // init prod coord
     // load build order
@@ -45,9 +47,10 @@ void FrogFish::onFrame() {
     timer.on_frame_update();
 
     // 1. update basic data that everything else references
+    // clear base storage stuff
     Basic::Units::on_frame_update();
-    // update base assets/ownership
-    // update tech
+    Basic::Bases::on_frame_update();
+    Basic::Tech::on_frame_update();
 
     // 2. update production data
     // update production coordinator
@@ -57,17 +60,13 @@ void FrogFish::onFrame() {
 
     // PRE-LAST. draw
     Utility::DebugDraw::draw_units();
+    Utility::DebugDraw::draw_bases();
     // DebugDraw::draw_build_graphs();
-    // DebugDraw::draw_base_info(base_storage);
-
-    // LAST. 
-    Basic::Units::clear_newly_stored_and_removed();
-    // clear base storage stuff
 
     if (Broodwar->getFrameCount() % Broodwar->getLatencyFrames() != 0) {return;}
     // RUN COMMANDS -----------------------------------------------------------------
-    // produce
-    // send idle workers to mine minerals
+    // produce (needs to move up)
+    // send idle workers to mine minerals (needs to move up)
 }
 
 void FrogFish::onSendText(std::string text) {

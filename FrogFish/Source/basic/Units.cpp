@@ -170,9 +170,30 @@ namespace {
         } 
     }
 
+    void clear_just_stored_and_removed() {
+        _self_just_stored.clear();
+        for (int i = 0; i < _self_scheduled_for_removal.size(); ++i) {
+            int ID = _self_scheduled_for_removal[i]->getID();
+            delete ID_to_data[ID];
+            ID_to_data.erase(ID);
+        }
+        _self_scheduled_for_removal.clear();
+        _self_just_changed_type.clear();
+        _enemy_just_stored.clear();
+        for (int i = 0; i < _enemy_scheduled_for_removal.size(); ++i) {
+            int ID = _enemy_scheduled_for_removal[i]->getID();
+            delete ID_to_data[ID];
+            ID_to_data.erase(ID);
+        }
+        _enemy_scheduled_for_removal.clear();
+        _enemy_just_changed_type.clear();
+        _enemy_just_moved.clear();
+    }
+
 }
 
 void on_frame_update() {
+    clear_just_stored_and_removed();
     store_queued();
     schedule_removals();
     update_self_units();
@@ -193,25 +214,7 @@ void queue_remove(const BWAPI::Unit u) {
     }
 }
 
-void clear_newly_stored_and_removed() {
-    _self_just_stored.clear();
-    for (int i = 0; i < _self_scheduled_for_removal.size(); ++i) {
-        int ID = _self_scheduled_for_removal[i]->getID();
-        delete ID_to_data[ID];
-        ID_to_data.erase(ID);
-    }
-    _self_scheduled_for_removal.clear();
-    _self_just_changed_type.clear();
-    _enemy_just_stored.clear();
-    for (int i = 0; i < _enemy_scheduled_for_removal.size(); ++i) {
-        int ID = _enemy_scheduled_for_removal[i]->getID();
-        delete ID_to_data[ID];
-        ID_to_data.erase(ID);
-    }
-    _enemy_scheduled_for_removal.clear();
-    _enemy_just_changed_type.clear();
-    _enemy_just_moved.clear();
-}
+
 
 // only for self units
 void set_utask(BWAPI::Unit u, UTASK task) {

@@ -2,6 +2,7 @@
 #include "BWTimer.h"
 #include "../FrogFish.h"
 #include "../basic/Units.h"
+#include "../basic/Bases.h"
 #include <BWAPI.h>
 #include <iostream>
 #include <list>
@@ -37,7 +38,6 @@ void draw_debug_text() {
 
 void draw_units() {
     auto &self_units = Units::self_units();
-    // std::cout << "self: " << self_units.size() << std::endl;
     for (int i = 0; i < self_units.size(); ++i) {
         const BWAPI::Unit &unit = self_units[i];
         const Units::UnitData &unit_data = Units::data(unit);
@@ -63,10 +63,7 @@ void draw_units() {
                 Broodwar->drawTextMap(pos, "struct");
         }
     }
-
-    
     auto &enemy_units = Units::enemy_units();
-    // std::cout << "enemy: " << enemy_units.size() << std::endl;
     for (int i = 0; i < enemy_units.size(); ++i) {
         const BWAPI::Unit &unit = enemy_units[i];
         const Units::UnitData &unit_data = Units::data(unit);
@@ -95,6 +92,73 @@ void draw_units() {
     }
 }
 
+void draw_bases() {
+    auto &self_bases = Bases::self_bases();
+    for (unsigned int i = 0; i < self_bases.size(); i++) {
+        auto &base = self_bases[i];
+        const BWAPI::Position &center = base->Center();
+        Broodwar->drawBoxMap(
+            BWAPI::Position(center.x + 7, center.y - 62),
+            BWAPI::Position(center.x + 107, center.y - 9),
+            BWAPI::Colors::Black,
+            true 
+        );
+        Broodwar->drawTextMap(BWAPI::Position(center.x + 10, center.y - 62), "Frog Base!");
+        Broodwar->drawTextMap(
+            BWAPI::Position(center.x + 10, center.y - 52), 
+            "structures: %d",
+            Bases::structures(base).size()
+        );
+        Broodwar->drawTextMap(
+            BWAPI::Position(center.x + 10, center.y - 42), 
+            "workers: %d",
+            Bases::workers(base).size()
+        );
+        Broodwar->drawTextMap(
+            BWAPI::Position(center.x + 10, center.y - 32), 
+            "resource depots: %d",
+            Bases::depots(base).size()
+        );
+        Broodwar->drawTextMap(
+            BWAPI::Position(center.x + 10, center.y - 22), 
+            "larva: %d",
+            Bases::larva(base).size()
+        );
+    }
+    auto &enemy_bases = Bases::enemy_bases();
+    for (unsigned int i = 0; i < enemy_bases.size(); i++) {
+        auto &base = enemy_bases[i];
+        const BWAPI::Position &center = base->Center();
+        Broodwar->drawBoxMap(
+            BWAPI::Position(center.x + 7, center.y - 62),
+            BWAPI::Position(center.x + 107, center.y - 9),
+            BWAPI::Colors::Black,
+            true 
+        );
+        Broodwar->drawTextMap(BWAPI::Position(center.x + 10, center.y - 62), "Enemy Base!");
+        Broodwar->drawTextMap(
+            BWAPI::Position(center.x + 10, center.y - 52), 
+            "structures: %d",
+            Bases::structures(base).size()
+        );
+        Broodwar->drawTextMap(
+            BWAPI::Position(center.x + 10, center.y - 42), 
+            "workers: %d",
+            Bases::workers(base).size()
+        );
+        Broodwar->drawTextMap(
+            BWAPI::Position(center.x + 10, center.y - 32), 
+            "resource depots: %d",
+            Bases::depots(base).size()
+        );
+        Broodwar->drawTextMap(
+            BWAPI::Position(center.x + 10, center.y - 22), 
+            "larva: %d",
+            Bases::larva(base).size()
+        );    
+    }
+}
+
 // void draw_map() {
 //     try {
 //         BWEM::utils::gridMapExample(the_map);
@@ -110,66 +174,6 @@ void draw_units() {
 //     }
 // }
 
-// void draw_base_info(BaseStorage &base_storage) {
-//     const std::vector<FBase> &self_bases = base_storage.get_self_bases();
-//     for (unsigned int i = 0; i < self_bases.size(); i++) {
-//         const FBase f_base = self_bases[i];
-//         const BWAPI::Position &center = f_base->get_center();
-//         Broodwar->drawBoxMap(
-//             BWAPI::Position(center.x + 7, center.y - 62),
-//             BWAPI::Position(center.x + 107, center.y - 9),
-//             BWAPI::Colors::Black,
-//             true 
-//         );
-//         Broodwar->drawTextMap(BWAPI::Position(center.x + 10, center.y - 62), "Frog Base!");
-//         Broodwar->drawTextMap(
-//             BWAPI::Position(center.x + 10, center.y - 52), 
-//             "structures: %d",
-//             f_base->get_structure_ct()
-//         );
-//         Broodwar->drawTextMap(
-//             BWAPI::Position(center.x + 10, center.y - 42), 
-//             "workers: %d",
-//             f_base->get_worker_ct()
-//         );
-//         Broodwar->drawTextMap(
-//             BWAPI::Position(center.x + 10, center.y - 32), 
-//             "resource depots: %d",
-//             f_base->get_resource_depot_ct()
-//         );
-//         Broodwar->drawTextMap(
-//             BWAPI::Position(center.x + 10, center.y - 22), 
-//             "larva: %d",
-//             f_base->get_larva_ct()
-//         );
-//     }
-//     const std::vector<EBase> &enemy_bases = base_storage.get_enemy_bases();
-//     for (unsigned int i = 0; i < enemy_bases.size(); i++) {
-//         const EBase e_base = enemy_bases[i];
-//         const BWAPI::Position &center = e_base->get_center();
-//         Broodwar->drawTextMap(BWAPI::Position(center.x + 10, center.y - 62), "Enemy Base!");
-//         Broodwar->drawTextMap(
-//             BWAPI::Position(center.x + 10, center.y - 52), 
-//             "structures: %d",
-//             e_base->get_structure_ct()
-//         );
-//         Broodwar->drawTextMap(
-//             BWAPI::Position(center.x + 10, center.y - 42), 
-//             "workers: %d",
-//             e_base->get_worker_ct()
-//         );
-//         Broodwar->drawTextMap(
-//             BWAPI::Position(center.x + 10, center.y - 32), 
-//             "resource depots: %d",
-//             e_base->get_resource_depot_ct()
-//         );
-//         Broodwar->drawTextMap(
-//             BWAPI::Position(center.x + 10, center.y - 22), 
-//             "larva: %d",
-//             e_base->get_larva_ct()
-//         );    
-//     }
-// }
 
 // void draw_make_queue(MakeQueue &make_queue) {
 //     const std::deque<BWAPI::UnitType> &queue = make_queue.get_queue();

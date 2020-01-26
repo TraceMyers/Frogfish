@@ -5,17 +5,7 @@
 #include <fstream>
 #include <thread>
 
-namespace TypeAndName {
-    extern const int ZERG_TYPE_CT;
-    extern const int ZERG_TECH_CT;
-    extern const int ZERG_UPGRADE_CT;
-    extern const char *ZERG_NAMES[28];
-    extern const BWAPI::UnitType ZERG_TYPES[28];
-    extern const char *ZERG_TECH_NAMES[9];
-    extern const BWAPI::TechType ZERG_TECH_TYPES[9];
-    extern const char *ZERG_UPGRADE_NAMES[16];
-    extern const BWAPI::UpgradeType ZERG_UPGRADE_TYPES[16];
-}
+
 
 class BuildItem {
 

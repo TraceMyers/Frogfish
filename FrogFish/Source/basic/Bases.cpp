@@ -36,49 +36,26 @@ namespace {
     void add_self_base(const BWEM::Base *b) {
         auto base_it = std::find(_neutral_bases.begin(), _neutral_bases.end(), b);
         if (base_it != _neutral_bases.end()) {
-            _neutral_bases.erase(base_it);
             _self_bases.push_back(*base_it);
             _self_just_stored.push_back(*base_it);
+            _neutral_bases.erase(base_it);
             base_to_data[b] = BaseData();
         }
         else {
             printf("Basic::Bases::add_self_base(): tried to add non-neutral base\n");
-            assert(false);
         }
     }
 
     void add_enemy_base(const BWEM::Base *b) {
         auto base_it = std::find(_neutral_bases.begin(), _neutral_bases.end(), b);
         if (base_it != _neutral_bases.end()) {
-            _neutral_bases.erase(base_it);
             _enemy_bases.push_back(*base_it);
             _enemy_just_stored.push_back(*base_it);
+            _neutral_bases.erase(base_it);
             base_to_data[b] = BaseData();
         }
         else {
             printf("Basic::Bases::add_enemy_base(): tried to add non-neutral base\n");
-            assert(false);
-        }
-    }
-
-    void assign_new_bases() {
-        const UnitArray &self_new_units = Units::self_just_stored();
-        assign_by_structures(self_new_units, SELF);
-        const UnitArray &self_morphed_units = Units::self_just_changed_type();
-        assign_by_structures(self_morphed_units, SELF);
-        const UnitArray &enemy_new_units = Units::enemy_just_stored();
-        assign_by_structures(enemy_new_units, ENEMY);
-
-        const BWAPI::Race &enemy_race = Broodwar->enemy()->getRace();
-        if (enemy_race == BWAPI::Races::Zerg) {
-            const UnitArray &enemy_morphed_units = Units::enemy_just_changed_type();
-            assign_by_structures(enemy_morphed_units, ENEMY);
-            const UnitArray &enemy_moved_units = Units::enemy_just_moved();
-            assign_by_structures(enemy_moved_units, ENEMY);
-        }
-        else if (enemy_race == BWAPI::Races::Terran) {
-            const UnitArray &enemy_moved_units = Units::enemy_just_moved();
-            assign_by_structures(enemy_moved_units, ENEMY);
         }
     }
 
@@ -95,10 +72,9 @@ namespace {
                         std::vector<const BWEM::Base *> potential_bases;
                         for (auto &base : area_bases) {
                             auto base_it = std::find(
-                                _neutral_bases.begin(),
+                                _neutral_bases.begin(), 
                                 _neutral_bases.end(),
-                                base
-                            );
+                                &base);
                             if (base_it != _neutral_bases.end()) {
                                 potential_bases.push_back(&base);
                             }
@@ -125,6 +101,27 @@ namespace {
                     }
                 }
             }
+        }
+    }
+
+    void assign_new_bases() {
+        const UnitArray &self_new_units = Units::self_just_stored();
+        assign_by_structures(self_new_units, SELF);
+        const UnitArray &self_morphed_units = Units::self_just_changed_type();
+        assign_by_structures(self_morphed_units, SELF);
+        const UnitArray &enemy_new_units = Units::enemy_just_stored();
+        assign_by_structures(enemy_new_units, ENEMY);
+
+        const BWAPI::Race &enemy_race = Broodwar->enemy()->getRace();
+        if (enemy_race == BWAPI::Races::Zerg) {
+            const UnitArray &enemy_morphed_units = Units::enemy_just_changed_type();
+            assign_by_structures(enemy_morphed_units, ENEMY);
+            const UnitArray &enemy_moved_units = Units::enemy_just_moved();
+            assign_by_structures(enemy_moved_units, ENEMY);
+        }
+        else if (enemy_race == BWAPI::Races::Terran) {
+            const UnitArray &enemy_moved_units = Units::enemy_just_moved();
+            assign_by_structures(enemy_moved_units, ENEMY);
         }
     }
 
@@ -291,17 +288,17 @@ namespace {
                                     potential_bases.push_back(base);
                                 }
                                 else if (
-                                    u_type == UTYPE::STRUCT
+                                    u_type != UTYPE::STRUCT
                                     && base_remove_structure(base_data, unit)
                                 ) {
                                     base_remove_depot(base_data, unit);
                                 }
                                 else if (
-                                    u_type == UTYPE::WORKER
+                                    u_type != UTYPE::WORKER
                                     && base_remove_worker(base_data, unit)
                                 ) {}
                                 else if (
-                                    u_type == UTYPE::LARVA
+                                    u_type != UTYPE::LARVA
                                     && base_remove_larva(base_data, unit)
                                 ) {}
                             }
@@ -354,6 +351,7 @@ namespace {
             const Units::UnitData &unit_data = Units::data(u);
             const UTYPE u_type = unit_data.u_type;
             bool is_depot = unit_data.type.isResourceDepot();
+            printf("processing just destroyed : %s\n", unit_data.type.c_str());
             if (u_type == UTYPE::STRUCT) {
                 if (is_depot) {
                     for (auto &base : bases) {
@@ -398,6 +396,7 @@ void init() {
 }
 
 void on_frame_update() {
+    clear_just_added_and_removed();
     assign_new_bases();
     assign_assets(SELF);
     assign_assets(ENEMY);
