@@ -14,6 +14,13 @@ namespace {
             workers,
             structures,
             resource_depots;
+
+        void clear() {
+            larva.clear();
+            workers.clear();
+            structures.clear();
+            resource_depots.clear();
+        }
     };
 
     enum WHO {
@@ -39,7 +46,6 @@ namespace {
             _self_bases.push_back(*base_it);
             _self_just_stored.push_back(*base_it);
             _neutral_bases.erase(base_it);
-            base_to_data[b] = BaseData();
         }
         else {
             printf("Basic::Bases::add_self_base(): tried to add non-neutral base\n");
@@ -52,7 +58,6 @@ namespace {
             _enemy_bases.push_back(*base_it);
             _enemy_just_stored.push_back(*base_it);
             _neutral_bases.erase(base_it);
-            base_to_data[b] = BaseData();
         }
         else {
             printf("Basic::Bases::add_enemy_base(): tried to add non-neutral base\n");
@@ -391,6 +396,7 @@ void init() {
         for (unsigned int i = 0; i < bases.size(); ++i) {
             _neutral_bases.push_back(&bases[i]);
             _all_bases.push_back(&bases[i]);
+            base_to_data[&bases[i]] = BaseData();
         }
     }
 }
@@ -409,11 +415,11 @@ void clear_just_added_and_removed() {
     _self_just_stored.clear();
     _enemy_just_stored.clear();
     for (auto base : _self_just_removed) {
-        base_to_data.erase(base);
+        base_to_data[base].clear();
     }
     _self_just_removed.clear();
     for (auto base : _enemy_just_removed) {
-        base_to_data.erase(base);
+        base_to_data[base].clear();
     }
     _enemy_just_removed.clear();
 }
