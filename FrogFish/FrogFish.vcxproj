@@ -133,8 +133,10 @@
     <ClCompile Include="Source\basic\Units.cpp" />
     <ClCompile Include="Source\Dll.cpp" />
     <ClCompile Include="Source\FrogFish.cpp" />
+    <ClCompile Include="Source\production\BuildGraph.cpp" />
     <ClCompile Include="Source\utility\BWTimer.cpp" />
     <ClCompile Include="Source\utility\DebugDraw.cpp" />
+    <ClCompile Include="Source\utility\FrogMath.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\BWEB\Block.h" />
@@ -168,8 +170,10 @@
     <ClInclude Include="Source\basic\UnitData.h" />
     <ClInclude Include="Source\basic\Units.h" />
     <ClInclude Include="Source\FrogFish.h" />
+    <ClInclude Include="Source\production\BuildGraph.h" />
     <ClInclude Include="Source\utility\BWTimer.h" />
     <ClInclude Include="Source\utility\DebugDraw.h" />
+    <ClInclude Include="Source\utility\FrogMath.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

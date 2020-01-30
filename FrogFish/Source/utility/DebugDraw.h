@@ -10,8 +10,8 @@ namespace Utility::DebugDraw {
     void draw_debug_text();
     void draw_units();
     void draw_bases();
+    void draw_build_nodes();
     // void draw_map();
     // void draw_make_queue(MakeQueue &make_queue);
-    // void draw_build_graphs();
     // void draw_bwem_data();
 }

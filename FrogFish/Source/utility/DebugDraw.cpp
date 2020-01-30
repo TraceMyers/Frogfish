@@ -3,12 +3,14 @@
 #include "../FrogFish.h"
 #include "../basic/Units.h"
 #include "../basic/Bases.h"
+#include "../production/BuildGraph.h"
 #include <BWAPI.h>
 #include <iostream>
 #include <list>
 #include <deque>
 
 using namespace Basic;
+using namespace Production;
 
 namespace Utility::DebugDraw {
 
@@ -185,41 +187,64 @@ void draw_bases() {
 //     }
 // }
 
-// void draw_build_graphs() {
-//     BuildGraph *build_graphs = BuildPlacement::get_graphs();
-//     for (int i = 0; i < BuildPlacement::MAX_BASES; ++i) {
-//         BuildGraph &build_graph = build_graphs[i];
-//         if (build_graph.get_base() != nullptr) {
-//             auto &nodes = build_graph.get_nodes();
-//             for (unsigned int j = 0; j < nodes.size(); ++j) {
-//                 if (nodes[j]->is_buildable()) {
-//                     BWAPI::TilePosition tp = nodes[j]->get_tilepos();
-//                     BWAPI::Position top_left(tp);
-//                     BWAPI::Position bot_right(BWAPI::TilePosition(tp.x + 1, tp.y + 1));
-//                     if (!nodes[j]->blocks_mining()) {
-//                         Broodwar->drawBoxMap(
-//                             top_left,
-//                             bot_right,
-//                             BWAPI::Colors::Green
-//                         );
-//                     }
-//                     else {
-//                         Broodwar->drawBoxMap(
-//                             top_left,
-//                             bot_right,
-//                             BWAPI::Colors::Purple
-//                         );
-//                     }
-//                     const std::vector<int> &dims = nodes[j]->get_buildable_dimensions();
-//                     Broodwar->drawTextMap(
-//                         BWAPI::Position(tp) + BWAPI::Position(5, 10), 
-//                         "%dx%d", dims[0], dims[1]
-//                     );
-//                 }
-//             }
-//         }
-//     }
-// }
+void draw_build_nodes() {
+    std::vector<BuildGraph::BNode> *build_nodes = BuildGraph::build_nodes();
+    int base_ct = Bases::all_bases().size();
+    for (int i = 0; i < base_ct; ++i) {
+        auto &node_vec = build_nodes[i];
+        for (auto &node : node_vec) {
+            const std::vector<int> &dims = node->buildable_dimensions;
+            if (dims[0] > 0) {
+                BWAPI::TilePosition tp = node->tilepos;
+                BWAPI::Position top_left(tp);
+                BWAPI::Position bot_right(BWAPI::TilePosition(tp.x + 1, tp.y + 1));
+                if (!node->blocks_mining) {
+                    Broodwar->drawBoxMap(
+                        top_left,
+                        bot_right,
+                        BWAPI::Colors::Green
+                    );
+                }
+                else {
+                    Broodwar->drawBoxMap(
+                        top_left,
+                        bot_right,
+                        BWAPI::Colors::Purple
+                    );
+                }
+                auto &node_edges = node->edges;
+                for (int j = 0; j < 4; ++j) {
+                    if (node_edges[j] != nullptr) {
+                        if (j == 0) {
+                            BWAPI::Position pstart(top_left.x + 26, top_left.y + 14);
+                            BWAPI::Position pend(top_left.x + 38, top_left.y + 14);
+                            Broodwar->drawLineMap(pstart, pend, BWAPI::Colors::Red);
+                        }
+                        else if (j == 1) {
+                            BWAPI::Position pstart(top_left.x + 14, top_left.y + 6);
+                            BWAPI::Position pend(top_left.x + 14, top_left.y - 6);
+                            Broodwar->drawLineMap(pstart, pend, BWAPI::Colors::Red);
+                        }
+                        else if (j == 2) {
+                            BWAPI::Position pstart(top_left.x + 6, top_left.y + 18);
+                            BWAPI::Position pend(top_left.x - 6, top_left.y + 18);
+                            Broodwar->drawLineMap(pstart, pend, BWAPI::Colors::Blue);
+                        }
+                        else {
+                            BWAPI::Position pstart(top_left.x + 18, top_left.y + 26);
+                            BWAPI::Position pend(top_left.x + 18, top_left.y + 38);
+                            Broodwar->drawLineMap(pstart, pend, BWAPI::Colors::Blue);
+                        }
+                    }
+                }
+                Broodwar->drawTextMap(
+                    BWAPI::Position(tp) + BWAPI::Position(5, 10), 
+                    "%dx%d", dims[0], dims[1]
+                );
+            }
+        }
+    }
+}
 
 // void draw_bwem_data() {
 //     // seas and lakes

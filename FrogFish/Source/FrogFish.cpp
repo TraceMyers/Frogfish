@@ -4,6 +4,7 @@
 #include "basic/Units.h"
 #include "basic/Bases.h"
 #include "basic/Tech.h"
+#include "production/BuildGraph.h"
 #include <BWAPI.h>
 #include <iostream>
 #include <string>
@@ -36,6 +37,7 @@ void FrogFish::onStart() {
     onStart_send_workers_to_mine();
     onStart_init_bwem_and_bweb();
     Basic::Bases::init();
+    Production::BuildGraph::init();
     // init build placement
     // init prod coord
     // load build order
@@ -53,15 +55,15 @@ void FrogFish::onFrame() {
     Basic::Tech::on_frame_update();
 
     // 2. update production data
+    Production::BuildGraph::on_frame_update();
     // update production coordinator
 
     // 3. issue commands that require newly assigned lists
     // send mineral workers to gas
 
-    // PRE-LAST. draw
     Utility::DebugDraw::draw_units();
     Utility::DebugDraw::draw_bases();
-    // DebugDraw::draw_build_graphs();
+    Utility::DebugDraw::draw_build_nodes();
 
     if (Broodwar->getFrameCount() % Broodwar->getLatencyFrames() != 0) {return;}
     // RUN COMMANDS -----------------------------------------------------------------
