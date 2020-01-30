@@ -10,6 +10,7 @@ namespace Production::BuildGraph {
 
 // TODO: to scan for nodes that can build out, look for nodes missing edges, rather than
 // trying ot build out from just any node. Do this at one base per frame
+// TODO: fix resource node flagging
 
 namespace {
     static const int    MAX_BASES = 30;
@@ -27,11 +28,11 @@ namespace {
     int                 start_chunk[MAX_BASES] {0};
     int                 end_chunk[MAX_BASES] {CHUNK_SIZE};
 
-    std::vector<double> get_buffered_resource_angles(const BWEM::Base *base) {
-        std::vector<double> return_angles {-1, -1, -1}; 
+    void set_resource_blocking_angles(int base_index) {
+        const BWEM::Base *base = Bases::all_bases()[base_index];
         auto &minerals = base->Minerals();
         if (minerals.size() <= 1 || Bases::depots(base).size() == 0) {
-            return return_angles;
+            return;
         }
         BWAPI::Position hatch_center = base->Center();
         hatch_center.x += 64;
@@ -90,16 +91,15 @@ namespace {
                 break;
             }
         }
-        return_angles[0] = saved_angles[min_i] - 0.4;
-        if (return_angles[0] < 0) {
-            return_angles[0] += 2 * FrogMath::FM_PI;
+        resource_blocking_angles[base_index][0] = saved_angles[min_i] - 0.4;
+        if (resource_blocking_angles[base_index][0] < 0) {
+            resource_blocking_angles[base_index][0] += 2 * FrogMath::FM_PI;
         }
-        return_angles[1] = saved_angles[max_i] + 0.4;
-        if (return_angles[1] > 2 * FrogMath::FM_PI) {
-            return_angles[1] -= 2 * FrogMath::FM_PI;
+        resource_blocking_angles[base_index][1] = saved_angles[max_i] + 0.4;
+        if (resource_blocking_angles[base_index][1] > 2 * FrogMath::FM_PI) {
+            resource_blocking_angles[base_index][1] -= 2 * FrogMath::FM_PI;
         }
-        return_angles[2] = saved_angles[inside_i];
-        return return_angles;
+        resource_blocking_angles[base_index][2] = saved_angles[inside_i];
     }
 
 	BNode find_node_at(int base_index, const BWAPI::TilePosition &tilepos) {
@@ -304,10 +304,11 @@ namespace {
 }
 
 void init() {
-    auto &all_bases = Bases::all_bases();
-    base_ct = all_bases.size();
+    base_ct = Bases::all_bases().size();
     for (int i = 0; i < base_ct; ++i) {
-        resource_blocking_angles[i] = get_buffered_resource_angles(all_bases[i]);
+        for (int j = 0; j < 3; ++j) {
+            resource_blocking_angles[i].push_back(-1);
+        }
     }
 }
 
@@ -344,6 +345,9 @@ void on_frame_update() {
                 // TODO: move this out of the on_frame loop (?)
                 printf("flagging\n");
                 flag_resource_blocking_nodes(i);
+            }
+            else {
+                set_resource_blocking_angles(i);
             }
             start_chunk[i] += CHUNK_SIZE;
             end_chunk[i] += CHUNK_SIZE;
