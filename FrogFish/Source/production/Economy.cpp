@@ -1,10 +1,8 @@
 #include "../FrogFish.h"
-#include "EconTracker.h"
-#include "MakeQueue.h"
-#include "../unitdata/UnitStorage.h"
-#include "../unitdata/BaseStorage.h"
-#include "../unitdata/FrogBase.h"
-#include "../unitdata/FrogUnit.h"
+#include "Economy.h"
+// #include "MakeQueue.h"
+#include "../basic/Units.h"
+#include "../basic/Bases.h"
 #include "../utility/BWTimer.h"
 #include <BWAPI.h>
 #include <BWEM/bwem.h>
@@ -13,26 +11,116 @@
 #include <fstream>
 #include <iomanip>
 
-// TODO: need to reserve minerals and gas separately
-EconTracker::EconTracker() : 
-    reserved_minerals(0),
-    reserved_gas(0),
-    larva_ct(0),
-    reserved_resource_ID(1),
-    minerals_per_frame(0.0),
-    gas_per_frame(0.0),
-    larva_per_frame(0.0),
-    supply_per_frame(0.0),
-    supply_frames()
-{}
+using namespace Basic;
 
-void EconTracker::init() {
+namespace Production::Economy {
+
+namespace {
+    enum RESOURCES {MINERALS, GAS};
+
+    BWAPI::Player self;
+    BWTimer update_calc_timer;
+
+    const int
+        SUPPLY_FRAME_SECONDS = 8,
+        SUPPLY_FRAME_CT = 3,
+        FINISH_TIME = 48;
+    int
+        reserved_minerals = 0,
+        reserved_gas = 0,
+        supply_frames[3] {0},
+        larva_ct = 0,
+        prev_supply;
+    unsigned int 
+        reserved_resource_ID = 1;
+    double
+        supply_per_frame = 0.0,
+        minerals_per_frame = 0.0,
+        gas_per_frame = 0.0,
+        larva_per_frame = 0.0;
+    const double
+        MPF_INTERCEPT = 0.0536346423597,
+        MPF_SATURATION_COEF = 0.02770819,
+        MPF_SATURATION_SQ_COEF = -0.01181919,
+        MPF_SATURATION_CU_COEF = 0.00121287,
+        MPF_SIMPLE_CONST = MPF_INTERCEPT + MPF_SATURATION_COEF 
+            + 4.0 * MPF_SATURATION_SQ_COEF + 8.0 * MPF_SATURATION_CU_COEF,
+        GPF_CONST = 0.071296296,
+        LPF_CONST = 0.002777778,
+        SUPPLY_FRAME_POLY_FACT = 0.54369;
+    BWTimer 
+        supply_frame_timer;
+
+    std::vector<unsigned int> reservation_IDs;
+    std::vector<BWTimer *> reservation_timers;
+    std::vector<int *> reserved_resources;
+
+    void estimate_income() {
+        larva_ct = 0;
+        minerals_per_frame = 0.0;
+        gas_per_frame = 0.0;
+        larva_per_frame = 0.0;
+        for (auto &base : Bases::self_bases()) {
+            larva_ct += Bases::larva(base).size();
+
+            auto &minerals = base->Minerals();
+            auto &base_depots = Bases::depots(base);
+            int resource_depot_ct = base_depots.size();
+            larva_per_frame += LPF_CONST * resource_depot_ct;
+
+            int mineral_worker_ct = 0;
+            for (auto &worker : Bases::workers(base)) {
+                Units::UnitData unit_data = Units::data(worker);
+                if (unit_data.u_task == Refs::UTASK::MINERALS) {
+                    ++mineral_worker_ct;
+                }
+                else if (unit_data.u_task == Refs::UTASK::GAS) {
+                    gas_per_frame += GPF_CONST;
+                }
+            }
+            int mineral_ct = minerals.size(); 
+
+            double
+                min_sat = (double)mineral_worker_ct / mineral_ct,
+                min_sat_plus_1 = min_sat + 1,
+                min_sat_sq_fact = min_sat_plus_1 * min_sat_plus_1,
+                min_sat_cu_fact = min_sat_sq_fact * min_sat_plus_1;
+
+            minerals_per_frame += 
+                (
+                    MPF_INTERCEPT
+                    + min_sat * MPF_SATURATION_COEF
+                    + min_sat_sq_fact * MPF_SATURATION_SQ_COEF
+                    + min_sat_cu_fact * MPF_SATURATION_CU_COEF
+                )
+                * mineral_worker_ct;
+        }
+    }
+
+    void estimate_supply_per_frame() {
+        double supply_per_frame_period = 0.0;
+        int supply_diff = self->supplyUsed() - prev_supply;
+        prev_supply = self->supplyUsed();
+        for (int i = 0; i < SUPPLY_FRAME_CT; ++i) {
+            if (i < SUPPLY_FRAME_CT - 1) {
+                supply_frames[i + 1] = supply_frames[i];
+            }
+            if (i == 0) {
+                supply_frames[i] = supply_diff;
+            }
+            supply_per_frame_period += supply_frames[i] * SUPPLY_FRAME_POLY_FACT;
+        } 
+        supply_per_frame = supply_per_frame_period / (SUPPLY_FRAME_SECONDS * 24);
+    }
+}
+
+void init() {
     self = Broodwar->self(); 
     prev_supply = self->supplyUsed();
     supply_frame_timer.start(SUPPLY_FRAME_SECONDS, 0);
 }
 
-void EconTracker::on_frame_update(BaseStorage &base_storage, UnitStorage &unit_storage) {
+void on_frame_update() {
     int reservation_ct = reservation_timers.size();
     std::vector<int> kill_res_IDs(reservation_ct);
     for (int i = 0; i < reservation_ct; ++i) {
@@ -44,10 +132,10 @@ void EconTracker::on_frame_update(BaseStorage &base_storage, UnitStorage &unit_s
     for (auto _ID : kill_res_IDs) {
         end_reservation(_ID);
     }
-	calc_income_stats(base_storage);
+	estimate_income();
     supply_frame_timer.on_frame_update();
     if (supply_frame_timer.is_stopped()) {
-        calc_supply_per_frame(unit_storage);
+        estimate_supply_per_frame();
         supply_frame_timer.restart();
     }
 
@@ -55,107 +143,30 @@ void EconTracker::on_frame_update(BaseStorage &base_storage, UnitStorage &unit_s
 
 // keep current coefs for normal mining, but need a coef for distance
 // greater than some constant to calc long distance mining
-void EconTracker::calc_income_stats(BaseStorage &base_storage) {
-    larva_ct = 0;
-	minerals_per_frame = 0.0;
-    gas_per_frame = 0.0;
-    larva_per_frame = 0.0;
-    for (auto &base : base_storage.get_self_bases()) {
-        // larva
-        larva_ct += base->get_larva_ct();
 
-        auto &minerals = base->get_minerals();
-		int resource_depot_ct = base->get_resource_depot_ct();
-		FUnit main_hatch;
-		if (resource_depot_ct > 0) {
-			double min_dist = 100000000.0;
-			for (auto &hatch : base->get_resource_depots()) {
-				int dist = 0;
-                BWAPI::Position hatch_pos = hatch->get_pos();
-				for (auto &mineral : minerals) {
-					dist += hatch_pos.getApproxDistance(mineral->Pos());
-				}
-                if (dist < min_dist) {
-                    main_hatch = hatch;
-                    min_dist = dist;
-                }
-                // larva per frame
-                larva_per_frame += LPF_CONST;
-			}
-		}
-        else {
-            continue;
-        }
-        int 
-            mineral_worker_ct = 0;
-        for (auto &worker : base->get_workers()) {
-            if (worker->f_task == FrogUnit::MINE_MINERALS) {
-                ++mineral_worker_ct;
-            }
-            // gas per frame
-            else if (worker->f_task == FrogUnit::MINE_GAS) {
-                gas_per_frame += GPF_CONST;
-            }
-        }
-        int mineral_ct = minerals.size(); 
+double get_minerals_per_frame() {return minerals_per_frame;}
 
-		double
-			min_sat = (double)mineral_worker_ct / mineral_ct,
-			min_sat_plus_1 = min_sat + 1,
-			min_sat_sq_fact = min_sat_plus_1 * min_sat_plus_1,
-			min_sat_cu_fact = min_sat_sq_fact * min_sat_plus_1;
+double get_gas_per_frame() {return gas_per_frame;}
 
-        // minerals per frame
-        minerals_per_frame += 
-			(
-				MPF_INTERCEPT
-				+ min_sat * MPF_SATURATION_COEF
-				+ min_sat_sq_fact * MPF_SATURATION_SQ_COEF
-				+ min_sat_cu_fact * MPF_SATURATION_CU_COEF
-			) 
-			* mineral_worker_ct;
-    }
-}
+double get_larva_per_frame() {return larva_per_frame;}
 
-void EconTracker::calc_supply_per_frame(UnitStorage &unit_storage) {
-    double supply_per_frame_period = 0.0;
-    int supply_diff = self->supplyUsed() - prev_supply;
-    prev_supply = self->supplyUsed();
-    for (int i = 0; i < SUPPLY_FRAME_CT; ++i) {
-        if (i < SUPPLY_FRAME_CT - 1) {
-            supply_frames[i + 1] = supply_frames[i];
-        }
-        if (i == 0) {
-            supply_frames[i] = supply_diff;
-        }
-        supply_per_frame_period += supply_frames[i] * SUPPLY_FRAME_POLY_FACT;
-    } 
-    supply_per_frame = supply_per_frame_period / (SUPPLY_FRAME_SECONDS * 24);
-}
-    
-double EconTracker::get_minerals_per_frame() {return minerals_per_frame;}
+double get_supply_per_frame() {return supply_per_frame;}
 
-double EconTracker::get_gas_per_frame() {return gas_per_frame;}
+double get_minerals_per_sec() {return minerals_per_frame * 24;}
 
-double EconTracker::get_larva_per_frame() {return larva_per_frame;}
+double get_gas_per_sec() {return gas_per_frame * 24;}
 
-double EconTracker::get_supply_per_frame() {return supply_per_frame;}
+double get_larva_per_sec() {return larva_per_frame * 24;}
 
-double EconTracker::get_minerals_per_sec() {return minerals_per_frame * 24;}
+double get_supply_per_sec() {return supply_per_frame * 24;}
 
-double EconTracker::get_gas_per_sec() {return gas_per_frame * 24;}
+int get_free_minerals() {return self->minerals() - reserved_minerals;}
 
-double EconTracker::get_larva_per_sec() {return larva_per_frame * 24;}
-
-double EconTracker::get_supply_per_sec() {return supply_per_frame * 24;}
-
-int EconTracker::get_free_minerals() {return self->minerals() - reserved_minerals;}
-
-int EconTracker::get_free_gas() {return self->gas() - reserved_gas;}
+int get_free_gas() {return self->gas() - reserved_gas;}
 
 // returns reference ID
 // allows current resources - reserved resources to go negative
-unsigned int EconTracker::make_reservation(int minerals, int gas, int reservation_seconds) {
+unsigned int make_reservation(int minerals, int gas, int reservation_seconds) {
     printf("reservation for %d minerals made\n", minerals);
     reserved_minerals += minerals;
     reserved_gas += gas;
@@ -168,7 +179,9 @@ unsigned int EconTracker::make_reservation(int minerals, int gas, int reservatio
     return reserved_resource_ID - 1;
 }
 
-bool EconTracker::reservation_alive(unsigned int ID) {
+// something should have gone wrong if this returns true to a concerned party;
+// said party should be regularly checking on its reservation's time left
+bool reservation_alive(unsigned int ID) {
     auto it = std::find(reservation_IDs.begin(), reservation_IDs.end(), ID);
     if (it != reservation_IDs.end()) {
         return true;
@@ -178,7 +191,7 @@ bool EconTracker::reservation_alive(unsigned int ID) {
 
 // used internally and externally. Works for killing/canceling a res,
 // or for noting that the res is filled
-bool EconTracker::end_reservation(unsigned int ID) {
+bool end_reservation(unsigned int ID) {
     auto it_rr = reserved_resources.begin();
     auto it_rt = reservation_timers.begin();
     auto it_rid = reservation_IDs.begin();
@@ -198,7 +211,7 @@ bool EconTracker::end_reservation(unsigned int ID) {
     return false;
 }
 
-bool EconTracker::extend_reservation(unsigned int ID, int seconds) {
+bool extend_reservation(unsigned int ID, int seconds) {
     for (unsigned int i = 0; i < reservation_IDs.size(); ++i) {
         if (ID == reservation_IDs[i]) {
             int frames_left = reservation_timers[i]->get_frames_left();
@@ -226,11 +239,7 @@ bool EconTracker::extend_reservation(unsigned int ID, int seconds) {
 // - Cancels do not support more than 1 cancellation per ID or passed-in making type
 // - Becomes fairly inaccurate if a cancellation is in the build order wherein the
 // building finishes before the cancellation can occur.
-std::vector<std::vector<int>> EconTracker::build_order_sim(
-    UnitStorage &unit_storage,
-    BuildOrder *build_order,
-    MakeQueue &make_queue
-) {
+std::vector<std::vector<int>> sim() {
     std::vector<BWAPI::UnitType> making_types_in;
     std::vector<int> making_frames_left_in;
     for (auto &unit : unit_storage.self_units()) {
@@ -487,4 +496,6 @@ std::vector<std::vector<int>> EconTracker::build_order_sim(
         }
     }
     return seconds_until_make;
+}
+
 }

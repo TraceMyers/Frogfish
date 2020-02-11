@@ -20,6 +20,7 @@ typedef struct BuildNode {
     BuildNode(const BWEM::Tile &_t, BWAPI::TilePosition tp, int _id) :
     tile(_t),
     tilepos(tp),
+    pos(BWAPI::Position(tp)),
     id(_id),
     edges(4),
     buildable_dimensions(2),
@@ -40,7 +41,9 @@ void                       on_frame_update();
 bool                       buildable(BWAPI::TilePosition &tilepos);
 std::vector<BNode> *       build_nodes();
 void                       clear();
+bool                       base_has_graph(const BWEM::Base *base);
+BWAPI::TilePosition        get_build_tilepos(const BWEM::Base *base, int width, int height);
+BWAPI::TilePosition        get_geyser_tilepos(const BWEM::Base *base);
 void                       free_data();
 
 }
-

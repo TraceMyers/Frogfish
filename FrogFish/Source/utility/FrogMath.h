@@ -5,7 +5,7 @@
 
 namespace FrogMath {
 
-    const double FM_PI = 3.14159265359;
+    const double PI = 3.14159265359;
     
     double get_angle(BWAPI::Position a, BWAPI::Position b);
     bool angle_is_between(double check, double a, double b, double inside);

@@ -19,7 +19,7 @@ namespace {
 
     int                 base_ct = 0;
     int                 node_ID_counter = 0;
-    std::vector<BNode>  remove_queue;
+    std::vector<std::pair<BNode,int>>  remove_queue;
 
     std::vector<double> resource_blocking_angles[MAX_BASES];
     enum                DIRECTIONS {RIGHT, UP, LEFT, DOWN};
@@ -74,7 +74,7 @@ namespace {
                 sub_value = angles[i];
                 found_gap = true;
                 for (unsigned int j = 0; j < i; ++j) {
-                    angles[j] += 2 * FrogMath::FM_PI - sub_value;
+                    angles[j] += 2 * FrogMath::PI - sub_value;
                 }
             }
             if (found_gap) {
@@ -93,13 +93,14 @@ namespace {
         }
         resource_blocking_angles[base_index][0] = saved_angles[min_i] - 0.4;
         if (resource_blocking_angles[base_index][0] < 0) {
-            resource_blocking_angles[base_index][0] += 2 * FrogMath::FM_PI;
+            resource_blocking_angles[base_index][0] += 2 * FrogMath::PI;
         }
         resource_blocking_angles[base_index][1] = saved_angles[max_i] + 0.4;
-        if (resource_blocking_angles[base_index][1] > 2 * FrogMath::FM_PI) {
-            resource_blocking_angles[base_index][1] -= 2 * FrogMath::FM_PI;
+        if (resource_blocking_angles[base_index][1] > 2 * FrogMath::PI) {
+            resource_blocking_angles[base_index][1] -= 2 * FrogMath::PI;
         }
         resource_blocking_angles[base_index][2] = saved_angles[inside_i];
+        
     }
 
 	BNode find_node_at(int base_index, const BWAPI::TilePosition &tilepos) {
@@ -118,6 +119,24 @@ namespace {
         return nullptr;
     }
 
+    void flag_resource_blocking_node(
+        BNode node, 
+        BWAPI::Position base_center,
+        std::vector<double> &blocking_angles
+    ) {
+        double angle_to_node = FrogMath::get_angle(base_center, node->pos);
+        if (FrogMath::angle_is_between(
+            angle_to_node,
+            blocking_angles[0],
+            blocking_angles[1],
+            blocking_angles[2]
+        )) {
+            node->blocks_mining = true;
+        }
+        else {
+            node->blocks_mining = false;
+        }
+    }
 
     void seed_creep(int base_index, const BWAPI::TilePosition &tilepos) {
         const BWEM::Tile &_t = the_map.GetTile(tilepos);
@@ -127,8 +146,13 @@ namespace {
             && _t.Walkable()
             && Broodwar->hasCreep(tilepos)
         ) {
-            printf("seeding\n");
-            _build_nodes[base_index].push_back(new BuildNode(_t, tilepos, node_ID_counter));
+            BNode new_node = new BuildNode(_t, tilepos, node_ID_counter);
+            flag_resource_blocking_node(
+                new_node, 
+                Bases::all_bases()[base_index]->Center(),
+                resource_blocking_angles[base_index]
+            );
+            _build_nodes[base_index].push_back(new_node);
             ++node_ID_counter;
         }
     }
@@ -168,7 +192,7 @@ namespace {
                 }
             }
             if (disconnected_ct == 4 || !Broodwar->hasCreep(check_node->tilepos)) {
-                remove_queue.push_back(check_node);
+                remove_queue.push_back(std::pair<BNode, int>(check_node, base_index));
                 continue;
             }
 
@@ -240,6 +264,11 @@ namespace {
                             if (check_node == nullptr) {
                                 const BWEM::Tile &t = the_map.GetTile(check_tp);
                                 check_node = new BuildNode(t, check_tp, node_ID_counter);
+                                flag_resource_blocking_node(
+                                    check_node, 
+                                    Bases::all_bases()[base_index]->Center(),
+                                    resource_blocking_angles[base_index]
+                                );
                                 _build_nodes[base_index].push_back(check_node);
                                 ++node_ID_counter;
                             }
@@ -264,39 +293,24 @@ namespace {
         }
     }
 
-    void flag_resource_blocking_nodes(int base_index) {
-        BWAPI::Position base_center = Bases::all_bases()[base_index]->Center();
-        for (int i = start_chunk[base_index]; i < end_chunk[base_index]; ++i) {
-            auto &node = _build_nodes[base_index][i];
-            double angle_to_node = FrogMath::get_angle(base_center, node->pos);
-            if (FrogMath::angle_is_between(
-                angle_to_node,
-                resource_blocking_angles[base_index][0],
-                resource_blocking_angles[base_index][1],
-                resource_blocking_angles[base_index][2]
-            )) {
-                node->blocks_mining = true;
-            }
-            else {
-                node->blocks_mining = false;
-            }
-        }
-    }
-
 	void remove_dead_nodes() {
         BNode edge;
-        for (int i = 0; i < base_ct; ++i) {
-            for (auto node : remove_queue) {
-                if((edge = node->get_edge(RIGHT)) != nullptr) edge->edges[LEFT] = nullptr;
-                if((edge = node->get_edge(UP)) != nullptr) edge->edges[DOWN] = nullptr;
-                if((edge = node->get_edge(LEFT)) != nullptr) edge->edges[RIGHT] = nullptr;
-                if((edge = node->get_edge(DOWN)) != nullptr) edge->edges[UP] = nullptr;
-                auto node_it = std::remove(_build_nodes[i].begin(), _build_nodes[i].end(), node);
-                if (node_it != _build_nodes[i].end()) {
-                    _build_nodes[i].erase(node_it);
-                }
-                delete node;
+        for (auto node : remove_queue) {
+            auto &bnode = node.first;
+            int base_index = node.second;
+            if((edge = bnode->get_edge(RIGHT)) != nullptr)  edge->edges[LEFT] = nullptr;
+            if((edge = bnode->get_edge(UP)) != nullptr)     edge->edges[DOWN] = nullptr;
+            if((edge = bnode->get_edge(LEFT)) != nullptr)   edge->edges[RIGHT] = nullptr;
+            if((edge = bnode->get_edge(DOWN)) != nullptr)   edge->edges[UP] = nullptr;
+            auto node_it = std::remove(
+                _build_nodes[base_index].begin(), 
+                _build_nodes[base_index].end(), 
+                bnode
+            );
+            if (node_it != _build_nodes[base_index].end()) {
+                _build_nodes[base_index].erase(node_it);
             }
+            delete bnode;
         }
         remove_queue.clear();
     }
@@ -336,28 +350,65 @@ void on_frame_update() {
                     end_chunk[i] = base_nodes_sz;
                 }
             }
-            // printf("base nodes size: %d\n", base_nodes_sz);
-            // printf("start chunk i: %d\n", start_chunk[i]);
-            // printf("end chunk i: %d\n", end_chunk[i]);
             try_expand(i);
             update_chunk(i);
-            if (resource_blocking_angles[i][0] >= 0) {
-                // TODO: move this out of the on_frame loop (?)
-                printf("flagging\n");
-                flag_resource_blocking_nodes(i);
-            }
-            else {
+            if (resource_blocking_angles[i][0] < 0) {
+                // TODO: change out with version that updates over the game,
+                // and change func so it doesn't group minerals and gas together,
+                // in case they're - for instance - on opposite sides
+                // Also, resource blocking nodes extend past resources,
+                // when they shouldn't
                 set_resource_blocking_angles(i);
             }
             start_chunk[i] += CHUNK_SIZE;
             end_chunk[i] += CHUNK_SIZE;
         }
     }
-    // remove_dead_nodes();
+    remove_dead_nodes();
 }
 
 std::vector<BNode> *build_nodes() {
     return _build_nodes;
+}
+
+bool base_has_graph(const BWEM::Base *base) {
+    auto &bases = Bases::all_bases();
+    for (int i = 0; i < bases.size(); ++i) {
+        auto &b = bases[i];
+        if (b == base) {
+            return _build_nodes[i].size() > 0;
+        }
+    }
+    return false;
+}
+
+BWAPI::TilePosition get_build_tilepos(const BWEM::Base *base, int width, int height) {
+    auto &bases = Bases::all_bases();
+    for (int i = 0; i < bases.size(); ++i) {
+        auto &b = bases[i];
+        auto &base_nodes = _build_nodes[i];
+        if (b == base && base_nodes.size() > 0) {
+            for (auto &node : base_nodes) {
+                if (
+                    node->buildable_dimensions[0] >= width
+                    && node->buildable_dimensions[1] >= height
+                    && !node->blocks_mining
+                ) {
+                    // TODO: make reservations across all tile affected
+                    return node->tilepos;
+                }
+            }
+        }
+    }
+    return BWAPI::TilePosition(-1, -1);
+}
+
+BWAPI::TilePosition get_geyser_tilepos(const BWEM::Base *base) {
+    auto &geysers = base->Geysers();
+    if (geysers.size() > 0) {
+        return geysers[0]->TopLeft();
+    }
+    return BWAPI::TilePosition(-1, -1);
 }
 
 void free_data() {
@@ -370,4 +421,37 @@ void free_data() {
     }
 }
 
+// -----------------------------------------
+// ------- getting base distances ----------
+// -----------------------------------------
+
+// for (int i = 0; i < base_ct; ++i) {
+//     // for each base, create a sorted list of bases by walk-distance closeness
+//     const BWEM::Base *from_base = all_bases[i];
+//     bases[i] = from_base;
+//     int distances[MAX_BASES] {-1};
+//     for (int j = 0; j < base_ct; ++j) {
+//         if (i != j) {
+//             BWEB::Path path;  
+//             path.createUnitPath(from_base->Center(), all_bases[j]->Center());                
+//             distances[j] = path.getDistance();
+//         }
+//         else {
+//             distances[j] = 0;
+//         }
+//     }
+//     int prev_min = -1;
+//     for (int j = 0; j < base_ct; ++j) {
+//         int min_dist = INT_MAX;
+//         int min_index = 0;
+//         for (int k = 0; k < base_ct; ++k) {
+//             if (distances[k] < min_dist && distances[k] > prev_min) {
+//                 min_dist = distances[k];
+//                 min_index = k;
+//             }
+//         }
+//         closest[i][j] = all_bases[min_index];
+//         prev_min = min_dist;
+//     }
+// }
 }

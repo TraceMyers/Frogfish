@@ -8,7 +8,7 @@ namespace FrogMath{
 double get_angle(BWAPI::Position a, BWAPI::Position b) {
     double angle = atan2(a.y - b.y, b.x - a.x); 
     if (angle < 0) {
-        angle = 2 * FrogMath::FM_PI + angle;
+        angle = 2 * PI + angle;
     }
     return angle;
 }
