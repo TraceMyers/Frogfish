@@ -7,10 +7,13 @@
 
 namespace Production::BuildOrder {
     
-struct Item {
+class Item {
+
+public:
+
     const enum ACTION {
-        MAKE_UNIT,
-        MORPH_UNIT,
+        MAKE,
+        MORPH,
         BUILD,
         TECH,
         UPGRADE,
@@ -31,27 +34,41 @@ struct Item {
         int _count,
         int _cancel_index
     );
+
+    int mineral_cost() {
+        return _mineral_cost;
+    }
+
+    int gas_cost() {
+        return _gas_cost;
+    }
+
+    int larva_cost() {
+        return _larva_cost;
+    }
+
+    int supply_cost() {
+        return _supply_cost;
+    }
+
+protected:
+
+    int _mineral_cost;
+    int _gas_cost;
+    int _larva_cost;
+    int _supply_cost;
 };
 
-std::string       race;
-std::string       name;
-std::vector<Item> build_items;
-int               cur_item;
-
-void     load(const char *_race, const char *build_name);
-void     add_item(
-    Item::ACTION action,
-    BWAPI::UnitType unit_type,
-    BWAPI::TechType tech_type,
-    BWAPI::UpgradeType upgrade_type,
-    int count,
-    int cancel_i
-);
-Item &   peek_next();
-Item &   next();
-Item &   get(int i);
-unsigned size();
-bool     finished();
-void     print();
+void            load(const char *_race, const char *build_name);
+void            push(Item item);
+int             current_index();
+void            insert(Item item, int i);
+void            insert_next(Item item);
+const Item &    peek_next();
+const Item &    next();
+const Item &    get(int i);
+unsigned        size();
+bool            finished();
+void            print();
 
 }

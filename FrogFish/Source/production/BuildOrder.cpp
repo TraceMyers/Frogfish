@@ -3,6 +3,7 @@
 #include <BWAPI.h>
 #include <fstream>
 #include <thread>
+#include <cassert>
 
 // TODO: only extra functionality needed is morph-transitioning between build orders
 // TODO: instead of UnitMaker doing proportional making, anything that is made goes
@@ -11,6 +12,90 @@
 using namespace Basic;
 
 namespace Production::BuildOrder { 
+
+namespace {
+
+    class InternalItem : public Item {
+
+    public:
+
+        void set_mineral_cost(
+            Item::ACTION action, 
+            BWAPI::UnitType unit_type, 
+            BWAPI::TechType tech_type, 
+            BWAPI::UpgradeType upgrade_type
+        ) {
+            switch(action) {
+                case Item::ACTION::TECH:
+                    _mineral_cost = tech_type.mineralPrice();
+                    break;
+                case Item::ACTION::UPGRADE:
+                    _mineral_cost = upgrade_type.mineralPrice();
+                    break;
+                case Item::ACTION::CANCEL:
+                    // use full build order
+                    _mineral_cost = -1;
+                    break;
+                default:
+                    _mineral_cost = unit_type.mineralPrice();
+            }
+        }
+
+        void set_gas_cost(
+            Item::ACTION action, 
+            BWAPI::UnitType unit_type, 
+            BWAPI::TechType tech_type, 
+            BWAPI::UpgradeType upgrade_type
+        ) {
+            switch(action) {
+                case Item::ACTION::TECH:
+                    _gas_cost = tech_type.gasPrice();
+                    break;
+                case Item::ACTION::UPGRADE:
+                    _gas_cost = upgrade_type.gasPrice();
+                    break;
+                case Item::ACTION::CANCEL:
+                    // use full build order
+                    _gas_cost = -1;
+                    break;
+                default:
+                    _gas_cost = unit_type.gasPrice();
+            }
+        }
+
+        void set_supply_cost(Item::ACTION action, BWAPI::UnitType unit_type, int cancel_index) {
+            switch(action) {
+                case Item::ACTION::BUILD:
+                    _supply_cost = -2 - unit_type.supplyProvided();
+                    break;
+                case Item::ACTION::MORPH:
+                    _supply_cost = 
+                        unit_type.supplyRequired() 
+                        - unit_type.whatBuilds().first.supplyRequired();
+                    break;
+                case Item::ACTION::MAKE:
+                    _supply_cost = unit_type.supplyRequired() - unit_type.supplyProvided();
+                    break;
+                case Item::ACTION::CANCEL:
+                    int cancel
+            }
+        }
+
+        void set_larva_cost(Item::ACTION action, BWAPI::UnitType unit_type) {
+            switch(action) {
+                case Item::ACTION::MAKE:
+                    _larva_cost = 1;
+                    break;
+                case Item::ACTION::CANCEL:
+                    // use full build order
+                    _larva_cost = -1;
+                    break;
+                default:
+                    _larva_cost = 0;
+            }
+        }
+    };
+}
 
 Item::Item(
     ACTION _action,
@@ -28,10 +113,16 @@ Item::Item(
     cancel_index(_cancel_index)
 {}
 
+namespace {
+    std::string       race;
+    std::string       name;
+    std::vector<Item> items;
+    int               cur_index;
+}
 
 void load(const char *_race, const char *build_name) {
-    cur_item = 0;
-    build_items.clear();
+    cur_index = 0;
+    items.clear();
     race = _race;
     name = build_name;
     std::ifstream in_file;
@@ -60,7 +151,10 @@ void load(const char *_race, const char *build_name) {
                             action = Item::BUILD;
                         }
                         else if (word == "make") {
-                            action = Item::MAKE_UNIT;
+                            action = Item::MAKE;
+                        }
+                        else if (word == "morph") {
+                            action == Item::MORPH;
                         }
                         else if (word == "tech") {
                             action = Item::TECH;
@@ -84,7 +178,8 @@ void load(const char *_race, const char *build_name) {
                         if (word != "null") {
                             if (
                                 action == Item::BUILD
-                                || action == Item::MAKE_UNIT
+                                || action == Item::MAKE
+                                || action == Item::MORPH
                                 || action == Item::CANCEL
                             ) {
                                 for (int i = 0; i < Refs::Zerg::TYPE_CT; ++i) {
@@ -113,8 +208,7 @@ void load(const char *_race, const char *build_name) {
                         if (word != "null") {
                             cancel_index = std::stoi(word);
                         }
-
-                        add_item (
+                        Item item(
                             action,
                             unit_type,
                             tech_type,
@@ -122,6 +216,7 @@ void load(const char *_race, const char *build_name) {
                             count,
                             cancel_index
                         );
+                        push(item);
                     }
                     else {
                         loaded = true;
@@ -134,46 +229,43 @@ void load(const char *_race, const char *build_name) {
     in_file.close();
 }
 
-void add_item(
-    Item::ACTION action,
-    BWAPI::UnitType unit_type,
-    BWAPI::TechType tech_type,
-    BWAPI::UpgradeType upgrade_type,
-    int count,
-    int cancel_index
-) {
-    build_items.push_back(
-        Item(
-            action,
-            unit_type,
-            tech_type,
-            upgrade_type,
-            count,
-            cancel_index
-        )
-    );
+void push(Item item) {
+    items.push_back(item);
 }
 
-Item &peek_next() {
-    return build_items[cur_item];
+int current_index() {
+    return cur_index;
 }
 
-Item &next() {
-    ++cur_item;
-    printf("build order next item: %d\n", cur_item);
-    return build_items[cur_item - 1];
+void insert(Item item, int i) {
+    // assert(i >= cur_index);
+    items.insert(items.begin() + i, item);
 }
 
-Item &get(int i) {
-    return build_items[i];
+void insert_next(Item item) {
+    items.insert(items.begin() + cur_index, item);
+}
+
+const Item &peek_next() {
+    return items[cur_index];
+}
+
+const Item &next() {
+    ++cur_index;
+    printf("build order next item: %d\n", cur_index);
+    return items[cur_index - 1];
+}
+
+const Item &get(int i) {
+    return items[i];
 }
 
 unsigned size() {
-    return build_items.size();
+    return items.size();
 }
 
 bool finished() {
-    return (unsigned int)cur_item >= build_items.size();
+    return (unsigned int)cur_index >= items.size();
 }
 
 }
