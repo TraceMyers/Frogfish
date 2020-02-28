@@ -34,9 +34,7 @@ namespace Production::BuildOrder {
 
     namespace {
 
-        class InternalItem : public Item {
-
-        public:
+        struct InternalItem : public Item {
 
             InternalItem(
                 ACTION _action,
@@ -44,8 +42,7 @@ namespace Production::BuildOrder {
                 BWAPI::TechType _tech_type,
                 BWAPI::UpgradeType _upgrade_type,
                 int _count,
-                int _cancel_index,
-                int _cancel_supply
+                int _cancel_index
             ) : 
                 Item (_action, _unit_type, _tech_type, _upgrade_type, count, _cancel_index)
             {
@@ -156,13 +153,23 @@ namespace Production::BuildOrder {
         };
     }
 
-    
-
     namespace {
         std::string       race;
         std::string       name;
         std::vector<InternalItem> items;
         int               cur_index;
+
+        void _push(InternalItem item) {
+            items.push_back(item);
+        }
+
+        void _insert(InternalItem item, int i) {
+            items.insert(items.begin() + i, item);
+        }
+
+        void _insert_next(InternalItem item) {
+            items.insert(items.begin() + cur_index, item);
+        }
     }
 
     void load(const char *_race, const char *build_name) {
@@ -253,7 +260,8 @@ namespace Production::BuildOrder {
                             if (word != "null") {
                                 cancel_index = std::stoi(word);
                             }
-                            Item item(
+
+                            InternalItem item(
                                 action,
                                 unit_type,
                                 tech_type,
@@ -261,7 +269,7 @@ namespace Production::BuildOrder {
                                 count,
                                 cancel_index
                             );
-                            push(item);
+                            _push(item);
                         }
                         else {
                             loaded = true;
@@ -274,21 +282,66 @@ namespace Production::BuildOrder {
         in_file.close();
     }
 
-    void push(Item item) {
-        items.push_back(item);
+    void push(
+        Item::ACTION _action,
+        BWAPI::UnitType _unit_type,
+        BWAPI::TechType _tech_type,
+        BWAPI::UpgradeType _upgrade_type,
+        int _count,
+        int _cancel_index
+    ) {
+        InternalItem item(
+            _action,
+            _unit_type,
+            _tech_type,
+            _upgrade_type,
+            _count,
+            _cancel_index
+        );
+        _push(item);
     }
 
+    void insert(
+        Item::ACTION _action,
+        BWAPI::UnitType _unit_type,
+        BWAPI::TechType _tech_type,
+        BWAPI::UpgradeType _upgrade_type,
+        int _count,
+        int _cancel_index,
+        int insert_index
+    ) {
+        InternalItem item(
+            _action,
+            _unit_type,
+            _tech_type,
+            _upgrade_type,
+            _count,
+            _cancel_index
+        );
+        _insert(item, insert_index);
+    }
+
+    void insert_next(
+        Item::ACTION _action,
+        BWAPI::UnitType _unit_type,
+        BWAPI::TechType _tech_type,
+        BWAPI::UpgradeType _upgrade_type,
+        int _count,
+        int _cancel_index
+    ) {
+        InternalItem item(
+            _action,
+            _unit_type,
+            _tech_type,
+            _upgrade_type,
+            _count,
+            _cancel_index
+        );
+        _insert_next(item);
+    }
+    
     int current_index() {
         return cur_index;
-    }
-
-    void insert(Item item, int i) {
-        // assert(i >= cur_index);
-        items.insert(items.begin() + i, item);
-    }
-
-    void insert_next(Item item) {
-        items.insert(items.begin() + cur_index, item);
     }
 
     const Item &peek_next() {
@@ -312,5 +365,4 @@ namespace Production::BuildOrder {
     bool finished() {
         return (unsigned int)cur_index >= items.size();
     }
-
 }

@@ -7,7 +7,8 @@ namespace Basic {
 
     class UnitArray {
 
-    public:
+        /* PUBLIC */
+        public:
 
         UnitArray();
         void              add(const BWAPI::Unit u);
@@ -20,7 +21,8 @@ namespace Basic {
         void              clear();
         const BWAPI::Unit operator [] (int i) const;
 
-    private:
+        /* PRIVATE */
+        private:
         
         static const int UNITARRAY_INIT_SIZE = 50;
         static const int UNITARRAY_RESIZE_CONST = 100;

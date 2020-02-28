@@ -2,7 +2,6 @@
 #include <iterator>
 
 
-
 Basic::UnitArray::UnitArray() :
     array(new BWAPI::Unit [UNITARRAY_INIT_SIZE]),
     internal_size(UNITARRAY_INIT_SIZE),
