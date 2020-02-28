@@ -11,14 +11,7 @@ class Item {
 
 public:
 
-    const enum ACTION {
-        MAKE,
-        MORPH,
-        BUILD,
-        TECH,
-        UPGRADE,
-        CANCEL
-    } action;
+    const enum ACTION {MAKE, MORPH, BUILD, TECH, UPGRADE, CANCEL} action;
 
     const BWAPI::UnitType unit_type;
     const BWAPI::TechType tech_type;
