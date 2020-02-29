@@ -12,22 +12,40 @@ namespace Production::BuildOrder {
         /* PUBLIC */
         public:
 
-        const enum ACTION {MAKE, MORPH, BUILD, TECH, UPGRADE, CANCEL} action;
-
-        const BWAPI::UnitType unit_type;
-        const BWAPI::TechType tech_type;
-        const BWAPI::UpgradeType upgrade_type;
-        const int count;
-        const int cancel_index;
+        enum ACTION {MAKE, MORPH, BUILD, TECH, UPGRADE, CANCEL};
 
         Item(
-            ACTION action,
-            BWAPI::UnitType _unit_type,
-            BWAPI::TechType _tech_type,
-            BWAPI::UpgradeType _upgrade_type,
-            int _count,
-            int _cancel_index
+            ACTION act,
+            BWAPI::UnitType u_type,
+            BWAPI::TechType tch_type,
+            BWAPI::UpgradeType up_type,
+            int cnt,
+            int cancel_i
         );
+
+        int action() const {
+            return _action;
+        }
+
+        BWAPI::UnitType unit_type() const {
+            return _unit_type;
+        }
+
+        BWAPI::TechType tech_type() const {
+            return _tech_type;
+        }
+
+        BWAPI::UpgradeType upgrade_type() const {
+            return _upgrade_type;
+        }
+
+        int count() const {
+            return _count;
+        }
+
+        int cancel_index() const {
+            return _cancel_index;
+        }
 
         int mineral_cost() const {
             return _mineral_cost;
@@ -48,10 +66,16 @@ namespace Production::BuildOrder {
         /* PROTECTED */
         protected:
 
-        int _mineral_cost;
-        int _gas_cost;
-        int _larva_cost;
-        int _supply_cost;
+        ACTION _action;
+        BWAPI::UnitType _unit_type;
+        BWAPI::TechType _tech_type;
+        BWAPI::UpgradeType _upgrade_type;
+        int _count;
+        int _cancel_index;
+        int _mineral_cost = 0;
+        int _gas_cost = 0;
+        int _larva_cost = 0;
+        int _supply_cost = 0;
     };
 
     void            load(const char *_race, const char *build_name);

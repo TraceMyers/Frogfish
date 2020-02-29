@@ -17,19 +17,20 @@ using namespace Basic;
 namespace Production::BuildOrder { 
 
     Item::Item(
-        ACTION _action,
-        BWAPI::UnitType _unit_type,
-        BWAPI::TechType _tech_type,
-        BWAPI::UpgradeType _upgrade_type,
-        int _count,
-        int _cancel_index
+        ACTION act,
+        BWAPI::UnitType u_type,
+        BWAPI::TechType tch_type,
+        BWAPI::UpgradeType up_type,
+        int cnt,
+        int cancel_i
+
     ) :
-        action(_action),
-        unit_type(_unit_type),
-        tech_type(_tech_type),
-        upgrade_type(_upgrade_type),
-        count(_count),
-        cancel_index(_cancel_index)
+        _action(act),
+        _unit_type(u_type),
+        _tech_type(tch_type),
+        _upgrade_type(up_type),
+        _count(cnt),
+        _cancel_index(cancel_i)
     {}
 
     namespace {
@@ -37,14 +38,14 @@ namespace Production::BuildOrder {
         struct InternalItem : public Item {
 
             InternalItem(
-                ACTION _action,
-                BWAPI::UnitType _unit_type,
-                BWAPI::TechType _tech_type,
-                BWAPI::UpgradeType _upgrade_type,
-                int _count,
-                int _cancel_index
+                ACTION act,
+                BWAPI::UnitType u_type,
+                BWAPI::TechType tch_type,
+                BWAPI::UpgradeType up_type,
+                int cnt,
+                int cancel_i
             ) : 
-                Item (_action, _unit_type, _tech_type, _upgrade_type, _count, _cancel_index)
+                Item (act, u_type, tch_type, up_type, cnt, cancel_i)
             {
                 set_mineral_cost();
                 set_gas_cost();
@@ -53,83 +54,83 @@ namespace Production::BuildOrder {
             }
 
             void set_mineral_cost() {
-                switch(action) {
+                switch(_action) {
                     case Item::ACTION::TECH:
-                        _mineral_cost = tech_type.mineralPrice();
+                        _mineral_cost = _tech_type.mineralPrice();
                         break;
                     case Item::ACTION::UPGRADE:
-                        _mineral_cost = upgrade_type.mineralPrice();
+                        _mineral_cost = _upgrade_type.mineralPrice();
                         break;
                     case Item::ACTION::CANCEL:
-                        if (unit_type != BWAPI::UnitTypes::None) {
-                            if (unit_type.isBuilding()) {
-                                _mineral_cost = (int)(-unit_type.mineralPrice() * 0.75);
+                        if (_unit_type != BWAPI::UnitTypes::None) {
+                            if (_unit_type.isBuilding()) {
+                                _mineral_cost = (int)(-_unit_type.mineralPrice() * 0.75);
                             }
                             else {
-                                _mineral_cost = -unit_type.mineralPrice();
+                                _mineral_cost = -_unit_type.mineralPrice();
                             }
                         }
-                        else if (tech_type != BWAPI::TechTypes::None) {
-                            _mineral_cost = -tech_type.mineralPrice();
+                        else if (_tech_type != BWAPI::TechTypes::None) {
+                            _mineral_cost = -_tech_type.mineralPrice();
                         }
                         else {
-                            _mineral_cost = -upgrade_type.mineralPrice();
+                            _mineral_cost = -_upgrade_type.mineralPrice();
                         }
                         break;
                     default:
-                        _mineral_cost = unit_type.mineralPrice();
+                        _mineral_cost = _unit_type.mineralPrice();
                 }
             }
 
             void set_gas_cost() {
-                switch(action) {
+                switch(_action) {
                     case Item::ACTION::TECH:
-                        _gas_cost = tech_type.gasPrice();
+                        _gas_cost = _tech_type.gasPrice();
                         break;
                     case Item::ACTION::UPGRADE:
-                        _gas_cost = upgrade_type.gasPrice();
+                        _gas_cost = _upgrade_type.gasPrice();
                         break;
                     case Item::ACTION::CANCEL:
-                        if (unit_type != BWAPI::UnitTypes::None) {
-                            if (unit_type.isBuilding()) {
-                                _gas_cost = (int)(-unit_type.gasPrice() * 0.75);
+                        if (_unit_type != BWAPI::UnitTypes::None) {
+                            if (_unit_type.isBuilding()) {
+                                _gas_cost = (int)(-_unit_type.gasPrice() * 0.75);
                             }
                             else {
-                                _gas_cost = -unit_type.gasPrice();
+                                _gas_cost = -_unit_type.gasPrice();
                             }
                         }
-                        else if (tech_type != BWAPI::TechTypes::None) {
-                            _gas_cost = -tech_type.gasPrice();
+                        else if (_tech_type != BWAPI::TechTypes::None) {
+                            _gas_cost = -_tech_type.gasPrice();
                         }
                         else {
-                            _gas_cost = -upgrade_type.gasPrice();
+                            _gas_cost = -_upgrade_type.gasPrice();
                         }
                         break;
                     default:
-                        _gas_cost = unit_type.gasPrice();
+                        _gas_cost = _unit_type.gasPrice();
                 }
             }
 
             void set_supply_cost() {
-                switch(action) {
+                switch(_action) {
                     case Item::ACTION::BUILD:
-                        _supply_cost = -2 - unit_type.supplyProvided();
+                        _supply_cost = -2 - _unit_type.supplyProvided();
                         break;
                     case Item::ACTION::MORPH:
                         _supply_cost = 
-                            unit_type.supplyRequired() - unit_type.whatBuilds().first.supplyRequired();
+                            _unit_type.supplyRequired() - _unit_type.whatBuilds().first.supplyRequired();
                         break;
                     case Item::ACTION::MAKE:
-                        _supply_cost = unit_type.supplyRequired() - unit_type.supplyProvided();
+                        _supply_cost = _unit_type.supplyRequired() - _unit_type.supplyProvided();
                         break;
                     case Item::ACTION::CANCEL:
-                        _supply_cost = unit_type.supplyProvided() - unit_type.supplyRequired()
-                            + unit_type.whatBuilds().first.supplyRequired();
+                        _supply_cost = _unit_type.supplyProvided() - _unit_type.supplyRequired()
+                            + _unit_type.whatBuilds().first.supplyRequired();
                 }
             }
 
             void set_larva_cost() {
-                switch(action) {
+                switch(_action) {
                     case Item::ACTION::MAKE:
                         _larva_cost = 1;
                         break;
@@ -156,7 +157,7 @@ namespace Production::BuildOrder {
 
         void _insert_next(InternalItem item) {
             items.insert(items.begin() + cur_index, item);
-        }
+        }       
     }
 
     void load(const char *_race, const char *build_name) {
@@ -177,84 +178,84 @@ namespace Production::BuildOrder {
                 if (word == build_name) {
                     while(in_file >> word) {
                         if (word[0] != '-') {
-                            Item::ACTION action;
-                            BWAPI::UnitType unit_type = BWAPI::UnitTypes::None;
-                            BWAPI::TechType tech_type = BWAPI::TechTypes::None;
-                            BWAPI::UpgradeType upgrade_type = BWAPI::UpgradeTypes::None;
-                            int count = 0;
-                            int cancel_index = -1;
+                            Item::ACTION _action;
+                            BWAPI::UnitType _unit_type = BWAPI::UnitTypes::None;
+                            BWAPI::TechType _tech_type = BWAPI::TechTypes::None;
+                            BWAPI::UpgradeType _upgrade_type = BWAPI::UpgradeTypes::None;
+                            int _count = 0;
+                            int _cancel_index = -1;
 
                             in_file >> word;
                             word.pop_back();
                             if (word == "build") {
-                                action = Item::BUILD;
+                                _action = Item::BUILD;
                             }
                             else if (word == "make") {
-                                action = Item::MAKE;
+                                _action = Item::MAKE;
                             }
                             else if (word == "morph") {
-                                action = Item::MORPH;
+                                _action = Item::MORPH;
                             }
                             else if (word == "tech") {
-                                action = Item::TECH;
+                                _action = Item::TECH;
                             }
                             else if (word == "upgrade") {
-                                action = Item::UPGRADE;
+                                _action = Item::UPGRADE;
                             }
                             else if (word == "cancel") {
-                                action = Item::CANCEL;
+                                _action = Item::CANCEL;
                             }
                             else {
-                                printf("BuildOrder error: action = %s\n", word.c_str());
+                                printf("BuildOrder error: _action = %s\n", word.c_str());
                             }
 
                             in_file >> word;
                             word.pop_back();
-                            count = std::stoi(word);
+                            _count = std::stoi(word);
 
                             in_file >> word;
                             word.pop_back();
                             if (
-                                action == Item::BUILD
-                                || action == Item::MAKE
-                                || action == Item::MORPH
-                                || action == Item::CANCEL
+                                _action == Item::BUILD
+                                || _action == Item::MAKE
+                                || _action == Item::MORPH
+                                || _action == Item::CANCEL
                             ) {
                                 for (int i = 0; i < Refs::Zerg::TYPE_CT; ++i) {
                                     if (word == Refs::Zerg::NAMES[i]) {
-                                        unit_type = Refs::Zerg::TYPES[i];
+                                        _unit_type = Refs::Zerg::TYPES[i];
                                     }
                                 }
                             }
-                            else if (action == Item::TECH || action == Item::CANCEL) {
+                            else if (_action == Item::TECH || _action == Item::CANCEL) {
                                 for (int i = 0; i < Refs::Zerg::TECH_CT; ++i) {
                                     if (word == Refs::Zerg::TECH_NAMES[i]) {
-                                        tech_type = Refs::Zerg::TECH_TYPES[i];
+                                        _tech_type = Refs::Zerg::TECH_TYPES[i];
                                     }
                                 }
                             }
-                            else if (action == Item::UPGRADE || action == Item::CANCEL) {
+                            else if (_action == Item::UPGRADE || _action == Item::CANCEL) {
                                 for (int i = 0; i < Refs::Zerg::UPGRADE_CT; ++i) {
                                     if (word == Refs::Zerg::UPGRADE_NAMES[i]) {
-                                        upgrade_type = Refs::Zerg::UPGRADE_TYPES[i];
+                                        _upgrade_type = Refs::Zerg::UPGRADE_TYPES[i];
                                     }
                                 }
                             }
 
                             in_file >> word;
                             if (word != "null") {
-                                cancel_index = std::stoi(word);
+                                _cancel_index = std::stoi(word);
                             }
 
                             InternalItem item(
-                                action,
-                                unit_type,
-                                tech_type,
-                                upgrade_type,
-                                count,
-                                cancel_index
+                                _action,
+                                _unit_type,
+                                _tech_type,
+                                _upgrade_type,
+                                _count,
+                                _cancel_index
                             );
-                            _push(item);
+                            // _push(item);
                         }
                         else {
                             loaded = true;
@@ -267,60 +268,62 @@ namespace Production::BuildOrder {
         in_file.close();
     }
 
+    
+
     void push(
-        Item::ACTION _action,
-        BWAPI::UnitType _unit_type,
-        BWAPI::TechType _tech_type,
-        BWAPI::UpgradeType _upgrade_type,
-        int _count,
-        int _cancel_index
+        Item::ACTION act,
+        BWAPI::UnitType u_type,
+        BWAPI::TechType tch_type,
+        BWAPI::UpgradeType up_type,
+        int cnt,
+        int cancel_i
     ) {
         InternalItem item(
-            _action,
-            _unit_type,
-            _tech_type,
-            _upgrade_type,
-            _count,
-            _cancel_index
+            act,
+            u_type,
+            tch_type,
+            up_type,
+            cnt,
+            cancel_i
         );
         _push(item);
     }
 
     void insert(
-        Item::ACTION _action,
-        BWAPI::UnitType _unit_type,
-        BWAPI::TechType _tech_type,
-        BWAPI::UpgradeType _upgrade_type,
-        int _count,
-        int _cancel_index,
+        Item::ACTION act,
+        BWAPI::UnitType u_type,
+        BWAPI::TechType tch_type,
+        BWAPI::UpgradeType up_type,
+        int cnt,
+        int cancel_i,
         int insert_index
     ) {
         InternalItem item(
-            _action,
-            _unit_type,
-            _tech_type,
-            _upgrade_type,
-            _count,
-            _cancel_index
+            act,
+            u_type,
+            tch_type,
+            up_type,
+            cnt,
+            cancel_i
         );
         _insert(item, insert_index);
     }
 
     void insert_next(
-        Item::ACTION _action,
-        BWAPI::UnitType _unit_type,
-        BWAPI::TechType _tech_type,
-        BWAPI::UpgradeType _upgrade_type,
-        int _count,
-        int _cancel_index
+        Item::ACTION act,
+        BWAPI::UnitType u_type,
+        BWAPI::TechType tch_type,
+        BWAPI::UpgradeType up_type,
+        int cnt,
+        int cancel_i
     ) {
         InternalItem item(
-            _action,
-            _unit_type,
-            _tech_type,
-            _upgrade_type,
-            _count,
-            _cancel_index
+            act,
+            u_type,
+            tch_type,
+            up_type,
+            cnt,
+            cancel_i
         );
         _insert_next(item);
     }
@@ -360,35 +363,35 @@ namespace Production::BuildOrder {
     void print_item(unsigned int i) {
         const Item &item = items[i];
         std::cout << "[" << i << "]: \n\t";
-        switch(item.action) {
+        switch(item.action()) {
             case Item::MAKE:
-                std::cout << "Make    " << item.count << " " << item.unit_type.c_str();
+                std::cout << "Make    " << item.count() << " " << item.unit_type().c_str();
                 break;
             case Item::MORPH:
-                std::cout << "Morph   " << item.count << " " << item.unit_type.c_str();
+                std::cout << "Morph   " << item.count() << " " << item.unit_type().c_str();
                 break;
             case Item::BUILD:
-                std::cout << "Build   " << item.count << " " << item.unit_type.c_str();
+                std::cout << "Build   " << item.count() << " " << item.unit_type().c_str();
                 break;
             case Item::TECH:
-                std::cout << "Tech    " << item.count << " " << item.tech_type.c_str();
+                std::cout << "Tech    " << item.count() << " " << item.tech_type().c_str();
                 break;
             case Item::UPGRADE:
-                std::cout << "Upgrade " << item.count << " " << item.upgrade_type.c_str();
+                std::cout << "Upgrade " << item.count() << " " << item.upgrade_type().c_str();
                 break;
             case Item::CANCEL:
-                std::cout << "Cancel  " << item.count << " ";
-                if (item.unit_type != BWAPI::UnitTypes::None) {
-                    std::cout << item.unit_type;
+                std::cout << "Cancel  " << item.count() << " ";
+                if (item.unit_type() != BWAPI::UnitTypes::None) {
+                    std::cout << item.unit_type();
                 }
-                else if (item.tech_type != BWAPI::TechTypes::None) {
-                    std::cout << item.tech_type;
+                else if (item.tech_type() != BWAPI::TechTypes::None) {
+                    std::cout << item.tech_type();
                 }
                 else {
-                    std::cout << item.upgrade_type;
+                    std::cout << item.upgrade_type();
                 }
         }
-        std::cout << "\n\tCancel Index: " << item.cancel_index;
+        std::cout << "\n\tCancel Index: " << item.cancel_index();
         std::cout << "\n\tMineral Cost: " << item.mineral_cost();
         std::cout << "\n\tGas Cost:     " << item.gas_cost();
         std::cout << "\n\tLarva Cost:   " << item.larva_cost();
