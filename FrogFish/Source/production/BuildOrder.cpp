@@ -44,20 +44,15 @@ namespace Production::BuildOrder {
                 int _count,
                 int _cancel_index
             ) : 
-                Item (_action, _unit_type, _tech_type, _upgrade_type, count, _cancel_index)
+                Item (_action, _unit_type, _tech_type, _upgrade_type, _count, _cancel_index)
             {
-                set_mineral_cost(_action, _unit_type, _tech_type, _upgrade_type);
-                set_gas_cost(_action, _unit_type, _tech_type, _upgrade_type);
-                set_supply_cost(_action, _unit_type);
-                set_larva_cost(_action);
+                set_mineral_cost();
+                set_gas_cost();
+                set_supply_cost();
+                set_larva_cost();
             }
 
-            void set_mineral_cost(
-                Item::ACTION action, 
-                BWAPI::UnitType unit_type, 
-                BWAPI::TechType tech_type, 
-                BWAPI::UpgradeType upgrade_type
-            ) {
+            void set_mineral_cost() {
                 switch(action) {
                     case Item::ACTION::TECH:
                         _mineral_cost = tech_type.mineralPrice();
@@ -86,12 +81,7 @@ namespace Production::BuildOrder {
                 }
             }
 
-            void set_gas_cost(
-                Item::ACTION action, 
-                BWAPI::UnitType unit_type, 
-                BWAPI::TechType tech_type, 
-                BWAPI::UpgradeType upgrade_type
-            ) {
+            void set_gas_cost() {
                 switch(action) {
                     case Item::ACTION::TECH:
                         _gas_cost = tech_type.gasPrice();
@@ -120,10 +110,7 @@ namespace Production::BuildOrder {
                 }
             }
 
-            void set_supply_cost(
-                Item::ACTION action, 
-                BWAPI::UnitType unit_type
-            ) {
+            void set_supply_cost() {
                 switch(action) {
                     case Item::ACTION::BUILD:
                         _supply_cost = -2 - unit_type.supplyProvided();
@@ -141,7 +128,7 @@ namespace Production::BuildOrder {
                 }
             }
 
-            void set_larva_cost(Item::ACTION action) {
+            void set_larva_cost() {
                 switch(action) {
                     case Item::ACTION::MAKE:
                         _larva_cost = 1;
@@ -206,7 +193,7 @@ namespace Production::BuildOrder {
                                 action = Item::MAKE;
                             }
                             else if (word == "morph") {
-                                action == Item::MORPH;
+                                action = Item::MORPH;
                             }
                             else if (word == "tech") {
                                 action = Item::TECH;
@@ -227,31 +214,29 @@ namespace Production::BuildOrder {
 
                             in_file >> word;
                             word.pop_back();
-                            if (word != "null") {
-                                if (
-                                    action == Item::BUILD
-                                    || action == Item::MAKE
-                                    || action == Item::MORPH
-                                    || action == Item::CANCEL
-                                ) {
-                                    for (int i = 0; i < Refs::Zerg::TYPE_CT; ++i) {
-                                        if (word == Refs::Zerg::NAMES[i]) {
-                                            unit_type = Refs::Zerg::TYPES[i];
-                                        }
+                            if (
+                                action == Item::BUILD
+                                || action == Item::MAKE
+                                || action == Item::MORPH
+                                || action == Item::CANCEL
+                            ) {
+                                for (int i = 0; i < Refs::Zerg::TYPE_CT; ++i) {
+                                    if (word == Refs::Zerg::NAMES[i]) {
+                                        unit_type = Refs::Zerg::TYPES[i];
                                     }
                                 }
-                                else if (action == Item::TECH) {
-                                    for (int i = 0; i < Refs::Zerg::TECH_CT; ++i) {
-                                        if (word == Refs::Zerg::TECH_NAMES[i]) {
-                                            tech_type = Refs::Zerg::TECH_TYPES[i];
-                                        }
+                            }
+                            else if (action == Item::TECH || action == Item::CANCEL) {
+                                for (int i = 0; i < Refs::Zerg::TECH_CT; ++i) {
+                                    if (word == Refs::Zerg::TECH_NAMES[i]) {
+                                        tech_type = Refs::Zerg::TECH_TYPES[i];
                                     }
                                 }
-                                else if (action == Item::UPGRADE) {
-                                    for (int i = 0; i < Refs::Zerg::UPGRADE_CT; ++i) {
-                                        if (word == Refs::Zerg::UPGRADE_NAMES[i]) {
-                                            upgrade_type = Refs::Zerg::UPGRADE_TYPES[i];
-                                        }
+                            }
+                            else if (action == Item::UPGRADE || action == Item::CANCEL) {
+                                for (int i = 0; i < Refs::Zerg::UPGRADE_CT; ++i) {
+                                    if (word == Refs::Zerg::UPGRADE_NAMES[i]) {
+                                        upgrade_type = Refs::Zerg::UPGRADE_TYPES[i];
                                     }
                                 }
                             }
@@ -364,5 +349,49 @@ namespace Production::BuildOrder {
 
     bool finished() {
         return (unsigned int)cur_index >= items.size();
+    }
+
+    void print(unsigned int start=0) {
+        for (; start < items.size(); ++start) {
+            print_item(start);
+        }
+    }
+
+    void print_item(unsigned int i) {
+        const Item &item = items[i];
+        std::cout << "[" << i << "]: \n\t";
+        switch(item.action) {
+            case Item::MAKE:
+                std::cout << "Make    " << item.count << " " << item.unit_type.c_str();
+                break;
+            case Item::MORPH:
+                std::cout << "Morph   " << item.count << " " << item.unit_type.c_str();
+                break;
+            case Item::BUILD:
+                std::cout << "Build   " << item.count << " " << item.unit_type.c_str();
+                break;
+            case Item::TECH:
+                std::cout << "Tech    " << item.count << " " << item.tech_type.c_str();
+                break;
+            case Item::UPGRADE:
+                std::cout << "Upgrade " << item.count << " " << item.upgrade_type.c_str();
+                break;
+            case Item::CANCEL:
+                std::cout << "Cancel  " << item.count << " ";
+                if (item.unit_type != BWAPI::UnitTypes::None) {
+                    std::cout << item.unit_type;
+                }
+                else if (item.tech_type != BWAPI::TechTypes::None) {
+                    std::cout << item.tech_type;
+                }
+                else {
+                    std::cout << item.upgrade_type;
+                }
+        }
+        std::cout << "\n\tCancel Index: " << item.cancel_index;
+        std::cout << "\n\tMineral Cost: " << item.mineral_cost();
+        std::cout << "\n\tGas Cost:     " << item.gas_cost();
+        std::cout << "\n\tLarva Cost:   " << item.larva_cost();
+        std::cout << "\n\tSupply Cost:  " << item.supply_cost() << std::endl;
     }
 }

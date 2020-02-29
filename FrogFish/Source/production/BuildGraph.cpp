@@ -86,7 +86,7 @@ namespace {
         int min_i = std::distance(angles.begin(), std::min_element(angles.begin(), angles.end()));
         int inside_i = 0;
         for (unsigned i = 0; i < angles.size(); ++i) {
-            if (i != max_i && i != min_i) {
+            if (i != (unsigned)max_i && i != (unsigned)min_i) {
                 inside_i = i;
                 break;
             }
@@ -373,7 +373,7 @@ std::vector<BNode> *build_nodes() {
 
 bool base_has_graph(const BWEM::Base *base) {
     auto &bases = Bases::all_bases();
-    for (int i = 0; i < bases.size(); ++i) {
+    for (unsigned int i = 0; i < bases.size(); ++i) {
         auto &b = bases[i];
         if (b == base) {
             return _build_nodes[i].size() > 0;
@@ -384,7 +384,7 @@ bool base_has_graph(const BWEM::Base *base) {
 
 BWAPI::TilePosition get_build_tilepos(const BWEM::Base *base, int width, int height) {
     auto &bases = Bases::all_bases();
-    for (int i = 0; i < bases.size(); ++i) {
+    for (unsigned int i = 0; i < bases.size(); ++i) {
         auto &b = bases[i];
         auto &base_nodes = _build_nodes[i];
         if (b == base && base_nodes.size() > 0) {
@@ -414,7 +414,7 @@ BWAPI::TilePosition get_geyser_tilepos(const BWEM::Base *base) {
 void free_data() {
     for (int i = 0; i < base_ct; ++i) {
         const std::vector<BNode> &base_nodes = _build_nodes[i];
-        for (int j = 0; j < base_nodes.size(); ++j) {
+        for (unsigned int j = 0; j < base_nodes.size(); ++j) {
             delete base_nodes[j];
         }
         _build_nodes[i].clear();

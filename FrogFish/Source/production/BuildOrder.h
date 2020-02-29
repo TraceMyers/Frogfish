@@ -29,19 +29,19 @@ namespace Production::BuildOrder {
             int _cancel_index
         );
 
-        int mineral_cost() {
+        int mineral_cost() const {
             return _mineral_cost;
         }
 
-        int gas_cost() {
+        int gas_cost() const {
             return _gas_cost;
         }
 
-        int larva_cost() {
+        int larva_cost() const {
             return _larva_cost;
         }
 
-        int supply_cost() {
+        int supply_cost() const {
             return _supply_cost;
         }
 
@@ -87,5 +87,6 @@ namespace Production::BuildOrder {
     unsigned        size();
     bool            finished();
     void            print();
+    void            print_item(unsigned int i);
 
 }

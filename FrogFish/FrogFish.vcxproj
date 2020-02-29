@@ -134,6 +134,7 @@
     <ClCompile Include="Source\Dll.cpp" />
     <ClCompile Include="Source\FrogFish.cpp" />
     <ClCompile Include="Source\production\BuildGraph.cpp" />
+    <ClCompile Include="Source\production\BuildOrder.cpp" />
     <ClCompile Include="Source\utility\BWTimer.cpp" />
     <ClCompile Include="Source\utility\DebugDraw.cpp" />
     <ClCompile Include="Source\utility\FrogMath.cpp" />
@@ -171,6 +172,7 @@
     <ClInclude Include="Source\basic\Units.h" />
     <ClInclude Include="Source\FrogFish.h" />
     <ClInclude Include="Source\production\BuildGraph.h" />
+    <ClInclude Include="Source\production\BuildOrder.h" />
     <ClInclude Include="Source\utility\BWTimer.h" />
     <ClInclude Include="Source\utility\DebugDraw.h" />
     <ClInclude Include="Source\utility\FrogMath.h" />
