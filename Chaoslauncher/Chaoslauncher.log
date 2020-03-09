@@ -31,3 +31,18 @@
 2/28/2020 8:22:35 PM 8008 Init GUI
 2/28/2020 8:22:35 PM 8008 Get Starcraftversions
 2/28/2020 8:22:35 PM 8008 Init complete
+3/8/2020 10:04:40 PM 8008 Startbutton
+3/8/2020 10:04:40 PM 8008 Starting Game Starcraft 1.16.1 C:\ProgramData\bwapi\starcraft\StarCraft.exe
+3/8/2020 10:04:40 PM 8008 BWAPI 4.4.0 Injector [DEBUG] Version  Compatible
+3/8/2020 10:04:40 PM 8008 W-MODE 1.02 Version 1.0.2 Compatible
+3/8/2020 10:04:40 PM 8008 Obtained DebugPrivilege
+3/8/2020 10:04:40 PM 8008 CreateProcess
+3/8/2020 10:04:41 PM 8008 Call ScSuspended for all active Plugins
+3/8/2020 10:04:41 PM 8008 ApplyPatchSuspended for BWAPI 4.4.0 Injector [DEBUG]
+3/8/2020 10:04:41 PM 8008 ApplyPatchSuspended for W-MODE 1.02
+3/8/2020 10:04:41 PM 8008 ResumeThread
+3/8/2020 10:04:41 PM 8008 WaitForInputIdle
+3/8/2020 10:04:41 PM 8008 Call ScWindowCreated for all active Plugins
+3/8/2020 10:04:41 PM 8008 ApplyPatch for BWAPI 4.4.0 Injector [DEBUG]
+3/8/2020 10:04:41 PM 8008 ApplyPatch for W-MODE 1.02
+3/8/2020 10:04:41 PM 8008 Starting Starcraft completed
