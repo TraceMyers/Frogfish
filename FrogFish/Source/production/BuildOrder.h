@@ -110,7 +110,7 @@ namespace Production::BuildOrder {
     const Item &    get(int i);
     unsigned        size();
     bool            finished();
-    void            print();
+    void            print(unsigned int start=0);
     void            print_item(unsigned int i);
 
 }

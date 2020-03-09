@@ -5,13 +5,6 @@
 #include <thread>
 #include <cassert>
 
-// TODO: only extra functionality needed is morph-transitioning between build orders
-// TODO: instead of UnitMaker doing proportional making, anything that is made goes
-// into the build order, so those proportional calcs are done, units placed here,
-// and unitmaker makes the same way the whole game - from the build order
-
-// Currently: transitioning from using Item to using InternalItem
-
 using namespace Basic;
 
 namespace Production::BuildOrder { 
@@ -247,7 +240,7 @@ namespace Production::BuildOrder {
                                 _cancel_index = std::stoi(word);
                             }
 
-                            InternalItem item(
+                            push(
                                 _action,
                                 _unit_type,
                                 _tech_type,
@@ -255,7 +248,6 @@ namespace Production::BuildOrder {
                                 _count,
                                 _cancel_index
                             );
-                            // _push(item);
                         }
                         else {
                             loaded = true;
@@ -267,8 +259,6 @@ namespace Production::BuildOrder {
         }
         in_file.close();
     }
-
-    
 
     void push(
         Item::ACTION act,
@@ -354,7 +344,7 @@ namespace Production::BuildOrder {
         return (unsigned int)cur_index >= items.size();
     }
 
-    void print(unsigned int start=0) {
+    void print(unsigned int start) {
         for (; start < items.size(); ++start) {
             print_item(start);
         }

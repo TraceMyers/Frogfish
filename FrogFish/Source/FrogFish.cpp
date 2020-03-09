@@ -5,6 +5,7 @@
 #include "basic/Bases.h"
 #include "basic/Tech.h"
 #include "production/BuildGraph.h"
+#include "production/BuildOrder.h"
 #include <BWAPI.h>
 #include <iostream>
 #include <string>
@@ -40,7 +41,8 @@ void FrogFish::onStart() {
     Production::BuildGraph::init();
     // init build placement
     // init prod coord
-    // load build order
+    Production::BuildOrder::load("protoss", "2_hatch_hydra");
+    Production::BuildOrder::print();
     timer.start(1,0);
 }
 
