@@ -119,6 +119,8 @@ namespace Production::BuildOrder {
                     case Item::ACTION::CANCEL:
                         _supply_cost = _unit_type.supplyProvided() - _unit_type.supplyRequired()
                             + _unit_type.whatBuilds().first.supplyRequired();
+                    default:
+                        _supply_cost = 0;
                 }
             }
 

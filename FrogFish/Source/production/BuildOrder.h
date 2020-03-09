@@ -23,7 +23,7 @@ namespace Production::BuildOrder {
             int cancel_i
         );
 
-        int action() const {
+        ACTION action() const {
             return _action;
         }
 
