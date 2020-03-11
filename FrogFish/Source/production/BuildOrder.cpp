@@ -177,7 +177,7 @@ namespace Production::BuildOrder {
                             BWAPI::UnitType _unit_type = BWAPI::UnitTypes::None;
                             BWAPI::TechType _tech_type = BWAPI::TechTypes::None;
                             BWAPI::UpgradeType _upgrade_type = BWAPI::UpgradeTypes::None;
-                            int _count = 0;
+                            int _count = 1;
                             int _cancel_index = -1;
 
                             in_file >> word;

@@ -12,6 +12,8 @@
 
 using namespace Production;
 
+// TODO: redo mining regression accounting for distance
+
 namespace Production::Economy {
 
     namespace {
@@ -53,6 +55,7 @@ namespace Production::Economy {
         std::vector<unsigned int> reservation_IDs;
         std::vector<BWTimer *> reservation_timers;
         std::vector<int *> reserved_resources;
+        std::vector<std::vector<int>> build_order_sim_data;
 
         void estimate_income() {
             larva_ct = 0;
@@ -111,6 +114,147 @@ namespace Production::Economy {
             } 
             supply_per_frame = supply_per_frame_period / (SUPPLY_FRAME_SECONDS * 24);
         }
+
+        // TODO: Account for tech requirements
+        std::vector<std::vector<int>> simulate(int sim_seconds=360) {
+            double 
+                minerals = get_free_minerals(),
+                gas = get_free_gas(),
+                larva = larva_ct,
+                supply_used = self->supplyUsed(),
+                supply_total = self->supplyTotal(),
+                mps = minerals_per_frame * 24,
+                gps = gas_per_frame * 24,
+                lps = larva_per_frame * 24,
+                add_drone_mps = MPF_SIMPLE_CONST * 24,
+                add_drone_gps = GPF_CONST * 24,
+                add_hatch_lps = LPF_CONST * 24;
+            unsigned cur_ID = (unsigned)BuildOrder::current_index();
+            int
+                extractor_drone_sink = 0,
+                cur_make_ct = 0;
+
+            std::vector<int> making_IDs;
+            std::vector<BWAPI::UnitType> making_types;
+            std::vector<int> making_frames_left;
+
+            std::vector<std::vector<int>> ID_and_start_time;
+            auto &self_units = Basic::Units::self_units();
+
+            for (int i = 0; i < self_units.size(); ++i) {
+                BWAPI::Unit u = self_units[i];
+                int remaining_time = u->getRemainingBuildTime(); 
+                if (u->getType() == BWAPI::UnitTypes::Zerg_Egg) {
+                    making_types.push_back(u->getBuildType());
+                    making_frames_left.push_back(remaining_time);
+                }
+                else if (u->getType() == BWAPI::UnitTypes::Zerg_Hatchery && remaining_time > 0) {
+                    making_types.push_back(BWAPI::UnitTypes::Zerg_Hatchery);
+                    making_frames_left.push_back(remaining_time);
+                }
+            }
+            
+            int seconds_passed = 0;
+            while(cur_ID < BuildOrder::size() && seconds_passed < sim_seconds) {
+                auto &item = BuildOrder::get(cur_ID);
+                const BuildOrder::Item::ACTION &action = item.action();
+
+                // TODO: Account for 200 supply max
+                const BWAPI::UnitType &unit_type = item.unit_type();
+                int 
+                    min_cost = item.mineral_cost(),
+                    gas_cost = item.gas_cost(),
+                    supply_cost = item.supply_cost(),
+                    larva_cost = item.larva_cost(),
+                    make_ct = item.count();
+
+                if (
+                    min_cost <= minerals 
+                    && gas_cost <= gas 
+                    && (supply_cost <= 0 || supply_cost <= supply_total - supply_used)
+                    && (larva_cost == 0 || larva >= 1)
+                ) {
+                    minerals -= min_cost;
+                    gas -= gas_cost;
+                    supply_used += supply_cost;
+                    larva -= larva_cost;
+                    ++cur_make_ct;
+
+                    if (
+                        action == BuildOrder::Item::MAKE
+                        || action == BuildOrder::Item::MORPH
+                        || action == BuildOrder::Item::BUILD
+                    ) {
+                        if (action == BuildOrder::Item::BUILD) {
+                            mps -= add_drone_mps;
+                        }
+                        making_IDs.push_back(cur_ID);
+                        making_types.push_back(unit_type);
+                        making_frames_left.push_back(unit_type.buildTime() + USABLE_BUFFER);
+                    }
+                    else if (action == BuildOrder::Item::CANCEL) {
+                        int cancel_ID = item.cancel_index();
+                        auto ID_it = making_IDs.begin();
+                        auto type_it = making_types.begin();
+                        auto frames_it = making_frames_left.begin();
+                        for ( ; ID_it != making_IDs.end(); ++ID_it, ++type_it, ++frames_it) {
+                            if (*(ID_it) == cancel_ID) {
+                                if (unit_type.whatBuilds().first == BWAPI::UnitTypes::Zerg_Drone) {
+                                    mps += add_drone_mps;
+                                }
+                                making_IDs.erase(ID_it);
+                                making_types.erase(type_it);
+                                making_frames_left.erase(frames_it);
+                                break;
+                            }
+                        }
+                    }
+                    ID_and_start_time.push_back(std::vector<int> {(int)cur_ID, seconds_passed});
+                    if (cur_make_ct == make_ct) {
+                        cur_make_ct = 0;
+                        ++cur_ID;
+                    }
+                }
+                else {
+                    ++seconds_passed;
+                    minerals += mps;
+                    gas += gps;
+                    larva += lps;
+
+                    auto ID_it = making_IDs.begin();
+                    auto type_it = making_types.begin();
+                    auto frames_it = making_frames_left.begin();
+                    for ( ; ID_it != making_IDs.end(); ++ID_it, ++type_it, ++frames_it) {
+                        *(frames_it) -= 24;
+                        if (*(frames_it) <= 0) {
+                            BWAPI::UnitType &finished_type = *(type_it);
+
+                            supply_total += finished_type.supplyProvided();
+                            if (finished_type == BWAPI::UnitTypes::Zerg_Extractor) {
+                                extractor_drone_sink += 3;
+                            }
+                            else if (finished_type == BWAPI::UnitTypes::Zerg_Drone) {
+                                if (extractor_drone_sink > 0) {
+                                    gps += add_drone_gps;
+                                    --extractor_drone_sink;
+                                }
+                                else {
+                                    mps += add_drone_mps;
+                                }
+                            }
+                            else if (finished_type == BWAPI::UnitTypes::Zerg_Hatchery) {
+                                lps += add_hatch_lps;
+                            }
+
+                            ID_it = making_IDs.erase(ID_it);
+                            type_it = making_types.erase(type_it);
+                            frames_it = making_frames_left.erase(frames_it);
+                        }
+                    }
+                }
+            }
+            return ID_and_start_time;
+        }
     }
 
     void init() {
@@ -137,11 +281,8 @@ namespace Production::Economy {
             estimate_supply_per_frame();
             supply_frame_timer.restart();
         }
-
+        build_order_sim_data = simulate();
     }
-
-    // keep current coefs for normal mining, but need a coef for distance
-    // greater than some constant to calc long distance mining
 
     double get_minerals_per_frame() {return minerals_per_frame;}
 
@@ -221,234 +362,17 @@ namespace Production::Economy {
         return false;
     }
 
-    // TODO: 
-    //      - upgrades
-    //      - refactor so it's not so redundant, and a little more split up
+    const std::vector<std::vector<int>> &sim_data() {
+        return build_order_sim_data;
+    }
 
-    // Assumes:
-        // - things are made immediately when they can be
-        // - that when an extractor finishes, 3 drones go to gas, all others mine minerals
-        // - drones mine minerals at bases with a drone-to-mineral ratio of 1, 
-        // which is pretty accurate for ratios between ~0.4 and ~1.6
-        // - drones are available to make buildings, and that they will be taken off
-        // of mineral mining. 
-        // - that units being morphed from other units have those units available to
-        // morph from
-        // - that larva are spawn continuously from every hatchery (no sitting on larva)
-    // - Cancels do not support more than 1 cancellation per ID or passed-in making type
-    // - Becomes fairly inaccurate if a cancellation is in the build order wherein the
-    // building finishes before the cancellation can occur.
-    std::vector<std::vector<int>> simulate(int sim_seconds) {
-        double 
-            minerals = get_free_minerals(),
-            gas = get_free_gas(),
-            larva = larva_ct,
-            supply_used = self->supplyUsed(),
-            supply_total = self->supplyTotal(),
-            mps = minerals_per_frame * 24,
-            gps = gas_per_frame * 24,
-            lps = larva_per_frame * 24,
-            add_drone_mps = MPF_SIMPLE_CONST * 24,
-            add_drone_gps = GPF_CONST * 24,
-            add_hatch_lps = LPF_CONST * 24;
-        unsigned cur_ID = (unsigned)BuildOrder::current_index();
-        int
-            extractor_drone_sink = 0,
-            cur_make_ct = 0;
-
-        std::vector<int> making_IDs;
-        std::vector<BWAPI::UnitType> making_types;
-        std::vector<int> making_frames_left;
-
-        std::vector<std::vector<int>> ID_and_start_time;
-        std::vector<BWAPI::UnitType> types_making;
-        std::vector<int> remaining_build_time;
-        auto &self_units = Basic::Units::self_units();
-
-        // iterating over units that are making, and pushing their types/times
-        for (int i = 0; i < self_units.size(); ++i) {
-            BWAPI::Unit u = self_units[i];
-            int remaining_time = u->getRemainingBuildTime(); 
-            if (u->getType() == BWAPI::UnitTypes::Zerg_Egg) {
-                types_making.push_back(u->getBuildType());
-                remaining_build_time.push_back(remaining_time);
-            }
-            else if (u->getType() == BWAPI::UnitTypes::Zerg_Hatchery && remaining_time > 0) {
-                types_making.push_back(BWAPI::UnitTypes::Zerg_Hatchery);
-                remaining_build_time.push_back(remaining_time);
-            }
+    void print_sim_data() {
+        printf("------------------\n---------Sim Data:---------\n------------------\n\n");
+        for (auto &item : build_order_sim_data) {
+            int ID = item[0];
+            int time = item[1];
+            printf("Time: %d seconds\n", time);
+            BuildOrder::print_item((unsigned)ID);
         }
-        
-        // simulating the build order over time
-        int seconds_passed = 0;
-        while(cur_ID < BuildOrder::size() && seconds_passed < sim_seconds) {
-            auto &item = BuildOrder::get(cur_ID);
-            const BuildOrder::Item::ACTION &action = item.action();
-
-            // process cancels here, too
-            const BWAPI::UnitType &unit_type = item.unit_type();
-            int 
-                min_cost = item.mineral_cost(),
-                gas_cost = item.gas_cost(),
-                supply_cost = item.supply_cost(),
-                larva_cost = item.larva_cost(),
-                make_ct = item.count();
-
-            if (
-                min_cost <= minerals 
-                && gas_cost <= gas 
-                && (supply_cost <= 0 || supply_cost <= supply_total - supply_used)
-                && (larva_cost == 0 || larva >= 1)
-            ) {
-                minerals -= min_cost;
-                gas -= gas_cost;
-                supply_used += supply_cost;
-
-                if (
-                    action == BuildOrder::Item::MAKE
-                    || action == BuildOrder::Item::MORPH
-                    || action == BuildOrder::Item::BUILD
-                ) {
-                    if (action == BuildOrder::Item::BUILD) {
-                        mps -= add_drone_mps;
-                    }
-                    larva -= larva_cost;
-                    making_IDs.push_back(cur_ID);
-                    making_types.push_back(unit_type)`
-                    making_frames_left.push_back(unit_type.buildTime() + USABLE_BUFFER);
-                    ID_and_start_time.push_back(std::vector<int> {(int)cur_ID, seconds_passed});
-                    ++cur_make_ct;
-                    if (cur_make_ct == make_ct) {
-                        cur_make_ct = 0;
-                        ++cur_ID;
-                    }
-                }
-                else if (action == BuildOrder::Item::CANCEL) {
-
-                }
-                else {
-                    ++cur_ID;
-                }
-            }
-            else {
-                ++seconds_passed;
-                minerals += mps;
-                gas += gps;
-                larva += lps;
-                // printf("seconds passed: %d, minerals: %.2lf, mps: %.2lf\n", 
-                //     seconds_passed, minerals, mps);
-                auto ID_it = making_IDs.begin();
-                auto type_it = making_types.begin();
-                auto frames_it = making_frames_left.begin();
-                for ( ; ID_it != making_IDs.end(); ++ID_it, ++type_it, ++frames_it) {
-                    *(frames_it) -= 24;
-                    if (*(frames_it) <= 0) {
-                        BWAPI::UnitType &finished_type = *(type_it);
-
-                        supply_total += finished_type.supplyProvided();
-                        if (finished_type == BWAPI::UnitTypes::Zerg_Extractor) {
-                            extractor_drone_sink += 3;
-                        }
-                        else if (finished_type == BWAPI::UnitTypes::Zerg_Drone) {
-                            if (extractor_drone_sink > 0) {
-                                gps += add_drone_gps;
-                                --extractor_drone_sink;
-                            }
-                            else {
-                                mps += add_drone_mps;
-                            }
-                        }
-                        else if (finished_type == BWAPI::UnitTypes::Zerg_Hatchery) {
-                            lps += add_hatch_lps;
-                        }
-
-                        ID_it = making_IDs.erase(ID_it);
-                        type_it = making_types.erase(type_it);
-                        frames_it = making_frames_left.erase(frames_it);
-                        if (ID_it == making_IDs.end()) {break;}
-                    }
-                }
-                type_it = making_types_in.begin();
-                frames_it = making_frames_left_in.begin();
-                for ( ; type_it != making_types_in.end(); ++type_it, ++frames_it) {
-                    *(frames_it) -= 24;
-                    if (*(frames_it) <= 0) {
-                        BWAPI::UnitType &finished_type = *(type_it);
-
-                        supply_total += finished_type.supplyProvided();
-                        if (finished_type == BWAPI::UnitTypes::Zerg_Extractor) {
-                            extractor_drone_sink += 3;
-                        }
-                        else if (finished_type == BWAPI::UnitTypes::Zerg_Drone) {
-                            if (extractor_drone_sink > 0) {
-                                gps += add_drone_gps;
-                                --extractor_drone_sink;
-                            }
-                            else {
-                                mps += add_drone_mps;
-                            }
-                        }
-                        else if (finished_type == BWAPI::UnitTypes::Zerg_Hatchery) {
-                            lps += add_hatch_lps;
-                        }
-
-                        type_it = making_types_in.erase(type_it);
-                        frames_it = making_frames_left_in.erase(frames_it);
-                        if (type_it == making_types_in.end()) {break;}
-                    }
-                }
-            }
-            // else {
-            //     int cancel_ID = item.required_i;
-            //     auto ID_it = making_IDs.begin();
-            //     auto type_it = making_types.begin();
-            //     auto frames_it = making_frames_left.begin();
-            //     bool found_cancel = false;
-            //     for ( ; ID_it != making_IDs.end(); ++ID_it, ++type_it, ++frames_it) {
-            //         if (*(ID_it) == cancel_ID) {
-            //             BWAPI::UnitType &cancel_type = *type_it;
-            //             minerals += cancel_type.mineralPrice() * 0.75;
-            //             gas += cancel_type.gasPrice() * 0.75;
-            //             supply_used -= cancel_type.supplyRequired();
-
-            //             making_IDs.erase(ID_it);
-            //             making_types.erase(type_it);
-            //             making_frames_left.erase(frames_it);
-            //             found_cancel = true;
-
-            //             if (item.make_type.isBuilding()) {
-            //                 mps += add_drone_mps;
-            //             }
-            //             break;
-            //         }
-            //     }
-            //     if (!found_cancel) {
-            //         type_it = making_types_in.begin();
-            //         for ( ; type_it < making_types_in.end(); ++type_it) {
-            //             if (item.make_type == *type_it) {
-            //                 const BWAPI::UnitType &cancel_type = item.make_type;
-            //                 minerals += cancel_type.mineralPrice() * 0.75;
-            //                 gas += cancel_type.gasPrice() * 0.75;
-            //                 supply_used -= cancel_type.supplyRequired();
-            //                 making_types_in.erase(type_it);
-
-            //                 if (item.make_type.isBuilding()) {
-            //                     mps += add_drone_mps;
-            //                     supply_used += 2;
-            //                 }
-            //                 found_cancel = true;
-            //                 break;
-            //             }
-            //         }
-            //     }
-            //     // advances to the next item even if a cancellation isn't found in order
-            //     // to avoid worse predictions than otherwise
-            //     ++cur_ID;
-            // }
-            if (seconds_passed > 360) {
-                break;
-            }
-        }
-        return seconds_until_make;
     }
 }

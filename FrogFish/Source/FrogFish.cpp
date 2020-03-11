@@ -6,6 +6,7 @@
 #include "basic/Tech.h"
 #include "production/BuildGraph.h"
 #include "production/BuildOrder.h"
+#include "production/Economy.h"
 #include <BWAPI.h>
 #include <iostream>
 #include <string>
@@ -58,6 +59,7 @@ void FrogFish::onFrame() {
 
     // 2. update production data
     Production::BuildGraph::on_frame_update();
+    Production::Economy::on_frame_update();
     // update production coordinator
 
     // 3. issue commands that require newly assigned lists
@@ -67,8 +69,6 @@ void FrogFish::onFrame() {
     Utility::DebugDraw::draw_bases();
     Utility::DebugDraw::draw_build_nodes();
 
-    if (Broodwar->getFrameCount() % Broodwar->getLatencyFrames() != 0) {return;}
-    // RUN COMMANDS -----------------------------------------------------------------
     // produce (needs to move up)
     // send idle workers to mine minerals (needs to move up)
 }
