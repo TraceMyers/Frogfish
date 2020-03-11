@@ -73,7 +73,8 @@ void FrogFish::onFrame() {
     // send idle workers to mine minerals (needs to move up)
     timer.on_frame_update();
     if (timer.is_stopped()) {
-        timer.restart();
+        // timer.restart();
+        timer.start(1000000,0);
         Production::Economy::print_sim_data();
     }
 }

@@ -214,8 +214,6 @@ namespace Basic::Units {
         }
     }
 
-
-
     // only for self units
     void set_utask(BWAPI::Unit u, UTASK task) {
         int ID = u->getID();

@@ -13,7 +13,7 @@
 using namespace Production;
 
 // TODO: redo mining regression accounting for distance
-// TODO: econ sim error: iterating past end of vector
+// TODO: revise reservations to use build order ID's
 
 namespace Production::Economy {
 
@@ -56,7 +56,9 @@ namespace Production::Economy {
         std::vector<unsigned int> reservation_IDs;
         std::vector<BWTimer *> reservation_timers;
         std::vector<int *> reserved_resources;
+
         std::vector<std::vector<int>> build_order_sim_data;
+        std::vector<int> seconds_until_supply_block;
 
         void estimate_income() {
             larva_ct = 0;
@@ -118,6 +120,10 @@ namespace Production::Economy {
 
         // TODO: Account for tech requirements
         std::vector<std::vector<int>> simulate(int sim_seconds=360) {
+            const double
+                ADD_DRONE_MPS = MPF_SIMPLE_CONST * 24,
+                ADD_DRONE_GPS = GPF_CONST * 24,
+                ADD_HATCH_LPS = LPF_CONST * 24;
             double 
                 minerals = get_free_minerals(),
                 gas = get_free_gas(),
@@ -126,14 +132,17 @@ namespace Production::Economy {
                 supply_total = self->supplyTotal(),
                 mps = minerals_per_frame * 24,
                 gps = gas_per_frame * 24,
-                lps = larva_per_frame * 24,
-                add_drone_mps = MPF_SIMPLE_CONST * 24,
-                add_drone_gps = GPF_CONST * 24,
-                add_hatch_lps = LPF_CONST * 24;
-            unsigned cur_ID = (unsigned)BuildOrder::current_index();
+                lps = larva_per_frame * 24;
+            const int 
+                OVERLORD_MINERAL_COST = 100,
+                OVERLORD_SUPPLY_PROVIDED = 16,
+                SUPPLY_MAX = 400;
             int
                 extractor_drone_sink = 0,
-                cur_make_ct = 0;
+                cur_make_ct = 0,
+                seconds_passed = 0,
+                pre_sim_making_ID = -100;
+            unsigned cur_ID = (unsigned)BuildOrder::current_index();
 
             std::vector<int> making_IDs;
             std::vector<int> making_frames_left;
@@ -142,8 +151,6 @@ namespace Production::Economy {
             std::vector<std::vector<int>> ID_and_start_time;
             auto &self_units = Basic::Units::self_units();
 
-            printf("1\n");
-            int pre_sim_making_ID = -100;
             for (int i = 0; i < self_units.size(); ++i) {
                 BWAPI::Unit u = self_units[i];
                 int remaining_time = u->getRemainingBuildTime(); 
@@ -161,13 +168,13 @@ namespace Production::Economy {
                 }
             }
             
-            printf("2\n");
-            int seconds_passed = 0;
+            seconds_until_supply_block.clear();
+
             while(cur_ID < BuildOrder::size() && seconds_passed < sim_seconds) {
                 auto &item = BuildOrder::get(cur_ID);
                 const BuildOrder::Item::ACTION &action = item.action();
 
-                // TODO: Account for 200 supply max
+                // TODO: Account for 200 supply max (probably by splitting supply - and supply + in item)
                 const BWAPI::UnitType &unit_type = item.unit_type();
                 int 
                     min_cost = item.mineral_cost(),
@@ -176,13 +183,23 @@ namespace Production::Economy {
                     larva_cost = item.larva_cost(),
                     make_ct = item.count();
 
-                printf("ID: %d\n", cur_ID);
                 if (
                     min_cost <= minerals 
                     && gas_cost <= gas 
-                    && (supply_cost <= 0 || supply_cost <= supply_total - supply_used)
                     && (larva_cost == 0 || larva >= 1)
                 ) {
+                    if (!(supply_cost <= 0 || supply_cost <= supply_total - supply_used)) {
+                        while (supply_cost >= supply_total - supply_used) {
+                            if (supply_total >= SUPPLY_MAX) {
+                                supply_total = SUPPLY_MAX;
+                                break;
+                            }
+                            seconds_until_supply_block.push_back(seconds_passed);
+                            minerals -= OVERLORD_MINERAL_COST;
+                            supply_total += OVERLORD_SUPPLY_PROVIDED;
+                        }
+                    }
+
                     minerals -= min_cost;
                     gas -= gas_cost;
                     supply_used += supply_cost;
@@ -195,7 +212,7 @@ namespace Production::Economy {
                         || action == BuildOrder::Item::BUILD
                     ) {
                         if (action == BuildOrder::Item::BUILD) {
-                            mps -= add_drone_mps;
+                            mps -= ADD_DRONE_MPS;
                         }
                         making_IDs.push_back(cur_ID);
                         making_types.push_back(unit_type);
@@ -207,14 +224,13 @@ namespace Production::Economy {
                         auto type_it = making_types.begin();
                         auto frames_it = making_frames_left.begin();
                         for ( ; ID_it != making_IDs.end(); ++ID_it, ++type_it, ++frames_it) {
-                            printf("making (in cancel): %d\n", *(ID_it));
                             if (*(ID_it) == cancel_ID) {
                                 if (unit_type.whatBuilds().first == BWAPI::UnitTypes::Zerg_Drone) {
-                                    mps += add_drone_mps;
+                                    mps += ADD_DRONE_MPS;
                                 }
-                                ID_it = making_IDs.erase(ID_it);
-                                type_it = making_types.erase(type_it);
-                                frames_it = making_frames_left.erase(frames_it);
+                                making_IDs.erase(ID_it);
+                                making_types.erase(type_it);
+                                making_frames_left.erase(frames_it);
                                 break;
                             }
                         }
@@ -235,7 +251,6 @@ namespace Production::Economy {
                     auto type_it = making_types.begin();
                     auto frames_it = making_frames_left.begin();
                     for ( ; ID_it != making_IDs.end(); ++ID_it, ++type_it, ++frames_it) {
-                        printf("making (in advance time): %d\n", *(ID_it));
                         *(frames_it) -= 24;
                         if (*(frames_it) <= 0) {
                             BWAPI::UnitType &finished_type = *(type_it);
@@ -247,21 +262,23 @@ namespace Production::Economy {
                             }
                             else if (finished_type == BWAPI::UnitTypes::Zerg_Drone) {
                                 if (extractor_drone_sink > 0) {
-                                    gps += add_drone_gps;
+                                    gps += ADD_DRONE_GPS;
                                     --extractor_drone_sink;
                                 }
                                 else {
-                                    mps += add_drone_mps;
+                                    mps += ADD_DRONE_MPS;
                                 }
                             }
                             else if (finished_type == BWAPI::UnitTypes::Zerg_Hatchery) {
-                                lps += add_hatch_lps;
+                                lps += ADD_HATCH_LPS;
                             }
 
                             ID_it = making_IDs.erase(ID_it);
                             type_it = making_types.erase(type_it);
                             frames_it = making_frames_left.erase(frames_it);
                         }
+                        // iterates past end of vector otherwise due to erase
+                        if (ID_it == making_IDs.end()) { break; }
                     }
                 }
             }
