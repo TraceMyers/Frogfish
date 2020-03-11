@@ -40,16 +40,16 @@ void FrogFish::onStart() {
     onStart_init_bwem_and_bweb();
     Basic::Bases::init();
     Production::BuildGraph::init();
+    Production::Economy::init();
     // init build placement
     // init prod coord
     Production::BuildOrder::load("protoss", "2_hatch_hydra");
-    Production::BuildOrder::print();
+    // Production::BuildOrder::print();
     timer.start(1,0);
 }
 
 void FrogFish::onFrame() {
 	if (Broodwar->isReplay() || Broodwar->isPaused() || !Broodwar->self()) {return;}
-    timer.on_frame_update();
 
     // 1. update basic data that everything else references
     // clear base storage stuff
@@ -71,6 +71,11 @@ void FrogFish::onFrame() {
 
     // produce (needs to move up)
     // send idle workers to mine minerals (needs to move up)
+    timer.on_frame_update();
+    if (timer.is_stopped()) {
+        timer.restart();
+        Production::Economy::print_sim_data();
+    }
 }
 
 void FrogFish::onSendText(std::string text) {

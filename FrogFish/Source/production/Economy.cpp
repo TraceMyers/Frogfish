@@ -13,6 +13,7 @@
 using namespace Production;
 
 // TODO: redo mining regression accounting for distance
+// TODO: econ sim error: iterating past end of vector
 
 namespace Production::Economy {
 
@@ -135,25 +136,32 @@ namespace Production::Economy {
                 cur_make_ct = 0;
 
             std::vector<int> making_IDs;
-            std::vector<BWAPI::UnitType> making_types;
             std::vector<int> making_frames_left;
+            std::vector<BWAPI::UnitType> making_types;
 
             std::vector<std::vector<int>> ID_and_start_time;
             auto &self_units = Basic::Units::self_units();
 
+            printf("1\n");
+            int pre_sim_making_ID = -100;
             for (int i = 0; i < self_units.size(); ++i) {
                 BWAPI::Unit u = self_units[i];
                 int remaining_time = u->getRemainingBuildTime(); 
                 if (u->getType() == BWAPI::UnitTypes::Zerg_Egg) {
+                    making_IDs.push_back(pre_sim_making_ID);
                     making_types.push_back(u->getBuildType());
                     making_frames_left.push_back(remaining_time);
+                    ++pre_sim_making_ID;
                 }
                 else if (u->getType() == BWAPI::UnitTypes::Zerg_Hatchery && remaining_time > 0) {
+                    making_IDs.push_back(pre_sim_making_ID);
                     making_types.push_back(BWAPI::UnitTypes::Zerg_Hatchery);
                     making_frames_left.push_back(remaining_time);
+                    ++pre_sim_making_ID;
                 }
             }
             
+            printf("2\n");
             int seconds_passed = 0;
             while(cur_ID < BuildOrder::size() && seconds_passed < sim_seconds) {
                 auto &item = BuildOrder::get(cur_ID);
@@ -168,6 +176,7 @@ namespace Production::Economy {
                     larva_cost = item.larva_cost(),
                     make_ct = item.count();
 
+                printf("ID: %d\n", cur_ID);
                 if (
                     min_cost <= minerals 
                     && gas_cost <= gas 
@@ -198,13 +207,14 @@ namespace Production::Economy {
                         auto type_it = making_types.begin();
                         auto frames_it = making_frames_left.begin();
                         for ( ; ID_it != making_IDs.end(); ++ID_it, ++type_it, ++frames_it) {
+                            printf("making (in cancel): %d\n", *(ID_it));
                             if (*(ID_it) == cancel_ID) {
                                 if (unit_type.whatBuilds().first == BWAPI::UnitTypes::Zerg_Drone) {
                                     mps += add_drone_mps;
                                 }
-                                making_IDs.erase(ID_it);
-                                making_types.erase(type_it);
-                                making_frames_left.erase(frames_it);
+                                ID_it = making_IDs.erase(ID_it);
+                                type_it = making_types.erase(type_it);
+                                frames_it = making_frames_left.erase(frames_it);
                                 break;
                             }
                         }
@@ -225,10 +235,12 @@ namespace Production::Economy {
                     auto type_it = making_types.begin();
                     auto frames_it = making_frames_left.begin();
                     for ( ; ID_it != making_IDs.end(); ++ID_it, ++type_it, ++frames_it) {
+                        printf("making (in advance time): %d\n", *(ID_it));
                         *(frames_it) -= 24;
                         if (*(frames_it) <= 0) {
                             BWAPI::UnitType &finished_type = *(type_it);
 
+                            // TODO: fix gas assignment behavior
                             supply_total += finished_type.supplyProvided();
                             if (finished_type == BWAPI::UnitTypes::Zerg_Extractor) {
                                 extractor_drone_sink += 3;
@@ -367,7 +379,7 @@ namespace Production::Economy {
     }
 
     void print_sim_data() {
-        printf("------------------\n---------Sim Data:---------\n------------------\n\n");
+        printf("---------------------------\n---------Sim Data:---------\n---------------------------\n\n");
         for (auto &item : build_order_sim_data) {
             int ID = item[0];
             int time = item[1];
