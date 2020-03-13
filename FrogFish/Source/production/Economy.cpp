@@ -33,8 +33,6 @@ namespace Production::Economy {
             supply_frames[3] {0},
             larva_ct = 0,
             prev_supply;
-        unsigned int 
-            reserved_resource_ID = 1;
         double
             supply_per_frame = 0.0,
             minerals_per_frame = 0.0,
@@ -119,7 +117,7 @@ namespace Production::Economy {
         }
 
         // TODO: Account for tech requirements
-        std::vector<std::vector<int>> simulate(int sim_seconds=360) {
+        std::vector<std::vector<int>> simulate(bool correct_for_supply_block=true, int sim_seconds=360) {
             const double
                 ADD_DRONE_MPS = MPF_SIMPLE_CONST * 24,
                 ADD_DRONE_GPS = GPF_CONST * 24,
@@ -182,22 +180,52 @@ namespace Production::Economy {
                     supply_cost = item.supply_cost(),
                     larva_cost = item.larva_cost(),
                     make_ct = item.count();
+                bool
+                    supply_not_blocked = (supply_cost <= 0 || supply_cost <= supply_total - supply_used),
+                    supply_blocked_and_will_correct = (
+                        !supply_not_blocked
+                        && correct_for_supply_block
+                    );
 
                 if (
-                    min_cost <= minerals 
+                    min_cost <= minerals
                     && gas_cost <= gas 
                     && (larva_cost == 0 || larva >= 1)
+                    && (supply_not_blocked || supply_blocked_and_will_correct)
                 ) {
-                    if (!(supply_cost <= 0 || supply_cost <= supply_total - supply_used)) {
+                    if (supply_blocked_and_will_correct) {
+                        // if we run into an unplanned supply block, we put the overlord
+                        // into the sim asap and push things back if needed.
                         while (supply_cost >= supply_total - supply_used) {
                             if (supply_total >= SUPPLY_MAX) {
                                 supply_total = SUPPLY_MAX;
                                 break;
                             }
+                            if (minerals < 100) {
+                                double deficit = 100 - minerals;
+                                int seconds_to_100_minerals = abs((int)round(deficit / mps)); 
+                                int frames_to_100_minerals = seconds_to_100_minerals * 24;
+                                int frames_passed = seconds_passed * 24;
+                                auto frames_it = making_frames_left.begin();
+                                while (frames_it != making_frames_left.end()) {
+                                    int available_frames = frames_passed - *frames_it;
+                                    if (available_frames >= 0 && available_frames < frames_to_100_minerals) {
+                                        *frames_it += frames_to_100_minerals;
+                                    }
+                                    ++frames_it;
+                                }
+                                for (auto ID_and_time : build_order_sim_data) {
+                                    int time_since_item_projected = seconds_passed - ID_and_time[1];
+                                    if (time_since_item_projected < seconds_to_100_minerals) {
+                                        ID_and_time[1] += seconds_to_100_minerals;
+                                    }
+                                }
+                            }
                             seconds_until_supply_block.push_back(seconds_passed);
                             minerals -= OVERLORD_MINERAL_COST;
                             supply_total += OVERLORD_SUPPLY_PROVIDED;
                         }
+                        if (min_cost > minerals) {continue;}
                     }
 
                     minerals -= min_cost;
@@ -335,22 +363,20 @@ namespace Production::Economy {
 
     // returns reference ID
     // allows current resources - reserved resources to go negative
-    unsigned int make_reservation(int minerals, int gas, int reservation_seconds) {
-        printf("reservation for %d minerals made\n", minerals);
-        reserved_minerals += minerals;
-        reserved_gas += gas;
+    void make_reservation(unsigned ID, int reservation_seconds) {
+        auto &item = BuildOrder::get(ID);
+        reserved_minerals += item.mineral_cost();
+        reserved_gas += item.gas_cost();
         BWTimer *reserve_timer = new BWTimer();
         reserve_timer->start(reservation_seconds, 0);
         reservation_timers.push_back(reserve_timer); 
-        reserved_resources.push_back(new int[2] {minerals, gas});
-        reservation_IDs.push_back(reserved_resource_ID);
-        reserved_resource_ID++;
-        return reserved_resource_ID - 1;
+        reserved_resources.push_back(new int[2] {item.mineral_cost(), item.gas_cost()});
+        reservation_IDs.push_back(ID);
     }
 
     // something should have gone wrong if this returns true to a concerned party;
     // said party should be regularly checking on its reservation's time left
-    bool reservation_alive(unsigned int ID) {
+    bool reservation_alive(unsigned ID) {
         auto it = std::find(reservation_IDs.begin(), reservation_IDs.end(), ID);
         if (it != reservation_IDs.end()) {
             return true;
@@ -360,7 +386,7 @@ namespace Production::Economy {
 
     // used internally and externally. Works for killing/canceling a res,
     // or for noting that the res is filled
-    bool end_reservation(unsigned int ID) {
+    bool end_reservation(unsigned ID) {
         auto it_rr = reserved_resources.begin();
         auto it_rt = reservation_timers.begin();
         auto it_rid = reservation_IDs.begin();
@@ -380,7 +406,7 @@ namespace Production::Economy {
         return false;
     }
 
-    bool extend_reservation(unsigned int ID, int seconds) {
+    bool extend_reservation(unsigned ID, int seconds) {
         for (unsigned int i = 0; i < reservation_IDs.size(); ++i) {
             if (ID == reservation_IDs[i]) {
                 int frames_left = reservation_timers[i]->get_frames_left();
@@ -403,5 +429,12 @@ namespace Production::Economy {
             printf("Time: %d seconds\n", time);
             BuildOrder::print_item((unsigned)ID);
         }
+    }
+
+    int seconds_until_supply_blocked() {
+        if (seconds_until_supply_block.size() > 0) {
+            return seconds_until_supply_block[0];
+        }
+        else return -1;
     }
 }

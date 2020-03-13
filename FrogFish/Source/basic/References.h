@@ -15,6 +15,7 @@ namespace Basic::Refs {
         GAS,
         TRANSFER,
         BUILD,
+        MAKE,
         MORPH,
         ATTACK,
         SCOUT

@@ -136,6 +136,7 @@
     <ClCompile Include="Source\production\BuildGraph.cpp" />
     <ClCompile Include="Source\production\BuildOrder.cpp" />
     <ClCompile Include="Source\production\Economy.cpp" />
+    <ClCompile Include="Source\production\PUnits.cpp" />
     <ClCompile Include="Source\utility\BWTimer.cpp" />
     <ClCompile Include="Source\utility\DebugDraw.cpp" />
     <ClCompile Include="Source\utility\FrogMath.cpp" />
@@ -175,6 +176,7 @@
     <ClInclude Include="Source\production\BuildGraph.h" />
     <ClInclude Include="Source\production\BuildOrder.h" />
     <ClInclude Include="Source\production\Economy.h" />
+    <ClInclude Include="Source\production\PUnits.h" />
     <ClInclude Include="Source\utility\BWTimer.h" />
     <ClInclude Include="Source\utility\DebugDraw.h" />
     <ClInclude Include="Source\utility\FrogMath.h" />

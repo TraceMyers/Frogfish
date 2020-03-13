@@ -76,6 +76,7 @@ namespace Production::BuildOrder {
         int _gas_cost = 0;
         int _larva_cost = 0;
         int _supply_cost = 0;
+        int _made = 0;
     };
 
     void            load(const char *_race, const char *build_name);
@@ -105,8 +106,10 @@ namespace Production::BuildOrder {
                         int _cancel_index
                     );
     int             current_index();
-    const Item &    peek_next();
-    const Item &    next();
+    const Item &    current_item();
+    void            increment_current_made_count();
+    bool            current_item_filled();
+    void            next();
     const Item &    get(int i);
     unsigned        size();
     bool            finished();

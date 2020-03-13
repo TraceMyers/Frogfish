@@ -137,10 +137,11 @@ namespace Production::BuildOrder {
     }
 
     namespace {
-        std::string       race;
-        std::string       name;
-        std::vector<InternalItem> items;
-        int               cur_index;
+        std::string                 race;
+        std::string                 name;
+        std::vector<InternalItem>   items;
+        int                         cur_index;
+        int                         cur_made_count;
 
         void _push(InternalItem item) {
             items.push_back(item);
@@ -324,14 +325,23 @@ namespace Production::BuildOrder {
         return cur_index;
     }
 
-    const Item &peek_next() {
+    // unsafe! don't use without checking if BuildOrder::finished()
+    const Item &current_item() {
         return items[cur_index];
     }
 
-    const Item &next() {
+    void increment_current_made_count() {
+        ++cur_made_count;
+    }
+
+    // unsafe! don't use without checking if BuildOrder::finished()
+    bool current_item_filled() {
+        return cur_made_count >= items[cur_index].count();
+    }
+
+    void next() {
         ++cur_index;
-        printf("build order next item: %d\n", cur_index);
-        return items[cur_index - 1];
+        cur_made_count = 0;
     }
 
     const Item &get(int i) {
@@ -343,7 +353,7 @@ namespace Production::BuildOrder {
     }
 
     bool finished() {
-        return (unsigned int)cur_index >= items.size();
+        return (unsigned)cur_index >= items.size();
     }
 
     void print(unsigned int start) {

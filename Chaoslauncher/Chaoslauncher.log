@@ -256,3 +256,63 @@
 3/11/2020 7:21:13 PM 8008 ApplyPatch for BWAPI 4.4.0 Injector [DEBUG]
 3/11/2020 7:21:13 PM 8008 ApplyPatch for W-MODE 1.02
 3/11/2020 7:21:13 PM 8008 Starting Starcraft completed
+3/12/2020 2:40:38 PM 8008 Startbutton
+3/12/2020 2:40:38 PM 8008 Starting Game Starcraft 1.16.1 C:\ProgramData\bwapi\starcraft\StarCraft.exe
+3/12/2020 2:40:38 PM 8008 BWAPI 4.4.0 Injector [DEBUG] Version  Compatible
+3/12/2020 2:40:38 PM 8008 W-MODE 1.02 Version 1.0.2 Compatible
+3/12/2020 2:40:38 PM 8008 Obtained DebugPrivilege
+3/12/2020 2:40:38 PM 8008 CreateProcess
+3/12/2020 2:40:38 PM 8008 Call ScSuspended for all active Plugins
+3/12/2020 2:40:38 PM 8008 ApplyPatchSuspended for BWAPI 4.4.0 Injector [DEBUG]
+3/12/2020 2:40:38 PM 8008 ApplyPatchSuspended for W-MODE 1.02
+3/12/2020 2:40:38 PM 8008 ResumeThread
+3/12/2020 2:40:38 PM 8008 WaitForInputIdle
+3/12/2020 2:40:39 PM 8008 Call ScWindowCreated for all active Plugins
+3/12/2020 2:40:39 PM 8008 ApplyPatch for BWAPI 4.4.0 Injector [DEBUG]
+3/12/2020 2:40:39 PM 8008 ApplyPatch for W-MODE 1.02
+3/12/2020 2:40:39 PM 8008 Starting Starcraft completed
+3/12/2020 6:50:30 PM 8008 Startbutton
+3/12/2020 6:50:30 PM 8008 Starting Game Starcraft 1.16.1 C:\ProgramData\bwapi\starcraft\StarCraft.exe
+3/12/2020 6:50:30 PM 8008 BWAPI 4.4.0 Injector [DEBUG] Version  Compatible
+3/12/2020 6:50:30 PM 8008 W-MODE 1.02 Version 1.0.2 Compatible
+3/12/2020 6:50:30 PM 8008 Obtained DebugPrivilege
+3/12/2020 6:50:30 PM 8008 CreateProcess
+3/12/2020 6:50:30 PM 8008 Call ScSuspended for all active Plugins
+3/12/2020 6:50:30 PM 8008 ApplyPatchSuspended for BWAPI 4.4.0 Injector [DEBUG]
+3/12/2020 6:50:30 PM 8008 ApplyPatchSuspended for W-MODE 1.02
+3/12/2020 6:50:30 PM 8008 ResumeThread
+3/12/2020 6:50:30 PM 8008 WaitForInputIdle
+3/12/2020 6:50:31 PM 8008 Call ScWindowCreated for all active Plugins
+3/12/2020 6:50:31 PM 8008 ApplyPatch for BWAPI 4.4.0 Injector [DEBUG]
+3/12/2020 6:50:31 PM 8008 ApplyPatch for W-MODE 1.02
+3/12/2020 6:50:31 PM 8008 Starting Starcraft completed
+3/12/2020 6:52:11 PM 8008 Startbutton
+3/12/2020 6:52:11 PM 8008 Starting Game Starcraft 1.16.1 C:\ProgramData\bwapi\starcraft\StarCraft.exe
+3/12/2020 6:52:11 PM 8008 BWAPI 4.4.0 Injector [DEBUG] Version  Compatible
+3/12/2020 6:52:11 PM 8008 W-MODE 1.02 Version 1.0.2 Compatible
+3/12/2020 6:52:11 PM 8008 Obtained DebugPrivilege
+3/12/2020 6:52:11 PM 8008 CreateProcess
+3/12/2020 6:52:11 PM 8008 Call ScSuspended for all active Plugins
+3/12/2020 6:52:11 PM 8008 ApplyPatchSuspended for BWAPI 4.4.0 Injector [DEBUG]
+3/12/2020 6:52:11 PM 8008 ApplyPatchSuspended for W-MODE 1.02
+3/12/2020 6:52:11 PM 8008 ResumeThread
+3/12/2020 6:52:11 PM 8008 WaitForInputIdle
+3/12/2020 6:52:12 PM 8008 Call ScWindowCreated for all active Plugins
+3/12/2020 6:52:12 PM 8008 ApplyPatch for BWAPI 4.4.0 Injector [DEBUG]
+3/12/2020 6:52:12 PM 8008 ApplyPatch for W-MODE 1.02
+3/12/2020 6:52:12 PM 8008 Starting Starcraft completed
+3/12/2020 6:56:11 PM 8008 Startbutton
+3/12/2020 6:56:11 PM 8008 Starting Game Starcraft 1.16.1 C:\ProgramData\bwapi\starcraft\StarCraft.exe
+3/12/2020 6:56:11 PM 8008 BWAPI 4.4.0 Injector [DEBUG] Version  Compatible
+3/12/2020 6:56:11 PM 8008 W-MODE 1.02 Version 1.0.2 Compatible
+3/12/2020 6:56:11 PM 8008 Obtained DebugPrivilege
+3/12/2020 6:56:11 PM 8008 CreateProcess
+3/12/2020 6:56:11 PM 8008 Call ScSuspended for all active Plugins
+3/12/2020 6:56:11 PM 8008 ApplyPatchSuspended for BWAPI 4.4.0 Injector [DEBUG]
+3/12/2020 6:56:11 PM 8008 ApplyPatchSuspended for W-MODE 1.02
+3/12/2020 6:56:11 PM 8008 ResumeThread
+3/12/2020 6:56:11 PM 8008 WaitForInputIdle
+3/12/2020 6:56:12 PM 8008 Call ScWindowCreated for all active Plugins
+3/12/2020 6:56:12 PM 8008 ApplyPatch for BWAPI 4.4.0 Injector [DEBUG]
+3/12/2020 6:56:12 PM 8008 ApplyPatch for W-MODE 1.02
+3/12/2020 6:56:12 PM 8008 Starting Starcraft completed

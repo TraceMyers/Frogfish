@@ -7,6 +7,7 @@
 #include "production/BuildGraph.h"
 #include "production/BuildOrder.h"
 #include "production/Economy.h"
+#include "production/PUnits.h"
 #include <BWAPI.h>
 #include <iostream>
 #include <string>
@@ -60,6 +61,7 @@ void FrogFish::onFrame() {
     // 2. update production data
     Production::BuildGraph::on_frame_update();
     Production::Economy::on_frame_update();
+    Production::Units::on_frame_update();
     // update production coordinator
 
     // 3. issue commands that require newly assigned lists
