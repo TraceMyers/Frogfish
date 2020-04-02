@@ -3,7 +3,7 @@
 
 #include <BWAPI.h>
 
-namespace FrogMath {
+namespace Utility::FrogMath {
 
     const double PI = 3.14159265359;
     
@@ -17,4 +17,5 @@ namespace FrogMath {
         double inside_angle
     );
     std::vector<double> unit_vector(BWAPI::Position a, BWAPI::Position b);
+    BWAPI::TilePosition average_tileposition(std::vector<BWAPI::Unit> units);
 }

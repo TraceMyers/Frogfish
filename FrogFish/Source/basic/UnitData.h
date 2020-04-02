@@ -26,7 +26,7 @@ namespace Basic::Units {
         int                 spell_cd;
         BWAPI::Unit         transport;
         BWAPI::Unitset      loaded_units;
-        BWAPI::TechType     tech_researching;
+        BWAPI::TechType     teching;
         BWAPI::UpgradeType  upgrading;
         // both
         int                 ID;
@@ -42,6 +42,7 @@ namespace Basic::Units {
         BWAPI::Position     pos;
         BWAPI::TilePosition tilepos;
         UTYPE               u_type;
+        int                 group_ID;
         // enemy
         bool                missing;
     };

@@ -114,7 +114,7 @@ namespace Basic::Units {
             u_data.stasis_timer = u->getStasisTimer();
             u_data.transport = u->getTransport();
             u_data.loaded_units = u->getLoadedUnits();
-            u_data.tech_researching = u->getTech();
+            u_data.teching = u->getTech();
             u_data.upgrading = u->getUpgrade();
             u_data.velocity[0] = u->getVelocityX(); 
             u_data.velocity[1] = u->getVelocityY();
@@ -246,5 +246,4 @@ namespace Basic::Units {
     const UnitArray &enemy_just_changed_type() {return _enemy_just_changed_type;}
 
     const UnitArray &enemy_just_moved() {return _enemy_just_moved;}
-
 }
