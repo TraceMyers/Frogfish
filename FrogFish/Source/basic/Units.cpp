@@ -215,12 +215,18 @@ namespace Basic::Units {
     }
 
     // only for self units
-    void set_utask(BWAPI::Unit u, UTASK task, int cmd_delay_frames) {
+    void set_utask(BWAPI::Unit u, UTASK task) {
         int ID = u->getID();
         auto &unit_data = ID_to_data[ID];
         unit_data->u_task = task;
+    }
+
+    void set_cmd_delay(BWAPI::Unit u, int cmd_delay_frames) {
+        int ID = u->getID();
+        auto &unit_data = ID_to_data[ID];
         unit_data->cmd_ready = false;
         unit_data->cmd_timer.start(0, cmd_delay_frames);
+
     }
 
     const UnitArray &self_units() {

@@ -45,7 +45,7 @@ namespace Basic::Units {
         stasis_timer(u->getStasisTimer()),
         transport(u->getTransport()),
         loaded_units(u->getLoadedUnits()),
-        tech_researching(u->getTech()),
+        teching(u->getTech()),
         upgrading(u->getUpgrade()),
         type(u->getType()), 
         init_type(u->getInitialType()),

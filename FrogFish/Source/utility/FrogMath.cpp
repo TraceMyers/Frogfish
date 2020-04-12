@@ -66,16 +66,31 @@ namespace Utility::FrogMath{
     }
 
     BWAPI::TilePosition average_tileposition(std::vector<BWAPI::Unit> units) {
-        BWAPI::TilePosition avg_pos;
+        BWAPI::TilePosition avg_tilepos;
+        avg_tilepos.x = 0;
+        avg_tilepos.y = 0;
+        for (BWAPI::Unit &u: units) {
+            const BWAPI::TilePosition &tp = Basic::Units::data(u).tilepos;
+            avg_tilepos.x += tp.x;
+            avg_tilepos.y += tp.y;
+        }
+        int units_size = units.size();
+        avg_tilepos.x = avg_tilepos.x / units_size;
+        avg_tilepos.y = avg_tilepos.y / units_size;
+        return avg_tilepos;
+    }
+
+    BWAPI::Position average_position(std::vector<BWAPI::Unit> units) {
+        BWAPI::Position avg_pos;
         avg_pos.x = 0;
         avg_pos.y = 0;
         for (BWAPI::Unit &u: units) {
-            const BWAPI::TilePosition &tp = Basic::Units::data(u).tilepos;
-            avg_pos.x += tp.x;
-            avg_pos.y += tp.y;
+            const BWAPI::Position &p = Basic::Units::data(u).pos;
+            avg_pos.x += p.x;
+            avg_pos.y += p.y;
         }
-        avg_pos.x = (int)round((double)avg_pos.x / units.size());
-        avg_pos.y = (int)round((double)avg_pos.y / units.size());
+        avg_pos.x = avg_pos.x / units.size();
+        avg_pos.y = avg_pos.y / units.size();
         return avg_pos;
     }
 }
