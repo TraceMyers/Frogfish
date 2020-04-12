@@ -1,5 +1,6 @@
 #include "FrogMath.h"
 #include "basic/Units.h"
+#include "basic/Tech.h"
 #include <BWAPI.h>
 #include <cmath>
 
@@ -92,5 +93,26 @@ namespace Utility::FrogMath{
         avg_pos.x = avg_pos.x / units.size();
         avg_pos.y = avg_pos.y / units.size();
         return avg_pos;
+    }
+
+    float average_speed(std::vector<BWAPI::Unit> units) {
+        // TODO: move speed + upgrade reference elsewhere, don't have to check everywhere every time
+        bool zergling_speed = Basic::Tech::self_upgrade_level(BWAPI::UpgradeTypes::Metabolic_Boost) > 0;
+        bool hydralisk_speed = Basic::Tech::self_upgrade_level(BWAPI::UpgradeTypes::Muscular_Augments) > 0;
+        bool ultralisk_speed = Basic::Tech::self_upgrade_level(BWAPI::UpgradeTypes::Anabolic_Synthesis) > 0;
+        float total_speed = 0.0f;
+        for (auto &unit : units) {
+            BWAPI::UnitType &unit_type = unit->getType();
+            float unit_speed = (float)unit_type.topSpeed();
+            if (
+                (unit_type == BWAPI::UnitTypes::Zerg_Zergling && zergling_speed)
+                || (unit_type == BWAPI::UnitTypes::Zerg_Hydralisk && hydralisk_speed)
+                || (unit_type == BWAPI::UnitTypes::Zerg_Ultralisk && ultralisk_speed)
+            ) {
+                unit_speed *= 1.5f;
+            }
+            total_speed += unit_speed;
+        }
+        return total_speed / units.size();
     }
 }

@@ -13,8 +13,6 @@ namespace Basic::Tech {
 
     namespace {
         std::map<BWAPI::UnitType, bool> _self_can_make;
-        std::vector<BWAPI::UpgradeType> self_upgrades;
-        std::vector<BWAPI::TechType> self_techs;
     }
 
     void on_frame_update() {
@@ -30,6 +28,7 @@ namespace Basic::Tech {
                     for (auto &type : struct_types) {
                         if (this_type == type) {
                             recorded = true;
+                            break;
                         }
                     }
                     if (!recorded) {
@@ -54,14 +53,7 @@ namespace Basic::Tech {
             }
             if (requirement_met) {
                 if (this_type == BWAPI::UnitTypes::Zerg_Lurker) {
-                    bool found_lurker_aspect = false;
-                    for (auto &tech : self_techs) {
-                        if (tech == BWAPI::TechTypes::Lurker_Aspect) {
-                            found_lurker_aspect = true;
-                            break;
-                        }
-                    }
-                    if (found_lurker_aspect) {
+                    if (Broodwar->self()->hasResearched(BWAPI::TechTypes::Lurker_Aspect)) {
                         _self_can_make[this_type] = true;
                     }
                     else {
@@ -80,5 +72,13 @@ namespace Basic::Tech {
 
     bool self_can_make(BWAPI::UnitType &ut) {
         return _self_can_make[ut];
+    }
+
+    int self_upgrade_level(const BWAPI::UpgradeType &upgrade_type) {
+        Broodwar->self()->getUpgradeLevel(upgrade_type);
+    }
+
+    bool self_has_tech(const BWAPI::TechType &tech_type) {
+        Broodwar->self()->hasResearched(tech_type);
     }
 }
