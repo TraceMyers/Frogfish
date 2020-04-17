@@ -7,7 +7,9 @@
 #include "production/BuildGraph.h"
 #include "production/BuildOrder.h"
 #include "production/Economy.h"
-#include "production/PUnits.h"
+#include "production/MakeUnits.h"
+#include "production/Construction.h"
+#include "production/GetTech.h"
 #include <BWAPI.h>
 #include <iostream>
 #include <string>
@@ -42,10 +44,9 @@ void FrogFish::onStart() {
     Basic::Bases::init();
     Production::BuildGraph::init();
     Production::Economy::init();
-    // init build placement
-    // init prod coord
+    Production::Construction::init();
     Production::BuildOrder::load("protoss", "2_hatch_hydra");
-    // Production::BuildOrder::print();
+    Production::BuildOrder::print();
     timer.start(1,0);
 }
 
@@ -61,8 +62,9 @@ void FrogFish::onFrame() {
     // 2. update production data
     Production::BuildGraph::on_frame_update();
     Production::Economy::on_frame_update();
-    Production::Units::on_frame_update();
-    // update production coordinator
+    Production::MakeUnits::on_frame_update();
+    Production::Construction::on_frame_update();
+    Production::GetTech::on_frame_update();
 
     // 3. issue commands that require newly assigned lists
     // send mineral workers to gas
@@ -71,14 +73,13 @@ void FrogFish::onFrame() {
     Utility::DebugDraw::draw_bases();
     Utility::DebugDraw::draw_build_nodes();
 
-    // produce (needs to move up)
     // send idle workers to mine minerals (needs to move up)
-    timer.on_frame_update();
-    if (timer.is_stopped()) {
-        // timer.restart();
-        timer.start(1000000,0);
-        Production::Economy::print_sim_data();
-    }
+    // timer.on_frame_update();
+    // if (timer.is_stopped()) {
+    //     // timer.restart();
+    //     timer.start(1000000,0);
+    //     Production::Economy::print_sim_data();
+    // }
 }
 
 void FrogFish::onSendText(std::string text) {

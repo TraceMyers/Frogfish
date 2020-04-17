@@ -12,7 +12,7 @@ namespace Production::BuildOrder {
         /* PUBLIC */
         public:
 
-        enum ACTION {MAKE, MORPH, BUILD, TECH, UPGRADE, CANCEL};
+        enum ACTION {MAKE, MORPH, BUILD, TECH, UPGRADE, CANCEL, NONE};
 
         Item(
             ACTION act,

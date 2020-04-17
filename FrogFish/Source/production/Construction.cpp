@@ -130,18 +130,12 @@ namespace Production::Construction {
         void resolve_dead_builders() {
             // exists()? does it even work?
 
-            // if something went wrong with a build job in the last frame, remove it this frame.
-            // if no special action is taken by the decision-making process, this build job will
-            // be restarted if it never started constructing; it will be forgotten if it started,
-            // since the build order has already advanced
             for (unsigned i = 0; i < statuses.size(); ++i) {
                 if (statuses[i] == DEAD) {
                     remove_build(i);
                     --i;
                 }
             }
-            // mark dead builders for one frame for other processes to see, 
-            // then get to resolving them next frame with code above
             auto &dead_units = Basic::Units::self_just_destroyed();
             for (int i = 0; i < dead_units.size(); ++i) {
                 const BWAPI::Unit &dead_unit = dead_units[i];

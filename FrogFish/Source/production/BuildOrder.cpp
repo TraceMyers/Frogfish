@@ -142,6 +142,14 @@ namespace Production::BuildOrder {
         std::vector<InternalItem>   items;
         int                         cur_index;
         int                         cur_made_count;
+        Item                        end_item(
+                                        Item::ACTION::NONE, 
+                                        BWAPI::UnitTypes::None,
+                                        BWAPI::TechTypes::None,
+                                        BWAPI::UpgradeTypes::None,
+                                        0,
+                                        -1
+                                    );
 
         void _push(InternalItem item) {
             items.push_back(item);
@@ -325,18 +333,18 @@ namespace Production::BuildOrder {
         return cur_index;
     }
 
-    // unsafe! don't use without checking if BuildOrder::finished()
     const Item &current_item() {
-        return items[cur_index];
+        if (cur_index < items.size()) {return items[cur_index];}
+        return end_item;
     }
 
     void increment_current_made_count() {
         ++cur_made_count;
     }
 
-    // unsafe! don't use without checking if BuildOrder::finished()
     bool current_item_filled() {
-        return cur_made_count >= items[cur_index].count();
+        if (cur_index < items.size()) {return cur_made_count >= items[cur_index].count();}
+        return true;
     }
 
     void next() {
@@ -344,6 +352,7 @@ namespace Production::BuildOrder {
         cur_made_count = 0;
     }
 
+    // unsafe - can cause read access error
     const Item &get(int i) {
         return items[i];
     }
