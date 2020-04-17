@@ -5,6 +5,6 @@
 #include "BuildOrder.h"
 #include "../basic/Tech.h"
 
-namespace Production::Units {
+namespace Production::MakeUnits {
     void on_frame_update();
 }

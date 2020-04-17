@@ -14,8 +14,8 @@ namespace Basic::Refs {
         MINERALS,
         GAS,
         TRANSFER,
-        BUILD,
         MAKE,
+        BUILD,
         MORPH,
         ATTACK,
         SCOUT

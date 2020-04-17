@@ -6,7 +6,7 @@
 #include <BWAPI.h>
 #include <vector>
 
-namespace Production::Units {
+namespace Production::MakeUnits {
 
     namespace {
         // TODO: do some science, fix numbers!
