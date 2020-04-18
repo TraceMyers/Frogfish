@@ -89,7 +89,7 @@ namespace Production::MakeUnits {
     }
 
     void on_frame_update() {
-        auto_insert_overlords();
+        //auto_insert_overlords();
         spend_down();
     }
 }

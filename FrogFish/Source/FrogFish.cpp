@@ -9,7 +9,8 @@
 #include "production/Economy.h"
 #include "production/MakeUnits.h"
 #include "production/Construction.h"
-#include "production/GetTech.h"
+#include "movement/Move.h"
+//#include "production/GetTech.h"
 #include <BWAPI.h>
 #include <iostream>
 #include <string>
@@ -64,7 +65,9 @@ void FrogFish::onFrame() {
     Production::Economy::on_frame_update();
     Production::MakeUnits::on_frame_update();
     Production::Construction::on_frame_update();
-    Production::GetTech::on_frame_update();
+    //Production::GetTech::on_frame_update();
+
+	Movement::Move::on_frame_update();
 
     // 3. issue commands that require newly assigned lists
     // send mineral workers to gas

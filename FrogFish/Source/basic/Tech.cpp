@@ -75,10 +75,10 @@ namespace Basic::Tech {
     }
 
     int self_upgrade_level(const BWAPI::UpgradeType &upgrade_type) {
-        Broodwar->self()->getUpgradeLevel(upgrade_type);
+        return Broodwar->self()->getUpgradeLevel(upgrade_type);
     }
 
     bool self_has_tech(const BWAPI::TechType &tech_type) {
-        Broodwar->self()->hasResearched(tech_type);
+        return Broodwar->self()->hasResearched(tech_type);
     }
 }

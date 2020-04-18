@@ -81,7 +81,10 @@
     <ClCompile Include="Source\utility\FrogMath.cpp" />
     <ClCompile Include="Source\production\BuildOrder.cpp" />
     <ClCompile Include="Source\production\Economy.cpp" />
-    <ClCompile Include="Source\production\PUnits.cpp" />
+    <ClCompile Include="Source\movement\Move.cpp" />
+    <ClCompile Include="Source\production\MakeUnits.cpp" />
+    <ClCompile Include="Source\production\Construction.cpp" />
+    <ClCompile Include="Source\production\GetTech.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\BWEM\area.h">
@@ -195,7 +198,16 @@
     <ClInclude Include="Source\production\Economy.h">
       <Filter>headers</Filter>
     </ClInclude>
-    <ClInclude Include="Source\production\PUnits.h">
+    <ClInclude Include="Source\movement\Move.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\production\MakeUnits.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\production\Construction.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\production\GetTech.h">
       <Filter>headers</Filter>
     </ClInclude>
   </ItemGroup>

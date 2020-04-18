@@ -1,6 +1,6 @@
 #include "FrogMath.h"
-#include "basic/Units.h"
-#include "basic/Tech.h"
+#include "../basic/Units.h"
+#include "../basic/Tech.h"
 #include <BWAPI.h>
 #include <cmath>
 

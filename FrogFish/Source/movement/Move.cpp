@@ -1,13 +1,12 @@
 #include "Move.h"
-#include "basic/UnitData.h"
-#include "basic/Units.h"
-#include "utility/FrogMath.h"
+#include "../basic/UnitData.h"
+#include "../basic/Units.h"
+#include "../utility/FrogMath.h"
 #include "../FrogFish.h"
 #include <BWAPI.h>
 #include <BWEB/BWEB.h>
 #include <math.h>
 
-using namespace Basic;
 
 // TODO: air unit move/attack move
 
@@ -108,7 +107,7 @@ namespace Movement::Move {
         void move_unit(BWAPI::Unit unit, const BWAPI::Position &target_pos, const STATUS &status) {
             if (status == ATTACK_MOVING) {unit->patrol(target_pos);}
             else                         {unit->move(target_pos);}
-            Units::set_cmd_delay(unit, MOVE_CMD_DELAY_FRAMES);
+            Basic::Units::set_cmd_delay(unit, MOVE_CMD_DELAY_FRAMES);
         }
 
         // Only for attack-moving units that never engage. Since attack-moving units are moved
@@ -149,6 +148,7 @@ namespace Movement::Move {
             if (waypoint_check_timer.is_stopped()) {
                 check_waypoint_path.createUnitPath(nearest_valid_pos(avg_pos), target_pos);
                 if (!check_waypoint_path.isReachable()) {
+					printf("unreachable waypoint\n");
                     status = UNREACHABLE_WAYPOINT;
                     return;
                 }
@@ -169,13 +169,15 @@ namespace Movement::Move {
                     if (distance_outside_radius > 0) {
                         wait_for_cohesion = true;
                     }
-                    auto &unit_data = Units::data(unit);
+                    auto &unit_data = Basic::Units::data(unit);
                     if (unit_data.cmd_ready) {move_unit(unit, target_pos, status);}
                 }
                 if (!wait_for_cohesion) {
                     wait_timer.start(0, 0);
                     ++waypoint;
+					printf("waypoint: %d, waypoints_count: %d\n", path_tiles.size());
                     if (waypoint == path_tiles.size()) {
+						printf("HERE HERE\n");
                         end_attack_move(group, target_pos);
                         status = DESTINATION;
                     }
@@ -192,7 +194,7 @@ namespace Movement::Move {
                     unit_it = group.erase(unit_it);
                     continue;
                 }
-                auto &unit_data = Units::data(unit);
+                auto &unit_data = Basic::Units::data(unit);
                 if (unit_data.cmd_ready) {move_unit(unit, target_pos, status);}
             }
             if (group.size() == 0) {status = KILLED;}

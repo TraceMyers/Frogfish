@@ -349,6 +349,7 @@ namespace Production::BuildOrder {
 
     void next() {
         ++cur_index;
+		printf("advancing to %d\n", cur_index);
         cur_made_count = 0;
     }
 

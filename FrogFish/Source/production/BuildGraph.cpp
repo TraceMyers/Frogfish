@@ -44,14 +44,14 @@ namespace Production::BuildGraph {
             if (geysers.size() > 0) {
                 for (auto & geyser : geysers) {
                     if (geyser->Pos().getApproxDistance(hatch_center) < 400) {
-                        double geyser_angle = FrogMath::get_angle(hatch_center, geyser->Pos());
+                        double geyser_angle = Utility::FrogMath::get_angle(hatch_center, geyser->Pos());
                         angles.push_back(geyser_angle);
                     } 
                 }
             }
             for (auto &mineral : minerals) {
                 if (mineral->Pos().getApproxDistance(hatch_center) < 300) {
-                    angles.push_back(FrogMath::get_angle(hatch_center, mineral->Pos()));
+                    angles.push_back(Utility::FrogMath::get_angle(hatch_center, mineral->Pos()));
                 }
             }
             for (unsigned int i = 0; i < angles.size() - 1; ++i) {
@@ -75,7 +75,7 @@ namespace Production::BuildGraph {
                     sub_value = angles[i];
                     found_gap = true;
                     for (unsigned int j = 0; j < i; ++j) {
-                        angles[j] += 2 * FrogMath::PI - sub_value;
+                        angles[j] += 2 * Utility::FrogMath::PI - sub_value;
                     }
                 }
                 if (found_gap) {
@@ -94,11 +94,11 @@ namespace Production::BuildGraph {
             }
             resource_blocking_angles[base_index][0] = saved_angles[min_i] - 0.4;
             if (resource_blocking_angles[base_index][0] < 0) {
-                resource_blocking_angles[base_index][0] += 2 * FrogMath::PI;
+                resource_blocking_angles[base_index][0] += 2 * Utility::FrogMath::PI;
             }
             resource_blocking_angles[base_index][1] = saved_angles[max_i] + 0.4;
-            if (resource_blocking_angles[base_index][1] > 2 * FrogMath::PI) {
-                resource_blocking_angles[base_index][1] -= 2 * FrogMath::PI;
+            if (resource_blocking_angles[base_index][1] > 2 * Utility::FrogMath::PI) {
+                resource_blocking_angles[base_index][1] -= 2 * Utility::FrogMath::PI;
             }
             resource_blocking_angles[base_index][2] = saved_angles[inside_i];
             
@@ -125,8 +125,8 @@ namespace Production::BuildGraph {
             BWAPI::Position base_center,
             std::vector<double> &blocking_angles
         ) {
-            double angle_to_node = FrogMath::get_angle(base_center, node->pos);
-            if (FrogMath::angle_is_between(
+            double angle_to_node = Utility::FrogMath::get_angle(base_center, node->pos);
+            if (Utility::FrogMath::angle_is_between(
                 angle_to_node,
                 blocking_angles[0],
                 blocking_angles[1],

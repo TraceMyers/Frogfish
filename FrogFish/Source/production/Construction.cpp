@@ -14,6 +14,7 @@
 // - make smart decisions about which worker to build with
 // - periodically check if building is still feasible while status == WAITING
 //      - request scouts for locations out of vision
+//	- if a move ID is invalid when start() is called, problem
 
 namespace Production::Construction {
 
@@ -38,10 +39,11 @@ namespace Production::Construction {
         std::vector<int>                        build_order_IDs;
         std::vector<int>                        move_IDs;
         std::vector<STATUS>                     statuses;
-        std::vector<BWTimer>                    check_timers;
         std::vector<BWAPI::Unit>                canceled_builders;
+        BWTimer									check_timer;
         const int                               FINISH_BUILD_FRAMES = 30;
         const int                               BUILD_CMD_DELAY = 2;
+		const int								CHECK_INTERVAL = 5;
 
         bool already_cached(int build_ID) {
             for (auto &ID : build_order_IDs) {
@@ -66,7 +68,6 @@ namespace Production::Construction {
                     // TODO: make better decision about whether or not the worker is fit to build
                     if (worker_data.u_task != MINERALS) {
                         worker_it = base_unused_workers.erase(worker_it);
-                        continue;
                     }
                     else for (auto &builder : builders) {
                         if (builder == *worker_it) {
@@ -74,6 +75,7 @@ namespace Production::Construction {
                             break;
                         }
                     }
+					if (worker_it == base_unused_workers.end()) {break;}
                 }
             }
         }
@@ -93,13 +95,13 @@ namespace Production::Construction {
         // temp process, temp params (just creating good func names and stand-in processes)
         int select_base_for_construction(const std::vector<const BWEM::Base *> &bases) {
             for (unsigned j = 0; j < bases.size(); ++j) {
-                auto &base = bases[j];
                 auto &base_unused_workers = unused_workers[j];
                 int base_unused_workers_size = base_unused_workers.size();
                 if (base_unused_workers_size > 0) {
                     return j;
                 }
             }
+			return -1;
         }
 
         // temp process, temp params (just creating good func names and stand-in processes)
@@ -152,39 +154,39 @@ namespace Production::Construction {
         void init_builds() {
             auto &econ_sim_data = Economy::sim_data();
             bool updated_unused_workers = false;
-            
             for (unsigned build_ID = BuildOrder::current_index(); build_ID < BuildOrder::size(); ++build_ID) {
                 const BuildOrder::Item &build_item = BuildOrder::get(build_ID);
                 const std::vector<int> *item_sim_data_ptr = get_relevant_sim_data(build_ID, econ_sim_data);
                 if (
-                    build_item.action == BuildOrder::Item::BUILD 
+                    build_item.action() == BuildOrder::Item::BUILD 
                     && !already_cached(build_ID) 
                     && item_sim_data_ptr != nullptr
                 ) {
-                    auto &bases = Basic::Bases::self_bases();
-                    int base_index = select_base_for_construction(bases);
-                    auto &base = bases[base_index];
-                    if (!updated_unused_workers) {
+					if (!updated_unused_workers) {
                         update_unused_workers();
                         updated_unused_workers = true;
                     }
+                    auto &bases = Basic::Bases::self_bases();
+                    int base_index = select_base_for_construction(bases);
+					if (base_index < 0) continue;
+                    auto &base = bases[base_index];
                     BWAPI::Unit builder = select_unused_worker(base_index);
                     BWAPI::TilePosition build_tp;
-                    if (build_item.unit_type == BWAPI::UnitTypes::Zerg_Hatchery) {
+                    //if (build_item.unit_type() == BWAPI::UnitTypes::Zerg_Hatchery) {
                         // TODO: handle hatchery building/placement
-                    }
-                    else if (build_item.unit_type == BWAPI::UnitTypes::Zerg_Extractor) {
+                    //}
+                    if (build_item.unit_type() == BWAPI::UnitTypes::Zerg_Extractor) {
                         build_tp = BuildGraph::get_geyser_tilepos(base);
                     }
                     else {
-                        const BWAPI::UnitType &build_type = build_item.unit_type;
+                        const BWAPI::UnitType &build_type = build_item.unit_type();
                         build_tp = BuildGraph::get_build_tilepos(
                             base, 
                             build_type.tileWidth(),
                             build_type.tileHeight()
                         );
                     }
-                    int move_ID = Movement::Move::move(builder, build_tp);
+                    int move_ID = Movement::Move::move(builder, build_tp, false, true);
                     if (move_ID < 0) {
                         // TODO: pathing error! need to deal with this somehow
                         continue;
@@ -196,6 +198,11 @@ namespace Production::Construction {
                     build_order_IDs.push_back(build_ID);
                     move_IDs.push_back(move_ID);
                     statuses.push_back(WAITING);
+					printf("start\n");
+					printf("%d, %d\n", build_tp.x, build_tp.y);
+					printf("%d\n", build_ID);
+					printf("%d\n", move_ID);
+					printf("end\n");
                 } 
             }
         }
@@ -210,7 +217,7 @@ namespace Production::Construction {
                     break;
                 }
             }
-            if (cur_build_item.action == BuildOrder::Item::CANCEL) {
+            if (cur_build_item.action() == BuildOrder::Item::CANCEL) {
                 int cancel_build_ID = cur_build_item.cancel_index();
                 for (unsigned i = 0; i < build_order_IDs.size(); ++i) {
                     if (build_order_IDs[i] == cancel_build_ID) {
@@ -226,13 +233,16 @@ namespace Production::Construction {
                 if (statuses[cur_constr_ID] == WAITING) {
                     int move_ID = move_IDs[cur_constr_ID];
                     int travel_time = Movement::Move::remaining_frames(move_ID);
+					printf("1\n");
                     const std::vector<int> *item_sim_data_ptr = get_relevant_sim_data(
                         build_ID, 
                         Economy::sim_data()
                     );
                     if (item_sim_data_ptr != nullptr) {
+						printf("2\n");
                         int start_build_frames = (*item_sim_data_ptr)[1] * 24;
                         if (travel_time <= start_build_frames) {
+							printf("3\n");
                             Movement::Move::start(move_ID);
                             BWAPI::Unit builder = builders[cur_constr_ID];
                             Basic::Units::set_utask(builder, Basic::Refs::BUILD);
@@ -244,6 +254,7 @@ namespace Production::Construction {
                     }
                 }
                 else if (statuses[cur_constr_ID] == MOVING) {
+					printf("moving\n");
                     int move_ID = move_IDs[cur_constr_ID];
                     // TODO: account for potential move errors
                     if (Movement::Move::get_status(move_ID) == Movement::Move::DESTINATION) {
@@ -252,6 +263,7 @@ namespace Production::Construction {
                     }
                 }
                 else if (statuses[cur_constr_ID] == AT_SITE) {
+					printf("at site\n");
                     if (
                         cur_build_item.mineral_cost() <= Economy::get_free_minerals()
                         && cur_build_item.gas_cost() <= Economy::get_free_gas()
@@ -271,6 +283,7 @@ namespace Production::Construction {
                     if (unit_type.isBuilding()) {
                         statuses[cur_constr_ID] = BUILDING;
                         Basic::Units::set_cmd_delay(builder, unit_type.buildTime() + FINISH_BUILD_FRAMES);
+						//BuildOrder::next();
                     }
                     // TODO: deal with not advancing to 'BUILDING' status after some time
                 }
@@ -289,6 +302,17 @@ namespace Production::Construction {
                 // TODO: ?
             }
         }
+
+		void check_paths() {
+			// TODO: (for now, just make sure a path is created)
+			for (int i = 0; i < move_IDs.size(); ++i) {
+				int move_ID = move_IDs[i];
+				if (move_ID < 0) {
+					printf("move ID < 0\n");
+                    move_IDs[i] = Movement::Move::move(builders[i], build_locations[i]);
+				}
+			}
+		}
     }
 
     void init() {
@@ -297,6 +321,11 @@ namespace Production::Construction {
     }
 
     void on_frame_update() {
+		check_timer.on_frame_update();
+		if (check_timer.is_stopped()) {
+			check_paths();
+			check_timer.start(0, CHECK_INTERVAL);
+		}
         resolve_dead_builders();
         init_builds();
         advance_builds();
