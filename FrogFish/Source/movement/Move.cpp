@@ -344,8 +344,8 @@ namespace Movement::Move {
             ++status_it;
             ++path_it;
             ++waypoint_it;
-            ++distance_remaining_it = distance_remaining.begin();
-            ++previous_pos_it = previous_positions.begin();
+            ++distance_remaining_it;
+            ++previous_pos_it;
             ++cohesion_wait_timer_it;
             ++waypoint_reachable_timer_it;
         }
