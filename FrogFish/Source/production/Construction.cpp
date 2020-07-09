@@ -191,6 +191,12 @@ namespace Production::Construction {
                     BWAPI::TilePosition build_tp;
                     if (build_item.unit_type() == BWAPI::UnitTypes::Zerg_Hatchery) {
                         // TODO: handle hatchery building/placement
+                        const BWAPI::UnitType &build_type = build_item.unit_type();
+                        build_tp = BuildGraph::get_build_tilepos(
+                            base, 
+                            build_type.tileWidth(),
+                            build_type.tileHeight()
+                        );
                     }
                     else if (build_item.unit_type() == BWAPI::UnitTypes::Zerg_Extractor) {
                         build_tp = BuildGraph::get_geyser_tilepos(base);
@@ -203,8 +209,13 @@ namespace Production::Construction {
                             build_type.tileHeight()
                         );
                     }
+                    // DEBUG
+                    // printf("calling move from init_builds()\n");
+                    printf("calling move to %d, %d\n", build_tp);
                     int move_ID = Movement::Move::move(builder, build_tp);
                     if (move_ID < 0) {
+                        printf("(%d, %d)\n", build_tp.x, build_tp.y);
+                        printf("***Construction::init_builds(): PATHING ERROR!***\n");
                         // TODO: pathing error! need to deal with this somehow
                         continue;
                     }

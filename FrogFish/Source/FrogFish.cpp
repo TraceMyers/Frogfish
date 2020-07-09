@@ -32,7 +32,7 @@ using namespace Filter;
 
 BWTimer timer;
 
-// todo print fish puns every now and again
+// TODO: fish puns 
 
 void FrogFish::onStart() {
     Broodwar->sendText("Hello Sailor!");

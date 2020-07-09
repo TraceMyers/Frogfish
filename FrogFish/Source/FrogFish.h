@@ -32,6 +32,7 @@ private:
 
     void onStart_init_bwem_and_bweb() {
         try {
+            printf("Map init\n");
             Broodwar << "Map init..." << std::endl;
             the_map.Initialize();
             the_map.EnableAutomaticPathAnalysis();

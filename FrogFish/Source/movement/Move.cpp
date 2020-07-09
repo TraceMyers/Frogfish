@@ -30,53 +30,96 @@ namespace Movement::Move {
         const int MOVE_CMD_DELAY_FRAMES = 2,
                   COHESION_WAIT_MAX_FRAMES = 48, // wait frames before timeout = this - 1
                   WAYPOINT_REACHABLE_CHECK_INTERVAL = 5;
+
+        
+        bool surrounding_tilepositions_walkable(const BWAPI::TilePosition &search_tp) {
+            // TODO: remove ridiculous number of redundant checks
+            BWAPI::TilePosition nearby_tiles[8] = {
+                BWAPI::TilePosition(search_tp.x + 1, search_tp.y),
+                BWAPI::TilePosition(search_tp.x - 1, search_tp.y),
+                BWAPI::TilePosition(search_tp.x, search_tp.y + 1),
+                BWAPI::TilePosition(search_tp.x, search_tp.y - 1),
+                BWAPI::TilePosition(search_tp.x + 1, search_tp.y + 1),
+                BWAPI::TilePosition(search_tp.x + 1, search_tp.y - 1),
+                BWAPI::TilePosition(search_tp.x - 1, search_tp.y + 1),
+                BWAPI::TilePosition(search_tp.x - 1, search_tp.y - 1)
+            };
+            bool walkable_surrounding_tiles = true;
+            BWAPI::TilePosition nearby_tile;
+            for (int j = 0; j < 8; ++j) {
+                nearby_tile = nearby_tiles[j];
+                if (
+                    !nearby_tile.isValid() 
+                    || !BWEB::Map::isWalkable(nearby_tile)
+                ) {
+                    walkable_surrounding_tiles = false;
+                    break;
+                }
+            }
+            return walkable_surrounding_tiles;
+        }
         
 
         BWAPI::TilePosition nearest_valid_tilepos(BWAPI::TilePosition dest) {
-            const int MAX_SEARCH_STEPS = 30;
+            // TODO: doesn't allow for moving units into a choke (surrounding_tileposiitions_walkable)
+            const int MAX_SEARCH_STEPS = 50;
             if (dest.isValid()) {
-                if (BWEB::Map::isWalkable(dest)) {
+                if (
+                    BWEB::Map::isWalkable(dest)
+                    && surrounding_tilepositions_walkable(dest)
+                ) {
                     return dest;
                 }
-                int x = dest.x;
-                int y = dest.y;
+
                 DIRECTIONS dir = UP;
-                DIRECTIONS remember_dir;
                 int inner_steps_bound = 1;
                 int inner_steps = 0;
                 int outer_steps_bound = 2;
                 int outer_steps = 0;
-                BWAPI::TilePosition search_tp = BWAPI::TilePositions::None;
+                BWAPI::TilePosition search_tp = dest;
                 for (int i = 0; i < MAX_SEARCH_STEPS; ++i) {
-                    remember_dir = dir;
                     switch(dir) {
                         case UP:
                             --search_tp.y;
-                            dir = RIGHT;
                             break;
                         case RIGHT:
                             ++search_tp.x;
-                            dir = DOWN;
                             break;
                         case DOWN:
                             ++search_tp.y;
-                            dir = LEFT;
                             break;
                         case LEFT:
                             --search_tp.x;
-                            dir = UP;
                     }
-                    if (BWEB::Map::isWalkable(search_tp)) {break;}
+                    if (
+                        search_tp.isValid() 
+                        && Broodwar->isWalkable(BWAPI::WalkPosition(search_tp))
+                        && surrounding_tilepositions_walkable(search_tp)
+                    ) {
+                        break;
+                    }
                     ++inner_steps;
                     if (inner_steps == inner_steps_bound) {
+                        inner_steps = 0;
                         ++outer_steps;
                         if (outer_steps == outer_steps_bound) {
                             ++inner_steps_bound;
-                            inner_steps = 0;
                             outer_steps = 0;
+                            switch(dir) {
+                                case UP:
+                                    dir = RIGHT;
+                                    break;
+                                case RIGHT:
+                                    dir = DOWN;
+                                    break;
+                                case DOWN:
+                                    dir = LEFT;
+                                    break;
+                                case LEFT:
+                                    dir = UP;
+                            }
                         }
                     }
-                    else {dir = remember_dir;}
                 }
                 return search_tp;
             }
@@ -211,7 +254,7 @@ namespace Movement::Move {
         dest = nearest_valid_tilepos(dest);
         if (dest == BWAPI::TilePositions::None) {
             return INVALID_DEST;
-        }
+        } 
         BWAPI::TilePosition src = Utility::FrogMath::average_tileposition(units); 
         src = nearest_valid_tilepos(src);
         if (src == BWAPI::TilePositions::None) {
@@ -243,9 +286,13 @@ namespace Movement::Move {
             unused_group_IDs.erase(unused_group_IDs.end() - 1);
         }
         else {
+            // DEBUG
+            printf("move(): using new group id\n");
             BWEB::Path p = BWEB::Path();
             p.createUnitPath(BWAPI::Position(src), BWAPI::Position(dest));
+            printf("move(): src: %d, %d, dest: %d, %d\n", src.x, src.y, dest.x, dest.y);
             if (!p.isReachable()) {return UNREACHABLE_DEST;}
+            printf("move(): p is reachable\n");
             if (attack) {
                 if (wait) {statuses.push_back(WAITING_ATTACK);}
                 else      {statuses.push_back(ATTACK_MOVING);}

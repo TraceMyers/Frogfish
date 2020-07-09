@@ -237,9 +237,13 @@ void draw_build_nodes() {
                         }
                     }
                 }
+                // Broodwar->drawTextMap(
+                //     BWAPI::Position(tp) + BWAPI::Position(5, 10), 
+                //     "%dx%d", dims[0], dims[1]
+                // );
                 Broodwar->drawTextMap(
                     BWAPI::Position(tp) + BWAPI::Position(5, 10), 
-                    "%dx%d", dims[0], dims[1]
+                    "%d,%d", tp.x, tp.y
                 );
             }
         }
