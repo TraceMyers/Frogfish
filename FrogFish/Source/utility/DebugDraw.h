@@ -11,6 +11,7 @@ namespace Utility::DebugDraw {
     void draw_units();
     void draw_bases();
     void draw_build_nodes();
+    void draw_all_movement_paths();
     // void draw_map();
     // void draw_make_queue(MakeQueue &make_queue);
     // void draw_bwem_data();

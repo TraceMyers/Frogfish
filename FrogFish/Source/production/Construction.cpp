@@ -209,10 +209,8 @@ namespace Production::Construction {
                             build_type.tileHeight()
                         );
                     }
-                    // DEBUG
-                    // printf("calling move from init_builds()\n");
                     printf("calling move to %d, %d\n", build_tp);
-                    int move_ID = Movement::Move::move(builder, build_tp);
+                    int move_ID = Movement::Move::move(builder, build_tp, false, true);
                     if (move_ID < 0) {
                         printf("(%d, %d)\n", build_tp.x, build_tp.y);
                         printf("***Construction::init_builds(): PATHING ERROR!***\n");
@@ -231,15 +229,7 @@ namespace Production::Construction {
         }
 
         void advance_builds() {
-            unsigned build_ID = BuildOrder::current_index();
             auto &cur_build_item = BuildOrder::current_item();
-            int cur_constr_ID = -1;
-            for (unsigned i = 0; i < build_order_IDs.size(); ++i) {
-                if (build_order_IDs[i] == build_ID) {
-                    cur_constr_ID = i;
-                    break;
-                }
-            }
             if (cur_build_item.action() == BuildOrder::Item::CANCEL) {
                 int cancel_build_ID = cur_build_item.cancel_index();
                 for (unsigned i = 0; i < build_order_IDs.size(); ++i) {
@@ -252,74 +242,76 @@ namespace Production::Construction {
                 // Advance the build order even if it's too late to cancel
                 BuildOrder::next();
             }
-            else if (cur_constr_ID >= 0) {
-                if (statuses[cur_constr_ID] == WAITING) {
-                    printf("ID: %d: waiting\n", cur_constr_ID);
-                    int move_ID = move_IDs[cur_constr_ID];
+            for (int i = 0; i < build_order_IDs.size(); ++i) {
+                if (statuses[i] == WAITING) {
+                    int move_ID = move_IDs[i];
                     int travel_time = Movement::Move::remaining_frames(move_ID);
                     const std::vector<int> *item_sim_data_ptr = get_relevant_sim_data(
-                        build_ID, 
+                        build_order_IDs[i], 
                         Economy::sim_data()
                     );
                     if (item_sim_data_ptr != nullptr) {
                         int start_build_frames = (*item_sim_data_ptr)[1] * 24;
-                        if (travel_time <= start_build_frames) {
+                        if (start_build_frames <= travel_time) {
                             Movement::Move::start(move_ID);
-                            BWAPI::Unit builder = builders[cur_constr_ID];
+                            BWAPI::Unit builder = builders[i];
                             Basic::Units::set_utask(builder, Basic::Refs::BUILD);
-                            statuses[cur_constr_ID] = MOVING;
+                            statuses[i] = MOVING;
                         }
                     }
                     else {
                         // TODO: address error
                     }
                 }
-                else if (statuses[cur_constr_ID] == MOVING) {
-                    printf("ID: %d: moving\n", cur_constr_ID);
-                    int move_ID = move_IDs[cur_constr_ID];
+                else if (statuses[i] == MOVING) {
+                    //printf("ID: %d: moving\n", i);
+                    int move_ID = move_IDs[i];
                     // TODO: account for potential move errors
                     if (Movement::Move::get_status(move_ID) == Movement::Move::DESTINATION) {
-                        statuses[cur_constr_ID] = AT_SITE;
+                        statuses[i] = AT_SITE;
                         Movement::Move::remove(move_ID);
                     }
                 }
-                else if (statuses[cur_constr_ID] == AT_SITE) {
-                    printf("ID: %d: at site\n", cur_constr_ID);
+                else if (statuses[i] == AT_SITE) {
+                    printf("ID: %d: at site\n", i);
                     if (
                         cur_build_item.mineral_cost() <= Economy::get_free_minerals()
                         && cur_build_item.gas_cost() <= Economy::get_free_gas()
                     ) {
                         // TODO: final check that building here is OK
                         const BWAPI::UnitType &build_type = cur_build_item.unit_type();
-                        const BWAPI::TilePosition &build_loc = build_locations[cur_constr_ID];
-                        BWAPI::Unit builder = builders[cur_constr_ID];
+                        const BWAPI::TilePosition &build_loc = build_locations[i];
+                        BWAPI::Unit builder = builders[i];
                         builder->build(build_type, build_loc);
-                        statuses[cur_constr_ID] = GIVEN_BUILD_CMD;
+                        statuses[i] = GIVEN_BUILD_CMD;
                         Basic::Units::set_cmd_delay(builder, BUILD_CMD_DELAY);
                     }
                 }
-                else if (statuses[cur_constr_ID] == GIVEN_BUILD_CMD) {
-                    const BWAPI::Unit &builder = builders[cur_constr_ID];
+                else if (statuses[i] == GIVEN_BUILD_CMD) {
+                    printf("ID: %d: given build cmd\n", i);
+                    const BWAPI::Unit &builder = builders[i];
                     const BWAPI::UnitType unit_type = builder->getType();
                     if (unit_type.isBuilding()) {
-                        statuses[cur_constr_ID] = BUILDING;
+                        statuses[i] = BUILDING;
                         Basic::Units::set_cmd_delay(builder, unit_type.buildTime() + FINISH_BUILD_FRAMES);
                     }
                     // TODO: deal with not advancing to 'BUILDING' status after some time
                 }
-                else if (statuses[cur_constr_ID] == BUILDING) {
-                    const BWAPI::Unit &builder = builders[cur_constr_ID];
+                else if (statuses[i] == BUILDING) {
+                    printf("ID: %d: building\n", i);
+                    const BWAPI::Unit &builder = builders[i];
                     auto &unit_data = Basic::Units::data(builder);
-                    if (unit_data.cmd_ready) {statuses[cur_constr_ID] = COMPLETED;}
+                    if (unit_data.cmd_ready) {statuses[i] = COMPLETED;}
+                    if (BuildOrder::current_index() == build_order_IDs[i]) {
+                        BuildOrder::next();
+                    }
                 }
-                else if (statuses[cur_constr_ID] == COMPLETED) {
+                else if (statuses[i] == COMPLETED) {
+                    printf("ID: %d: finished building\n", i);
                     // status is COMPLETED for one frame to allow for other sections to use that
                     // information
-                    remove_build(build_ID);
+                    remove_build(build_order_IDs[i]);
                 }
-            }
-            else {
-                // TODO: ?
             }
         }
     }

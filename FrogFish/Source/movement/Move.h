@@ -83,4 +83,10 @@ namespace Movement::Move {
     bool    remove(int group_ID);
 
     void    on_frame_update();
+
+    const std::vector<BWAPI::Unit> &get_group(int ID);
+
+    const std::vector<BWAPI::TilePosition> get_path_tiles(int ID);
+
+    std::vector<int> get_valid_IDs();
 }

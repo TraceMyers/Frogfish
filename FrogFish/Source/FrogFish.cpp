@@ -75,6 +75,7 @@ void FrogFish::onFrame() {
     Utility::DebugDraw::draw_units();
     Utility::DebugDraw::draw_bases();
     Utility::DebugDraw::draw_build_nodes();
+    Utility::DebugDraw::draw_all_movement_paths();
 
     // send idle workers to mine minerals (needs to move up)
     // timer.on_frame_update();

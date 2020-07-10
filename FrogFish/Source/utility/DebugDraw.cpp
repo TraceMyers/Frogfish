@@ -4,6 +4,7 @@
 #include "../basic/Units.h"
 #include "../basic/Bases.h"
 #include "../production/BuildGraph.h"
+#include "../movement/Move.h"
 #include <BWAPI.h>
 #include <iostream>
 #include <list>
@@ -246,6 +247,23 @@ void draw_build_nodes() {
                     "%d,%d", tp.x, tp.y
                 );
             }
+        }
+    }
+}
+
+void draw_all_movement_paths() {
+    std::vector<int> move_IDs = Movement::Move::get_valid_IDs();
+
+    for (auto &ID : move_IDs) {
+        const std::vector<BWAPI::Unit> &group = Movement::Move::get_group(ID);
+        const std::vector<BWAPI::TilePosition> path_tiles = Movement::Move::get_path_tiles(ID);
+        // TODO: make not shit
+        for (auto &unit : group) {
+            Broodwar->drawLineMap(
+                BWAPI::Position(unit->getPosition()), 
+                BWAPI::Position(path_tiles[path_tiles.size() - 1]),
+                BWAPI::Colors::Green
+            );
         }
     }
 }

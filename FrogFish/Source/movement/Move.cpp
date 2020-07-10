@@ -364,6 +364,7 @@ namespace Movement::Move {
         while (group_it != groups.end()) {
             STATUS &status = *status_it;
             if (status == MOVING || status == ATTACK_MOVING) {
+                printf("Movement::on_frame_update(), moving\n");
                 auto &group = *group_it;
                 auto &path = *path_it;
                 auto &radius = *cohesion_radii_it;
@@ -396,5 +397,24 @@ namespace Movement::Move {
             ++cohesion_wait_timer_it;
             ++waypoint_reachable_timer_it;
         }
+    }
+
+    const std::vector<BWAPI::Unit> &get_group(int ID) {
+        return groups[ID];
+    }
+
+    const std::vector<BWAPI::TilePosition> get_path_tiles(int ID) { 
+        return paths[ID].getTiles(); 
+    }
+
+    std::vector<int> get_valid_IDs() {
+        // returns a vector of IDs that can be used to call get_group() and get_path_tiles()
+        std::vector<int> IDs;
+        for (unsigned i = 0; i < statuses.size(); ++i) {
+            if (statuses[i] != UNUSED_GROUP) {
+                IDs.push_back(i);
+            }
+        }
+        return IDs;
     }
 }
