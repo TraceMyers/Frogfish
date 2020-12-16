@@ -28,6 +28,6 @@ namespace Production::Economy {
     bool            end_reservation(unsigned ID);   
     bool            extend_reservation(unsigned ID, int seconds);
     void            print_sim_data();
-    int             seconds_until_supply_blocked();
-    const std::vector<std::vector<int>> &sim_data();
+    //int             seconds_until_supply_blocked();
+    const std::vector<std::vector<int>> &get_sim_data();
 }

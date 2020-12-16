@@ -12,14 +12,23 @@ namespace Production::BuildOrder {
         /* PUBLIC */
         public:
 
-        enum ACTION {MAKE, MORPH, BUILD, TECH, UPGRADE, CANCEL, NONE};
+        enum ACTION {
+            MAKE, 
+            MORPH, 
+            BUILD, 
+            TECH, 
+            UPGRADE, 
+            CANCEL, 
+            OVERLORD_MAKE_BLOCK_ON, 
+            OVERLORD_MAKE_BLOCK_OFF, 
+            NONE
+        };
 
         Item(
             ACTION act,
             BWAPI::UnitType u_type,
             BWAPI::TechType tch_type,
             BWAPI::UpgradeType up_type,
-            int cnt,
             int cancel_i
         );
 
@@ -37,10 +46,6 @@ namespace Production::BuildOrder {
 
         BWAPI::UpgradeType upgrade_type() const {
             return _upgrade_type;
-        }
-
-        int count() const {
-            return _count;
         }
 
         int cancel_index() const {
@@ -70,13 +75,11 @@ namespace Production::BuildOrder {
         BWAPI::UnitType _unit_type;
         BWAPI::TechType _tech_type;
         BWAPI::UpgradeType _upgrade_type;
-        int _count;
         int _cancel_index;
         int _mineral_cost = 0;
         int _gas_cost = 0;
         int _larva_cost = 0;
         int _supply_cost = 0;
-        int _made = 0;
     };
 
     void            load(const char *_race, const char *build_name);
@@ -85,7 +88,6 @@ namespace Production::BuildOrder {
                         BWAPI::UnitType _unit_type,
                         BWAPI::TechType _tech_type,
                         BWAPI::UpgradeType _upgrade_type,
-                        int _count,
                         int _cancel_index
                     );
     void            insert(
@@ -93,7 +95,6 @@ namespace Production::BuildOrder {
                         BWAPI::UnitType _unit_type,
                         BWAPI::TechType _tech_type,
                         BWAPI::UpgradeType _upgrade_type,
-                        int _count,
                         int _cancel_index,
                         int insert_index
                     );
@@ -102,15 +103,13 @@ namespace Production::BuildOrder {
                         BWAPI::UnitType _unit_type,
                         BWAPI::TechType _tech_type,
                         BWAPI::UpgradeType _upgrade_type,
-                        int _count,
                         int _cancel_index
                     );
     int             current_index();
     const Item &    current_item();
-    void            increment_current_made_count();
-    bool            current_item_filled();
     void            next();
     const Item &    get(int i);
+    bool            overlord_make_block();
     unsigned        size();
     bool            finished();
     void            print(unsigned int start=0);

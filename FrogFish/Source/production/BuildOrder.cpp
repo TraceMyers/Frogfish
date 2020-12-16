@@ -14,7 +14,6 @@ namespace Production::BuildOrder {
         BWAPI::UnitType u_type,
         BWAPI::TechType tch_type,
         BWAPI::UpgradeType up_type,
-        int cnt,
         int cancel_i
 
     ) :
@@ -22,7 +21,6 @@ namespace Production::BuildOrder {
         _unit_type(u_type),
         _tech_type(tch_type),
         _upgrade_type(up_type),
-        _count(cnt),
         _cancel_index(cancel_i)
     {}
 
@@ -35,10 +33,9 @@ namespace Production::BuildOrder {
                 BWAPI::UnitType u_type,
                 BWAPI::TechType tch_type,
                 BWAPI::UpgradeType up_type,
-                int cnt,
                 int cancel_i
             ) : 
-                Item (act, u_type, tch_type, up_type, cnt, cancel_i)
+                Item (act, u_type, tch_type, up_type, cancel_i)
             {
                 set_mineral_cost();
                 set_gas_cost();
@@ -70,6 +67,10 @@ namespace Production::BuildOrder {
                             _mineral_cost = -_upgrade_type.mineralPrice();
                         }
                         break;
+                    case Item::ACTION::OVERLORD_MAKE_BLOCK_OFF:
+                    case Item::ACTION::OVERLORD_MAKE_BLOCK_ON:
+                        _mineral_cost = 0;
+                        break;
                     default:
                         _mineral_cost = _unit_type.mineralPrice();
                 }
@@ -98,6 +99,10 @@ namespace Production::BuildOrder {
                         else {
                             _gas_cost = -_upgrade_type.gasPrice();
                         }
+                        break;
+                    case Item::ACTION::OVERLORD_MAKE_BLOCK_OFF:
+                    case Item::ACTION::OVERLORD_MAKE_BLOCK_ON:
+                        _gas_cost = 0;
                         break;
                     default:
                         _gas_cost = _unit_type.gasPrice();
@@ -141,15 +146,14 @@ namespace Production::BuildOrder {
         std::string                 name;
         std::vector<InternalItem>   items;
         int                         cur_index;
-        int                         cur_made_count;
         Item                        end_item(
                                         Item::ACTION::NONE, 
                                         BWAPI::UnitTypes::None,
                                         BWAPI::TechTypes::None,
                                         BWAPI::UpgradeTypes::None,
-                                        0,
                                         -1
                                     );
+        bool                        overlord_make_block_on;
 
         void _push(InternalItem item) {
             items.push_back(item);
@@ -165,6 +169,7 @@ namespace Production::BuildOrder {
     }
 
     void load(const char *_race, const char *build_name) {
+        overlord_make_block_on = false;
         cur_index = 0;
         items.clear();
         race = _race;
@@ -196,6 +201,12 @@ namespace Production::BuildOrder {
                             }
                             else if (word == "make") {
                                 _action = Item::MAKE;
+                            }
+                            else if (word == "makeblockon") {
+                                _action = Item::OVERLORD_MAKE_BLOCK_ON;
+                            }
+                            else if (word == "makeblockoff") {
+                                _action = Item::OVERLORD_MAKE_BLOCK_OFF;
                             }
                             else if (word == "morph") {
                                 _action = Item::MORPH;
@@ -251,14 +262,16 @@ namespace Production::BuildOrder {
                                 _cancel_index = std::stoi(word);
                             }
 
-                            push(
-                                _action,
-                                _unit_type,
-                                _tech_type,
-                                _upgrade_type,
-                                _count,
-                                _cancel_index
-                            );
+                            for (int i = 0; i < _count; ++i) {
+                                push(
+                                    _action,
+                                    _unit_type,
+                                    _tech_type,
+                                    _upgrade_type,
+                                    _cancel_index
+                                );
+                            }
+                            
                         }
                         else {
                             loaded = true;
@@ -276,7 +289,6 @@ namespace Production::BuildOrder {
         BWAPI::UnitType u_type,
         BWAPI::TechType tch_type,
         BWAPI::UpgradeType up_type,
-        int cnt,
         int cancel_i
     ) {
         InternalItem item(
@@ -284,7 +296,6 @@ namespace Production::BuildOrder {
             u_type,
             tch_type,
             up_type,
-            cnt,
             cancel_i
         );
         _push(item);
@@ -295,7 +306,6 @@ namespace Production::BuildOrder {
         BWAPI::UnitType u_type,
         BWAPI::TechType tch_type,
         BWAPI::UpgradeType up_type,
-        int cnt,
         int cancel_i,
         int insert_index
     ) {
@@ -304,7 +314,6 @@ namespace Production::BuildOrder {
             u_type,
             tch_type,
             up_type,
-            cnt,
             cancel_i
         );
         _insert(item, insert_index);
@@ -315,7 +324,6 @@ namespace Production::BuildOrder {
         BWAPI::UnitType u_type,
         BWAPI::TechType tch_type,
         BWAPI::UpgradeType up_type,
-        int cnt,
         int cancel_i
     ) {
         InternalItem item(
@@ -323,7 +331,6 @@ namespace Production::BuildOrder {
             u_type,
             tch_type,
             up_type,
-            cnt,
             cancel_i
         );
         _insert_next(item);
@@ -338,24 +345,33 @@ namespace Production::BuildOrder {
         return end_item;
     }
 
-    void increment_current_made_count() {
-        ++cur_made_count;
-    }
-
-    bool current_item_filled() {
-        if (cur_index < items.size()) {return cur_made_count >= items[cur_index].count();}
-        return true;
-    }
-
     void next() {
         ++cur_index;
-		printf("advancing to %d\n", cur_index);
-        cur_made_count = 0;
+        if (cur_index < items.size()) {
+            auto& cur_item = items[cur_index];
+            const Item::ACTION& action = cur_item.action();
+            if (action == Item::OVERLORD_MAKE_BLOCK_ON) {
+                overlord_make_block_on = true;
+                printf("BuildOrder::next(): Overlord make block *ON*\n");
+                next();
+            }
+            else if (action == Item::OVERLORD_MAKE_BLOCK_OFF) {
+                overlord_make_block_on = false;
+                printf("BuildOrder::next(): Overlord make block *OFF*\n");
+                next();
+            }
+            printf("BuildOrder::next(): advancing to %d\n", cur_index);
+        }
+        printf("BuildOrder::next(): Build order reached the end.\n");
     }
 
     // unsafe - can cause read access error
     const Item &get(int i) {
         return items[i];
+    }
+
+    bool overlord_make_block() {
+        return overlord_make_block_on;
     }
 
     unsigned size() {
@@ -371,28 +387,34 @@ namespace Production::BuildOrder {
             print_item(start);
         }
     }
-
+    
     void print_item(unsigned int i) {
         const Item &item = items[i];
         std::cout << "[" << i << "]: \n\t";
         switch(item.action()) {
             case Item::MAKE:
-                std::cout << "Make    " << item.count() << " " << item.unit_type().c_str();
+                std::cout << "Make    " << item.unit_type().c_str();
+                break;
+            case Item::OVERLORD_MAKE_BLOCK_OFF:
+                std::cout << "Overlord make block *OFF* ";
+                break;
+            case Item::OVERLORD_MAKE_BLOCK_ON:
+                std::cout << "Overlord make block *ON*  ";
                 break;
             case Item::MORPH:
-                std::cout << "Morph   " << item.count() << " " << item.unit_type().c_str();
+                std::cout << "Morph   " << item.unit_type().c_str();
                 break;
             case Item::BUILD:
-                std::cout << "Build   " << item.count() << " " << item.unit_type().c_str();
+                std::cout << "Build   " << item.unit_type().c_str();
                 break;
             case Item::TECH:
-                std::cout << "Tech    " << item.count() << " " << item.tech_type().c_str();
+                std::cout << "Tech    " << item.tech_type().c_str();
                 break;
             case Item::UPGRADE:
-                std::cout << "Upgrade " << item.count() << " " << item.upgrade_type().c_str();
+                std::cout << "Upgrade " << item.upgrade_type().c_str();
                 break;
             case Item::CANCEL:
-                std::cout << "Cancel  " << item.count() << " ";
+                std::cout << "Cancel  ";
                 if (item.unit_type() != BWAPI::UnitTypes::None) {
                     std::cout << item.unit_type();
                 }

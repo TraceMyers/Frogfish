@@ -85,6 +85,7 @@
     <ClCompile Include="Source\production\MakeUnits.cpp" />
     <ClCompile Include="Source\production\Construction.cpp" />
     <ClCompile Include="Source\production\GetTech.cpp" />
+    <ClCompile Include="Source\test\TestMove.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\BWEM\area.h">
@@ -208,6 +209,9 @@
       <Filter>headers</Filter>
     </ClInclude>
     <ClInclude Include="Source\production\GetTech.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\test\TestMove.h">
       <Filter>headers</Filter>
     </ClInclude>
   </ItemGroup>

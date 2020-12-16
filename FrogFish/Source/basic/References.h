@@ -21,6 +21,17 @@ namespace Basic::Refs {
         SCOUT
     };
 
+    enum BUILD_STATUS {
+        NONE,
+        RESERVED,
+        MOVING,
+        AT_SITE,
+        GIVEN_BUILD_CMD,
+        BUILDING,
+        COMPLETED,
+        PATH_ERROR
+    };
+
     enum UTYPE {
         UNASSIGNED,
         EGG,

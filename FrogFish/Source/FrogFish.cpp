@@ -10,6 +10,7 @@
 #include "production/MakeUnits.h"
 #include "production/Construction.h"
 #include "movement/Move.h"
+#include "test/TestMove.h"
 //#include "production/GetTech.h"
 #include <BWAPI.h>
 #include <iostream>
@@ -37,7 +38,7 @@ BWTimer timer;
 void FrogFish::onStart() {
     Broodwar->sendText("Hello Sailor!");
     Broodwar->enableFlag(Flag::UserInput);
-    Broodwar->setLocalSpeed(12);
+    Broodwar->setLocalSpeed(20);
     Broodwar->setCommandOptimizationLevel(2);
     onStart_alloc_debug_console();
     onStart_send_workers_to_mine();
@@ -48,7 +49,7 @@ void FrogFish::onStart() {
     Production::Construction::init();
     Production::BuildOrder::load("protoss", "2_hatch_hydra");
     Production::BuildOrder::print();
-    timer.start(1,0);
+    timer.start(5,0);
 }
 
 void FrogFish::onFrame() {
@@ -73,17 +74,17 @@ void FrogFish::onFrame() {
     // send mineral workers to gas
 
     Utility::DebugDraw::draw_units();
-    Utility::DebugDraw::draw_bases();
-    Utility::DebugDraw::draw_build_nodes();
+    //Utility::DebugDraw::draw_bases();
+    //Utility::DebugDraw::draw_build_nodes();
     Utility::DebugDraw::draw_all_movement_paths();
 
     // send idle workers to mine minerals (needs to move up)
-    // timer.on_frame_update();
-    // if (timer.is_stopped()) {
-    //     // timer.restart();
-    //     timer.start(1000000,0);
-    //     Production::Economy::print_sim_data();
-    // }
+    timer.on_frame_update();
+    if (timer.is_stopped()) {
+        // timer.restart();
+        timer.start(1,0);
+        //Test::Move::move_unit_to_map_center();
+    }
 }
 
 void FrogFish::onSendText(std::string text) {

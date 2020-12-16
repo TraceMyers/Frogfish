@@ -1,47 +1,55 @@
 
 terran 9_pool
-0:  make,   5,  drone,         null
-1:  build,  1,  spawning_pool, null
-2:  make,   1,  drone,         null
-3:  build,  1,  extractor,     null
-4:  make,   1,  drone,         null
-5:  cancel, 1,  extractor,        3
-6:  make,   1,  overlord,      null
-7:  make,   3,  zergling,      null
+0:  makeblockon,   1,  overlord,         null
+1:  make,   5,  drone,         null
+2:  build,  1,  spawning_pool, null
+3:  make,   1,  drone,         null
+4:  build,  1,  extractor,     null
+5:  make,   1,  drone,         null
+6:  cancel, 1,  extractor,        3
+7:  make,   1,  overlord,      null
+8:  make,   3,  zergling,      null
+9:  makeblockoff,   1,  overlord,         null
 -------------------------------------------------
 
 protoss 12_hatch
-0:  make,   5,  drone,         null
-1:  make,   1,  overlord,      null
-2:  make,   3,  drone,         null
-3:  build,  1,  hatchery,      null
-4:  build,  1,  spawning_pool, null
-5:  make,   4,  drone,         null
-6:  make,   2,  zergling,      null
+0:  makeblockon,   1,  overlord,         null
+1:  make,   5,  drone,         null
+2:  make,   1,  overlord,      null
+3:  make,   3,  drone,         null
+4:  build,  1,  hatchery,      null
+5:  build,  1,  spawning_pool, null
+6:  make,   4,  drone,         null
+7:  make,   2,  zergling,      null
+8:  makeblockoff,   1,  overlord,         null
 -------------------------------------------------
 
 terran 3_hatch_pool
-0:  make,   5,  drone,         null
-1:  make,   1,  overlord,      null
-2:  make,   3,  drone,         null
-3:  build,  1,  hatchery,      null
-4:  make,   3,  drone,         null
-5:  build,  1,  hatchery,      null
-6:  build,  1,  spawning_pool, null
+0:  makeblockon,   1,  overlord,         null
+1:  make,   5,  drone,         null
+2:  make,   1,  overlord,      null
+3:  make,   3,  drone,         null
+4:  build,  1,  hatchery,      null
+5:  make,   3,  drone,         null
+6:  build,  1,  hatchery,      null
+7:  build,  1,  spawning_pool, null
+8:  makeblockoff,   1,  overlord,         null
 -------------------------------------------------
 
 protoss 2_hatch_hydra
-0:  make,    5,  drone,             null
-1:  make,    1,  overlord,          null
-2:  make,    3,  drone,             null
-3:  build,   1,  hatchery,          null
-4:  build,   1,  spawning_pool,     null
-5:  make,    3,  drone,             null
-6:  build,   1,  extractor,         null
-7:  build,   1,  hydralisk_den,     null
-8:  make,    5,  drone,             null
-9:  make,    1,  overlord,          null
-10: upgrade, 1,  grooved_spines,    null
-11: make,    6,  hydralisk,         null
-12: upgrade, 1,  muscular_augments, null
+0:  makeblockon,   1,  overlord,         null
+1:  make,    5,  drone,             null
+2:  make,    1,  overlord,          null
+3:  make,    3,  drone,             null
+4:  build,   1,  hatchery,          null
+5:  build,   1,  spawning_pool,     null
+6:  make,    3,  drone,             null
+7:  build,   1,  extractor,         null
+8:  build,   1,  hydralisk_den,     null
+9:  make,    5,  drone,             null
+10: make,    1,  overlord,          null
+11: upgrade, 1,  grooved_spines,    null
+12: make,    6,  hydralisk,         null
+13: upgrade, 1,  muscular_augments, null
+14: makeblockoff,   1,  overlord,         null
 ------------------------------------------------------

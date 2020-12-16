@@ -257,13 +257,25 @@ void draw_all_movement_paths() {
     for (auto &ID : move_IDs) {
         const std::vector<BWAPI::Unit> &group = Movement::Move::get_group(ID);
         const std::vector<BWAPI::TilePosition> path_tiles = Movement::Move::get_path_tiles(ID);
+        int waypoint_no = Movement::Move::get_waypoint(ID);
         // TODO: make not shit
         for (auto &unit : group) {
+            for (
+                auto& tile_it = path_tiles.begin() + waypoint_no; 
+                tile_it <= path_tiles.end() - 3; 
+                ++tile_it
+            ) {
+                auto& tile = *tile_it;
+                auto& next_tile = *(tile_it + 1);
+                Broodwar->drawCircleMap(BWAPI::Position(tile), 5, BWAPI::Colors::Red);
+                Broodwar->drawLineMap(BWAPI::Position(tile), BWAPI::Position(next_tile), BWAPI::Colors::Purple);
+            }
             Broodwar->drawLineMap(
                 BWAPI::Position(unit->getPosition()), 
-                BWAPI::Position(path_tiles[path_tiles.size() - 1]),
+                BWAPI::Position(path_tiles[waypoint_no]),
                 BWAPI::Colors::Green
             );
+            Broodwar->drawCircleMap(BWAPI::Position(path_tiles[path_tiles.size() - 1]), 7, BWAPI::Colors::Yellow);
         }
     }
 }

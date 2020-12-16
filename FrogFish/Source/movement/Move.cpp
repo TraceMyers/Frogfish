@@ -170,6 +170,7 @@ namespace Movement::Move {
         }
 
         // TODO: account for unit size
+        // TODO: fairly major refactor; warts obvious
         void move_group(
             std::vector<BWAPI::Unit> &group,
             BWEB::Path &path,
@@ -181,11 +182,15 @@ namespace Movement::Move {
             BWTimer &wait_timer,
             BWTimer &waypoint_check_timer
         ) {
+            float tile_radius = radius / 32.0f;
+            if (tile_radius < 3) { tile_radius = 3.0f; }
             std::vector<BWAPI::TilePosition> &path_tiles = path.getTiles();
             BWAPI::TilePosition target_tilepos = path_tiles[waypoint]; 
             BWAPI::Position target_pos (target_tilepos.x * 32, target_tilepos.y * 32);
             BWAPI::TilePosition avg_tilepos = Utility::FrogMath::average_tileposition(group);
-            BWAPI::Position avg_pos (avg_tilepos.x * 32, avg_tilepos.y * 32);
+            // TODO: (prev used avg tilepos, innacurate by factor of 32 ofc; better solution?)
+            BWAPI::Position avg_pos = Utility::FrogMath::average_position(group);
+            // TODO: Assumes progress? Forseeable bugs
             dist_remain -= avg_pos.getApproxDistance(prev_pos);
             prev_pos = avg_pos;
             if (waypoint_check_timer.is_stopped()) {
@@ -199,7 +204,8 @@ namespace Movement::Move {
             }
 
             int distance_to_target = avg_tilepos.getApproxDistance(target_tilepos);
-            if (distance_to_target <= radius) {
+            if (distance_to_target <= tile_radius) {
+                // DEBUG NOTE: in here
                 bool wait_for_cohesion = false;
                 for (auto unit_it = group.begin(); unit_it != group.end(); ++unit_it) {
                     auto &unit = *unit_it;
@@ -208,7 +214,8 @@ namespace Movement::Move {
                         if (unit_it == group.end()) {break;}
                         else                        {continue;}
                     }
-                    float distance_outside_radius = avg_pos.getApproxDistance(unit->getPosition()) - radius;
+                    float distance_outside_radius = 
+                        Utility::FrogMath::get_distance(avg_pos, unit->getPosition()) - radius;
                     if (distance_outside_radius > 0) {
                         wait_for_cohesion = true;
                     }
@@ -218,9 +225,9 @@ namespace Movement::Move {
                 if (!wait_for_cohesion) {
                     wait_timer.start(0, 0);
                     ++waypoint;
-					printf("waypoint: %d, waypoints_count: %d\n", path_tiles.size());
-                    if (waypoint == path_tiles.size()) {
-						printf("HERE HERE\n");
+                    // TODO: path_tiles ends up with origin as last node... why?
+                    // results in vector out of range crash, too
+                    if (waypoint == path_tiles.size() - 1) {
                         end_attack_move(group, target_pos);
                         status = DESTINATION;
                     }
@@ -364,7 +371,7 @@ namespace Movement::Move {
         while (group_it != groups.end()) {
             STATUS &status = *status_it;
             if (status == MOVING || status == ATTACK_MOVING) {
-                printf("Movement::on_frame_update(), moving\n");
+                //printf("Movement::on_frame_update(), moving\n");
                 auto &group = *group_it;
                 auto &path = *path_it;
                 auto &radius = *cohesion_radii_it;
@@ -405,6 +412,10 @@ namespace Movement::Move {
 
     const std::vector<BWAPI::TilePosition> get_path_tiles(int ID) { 
         return paths[ID].getTiles(); 
+    }
+
+    int get_waypoint(int ID) {
+        return waypoints[ID];
     }
 
     std::vector<int> get_valid_IDs() {

@@ -17,6 +17,7 @@ namespace Basic::Units {
         bool                cmd_ready;
         BWTimer             cmd_timer;
         UTASK               u_task;
+        BUILD_STATUS        build_status;
         int                 irradiate_timer;
         int                 lockdown_timer;
         int                 plague_timer;

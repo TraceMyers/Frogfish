@@ -31,6 +31,7 @@ namespace Basic::Units {
         cmd_ready(true),
         cmd_timer(),
         u_task(UTASK::IDLE),
+        build_status(BUILD_STATUS::NONE),
         ID(u->getID()), 
         hp(u->getHitPoints()),
         max_hp(u->getType().maxHitPoints()),

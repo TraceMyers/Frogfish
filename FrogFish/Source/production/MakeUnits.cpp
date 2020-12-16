@@ -22,7 +22,8 @@ namespace Production::MakeUnits {
                 }
                 else {break;}
             }
-            int seconds_until_blocked = Economy::seconds_until_supply_blocked();
+            // TODO: fix
+            int seconds_until_blocked = 1000; //Economy::seconds_until_supply_blocked();
             int supply_deficit = Broodwar->self()->supplyTotal() + overlord_supply_incoming 
                 - Broodwar->self()->supplyUsed();
             if (supply_deficit < 0) {
@@ -34,7 +35,6 @@ namespace Production::MakeUnits {
                         BWAPI::UnitTypes::Zerg_Overlord,
                         BWAPI::TechTypes::None,
                         BWAPI::UpgradeTypes::None,
-                        1,
                         -1
                     );
                 }
@@ -45,7 +45,6 @@ namespace Production::MakeUnits {
                     BWAPI::UnitTypes::Zerg_Overlord,
                     BWAPI::TechTypes::None,
                     BWAPI::UpgradeTypes::None,
-                    1,
                     -1
                 );
             }
@@ -73,10 +72,7 @@ namespace Production::MakeUnits {
                         larva->morph(item.unit_type());
                         Basic::Units::set_utask(larva, Basic::Refs::MAKE);
                         Basic::Units::set_cmd_delay(larva, item.unit_type().buildTime() + EXTRA_DELAY_FRAMES);
-                        BuildOrder::increment_current_made_count();
-                        if (BuildOrder::current_item_filled()) {
-                            BuildOrder::next();
-                        }
+                        BuildOrder::next();
                     }
                     else {
                         still_spending = false;

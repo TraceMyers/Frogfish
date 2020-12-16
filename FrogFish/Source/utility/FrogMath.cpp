@@ -86,7 +86,7 @@ namespace Utility::FrogMath{
         avg_pos.x = 0;
         avg_pos.y = 0;
         for (BWAPI::Unit &u: units) {
-            const BWAPI::Position &p = Basic::Units::data(u).pos;
+            const BWAPI::Position &p = u->getPosition();
             avg_pos.x += p.x;
             avg_pos.y += p.y;
         }
@@ -114,5 +114,11 @@ namespace Utility::FrogMath{
             total_speed += unit_speed;
         }
         return total_speed / units.size();
+    }
+
+    float get_distance(BWAPI::Position a, BWAPI::Position b) {
+        float x_diff = a.x - b.x;
+        float y_diff = a.y - b.y;
+        return (float)sqrt(x_diff*x_diff + y_diff*y_diff);
     }
 }

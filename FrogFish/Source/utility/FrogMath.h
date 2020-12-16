@@ -20,4 +20,5 @@ namespace Utility::FrogMath {
     BWAPI::TilePosition average_tileposition(std::vector<BWAPI::Unit> units);
     BWAPI::Position average_position(std::vector<BWAPI::Unit> units);
     float average_speed(std::vector<BWAPI::Unit> units);
+    float get_distance(BWAPI::Position a, BWAPI::Position b);
 }

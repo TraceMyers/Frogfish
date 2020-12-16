@@ -1,7 +1,9 @@
 #pragma once
 #pragma message("including UnitArray")
 
-#include <BWAPI.h> 
+#include <BWAPI.h>
+
+// TODO: Take off the heap, put all UnitArrays together into one big buffer or just have several separate ones
 
 namespace Basic {
 

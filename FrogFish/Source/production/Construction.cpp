@@ -19,30 +19,13 @@ namespace Production::Construction {
 
     namespace {
 
-        enum STATUS {
-            WAITING,
-            MOVING,
-            AT_SITE,
-            GIVEN_BUILD_CMD,
-            BUILDING,
-            COMPLETED,
-            PATH_ERROR,
-            DEAD,
-            NONE
-        };
-
-        std::vector<std::vector<BWAPI::Unit>>   unused_workers;
         std::vector<BWAPI::Unit>                builders;
-        std::vector<const BWEM::Base *>         build_bases;
-        std::vector<BWAPI::TilePosition>        build_locations;
         std::vector<int>                        build_order_IDs;
         std::vector<int>                        move_IDs;
-        std::vector<STATUS>                     statuses;
-        std::vector<BWTimer>                    check_timers;
-        std::vector<BWAPI::Unit>                canceled_builders;
         const int                               FINISH_BUILD_FRAMES = 30;
         const int                               BUILD_CMD_DELAY = 2;
 
+        /*
         bool already_cached(int build_ID) {
             for (auto &ID : build_order_IDs) {
                 if (ID == build_ID) {return true;}
@@ -314,23 +297,27 @@ namespace Production::Construction {
                 }
             }
         }
+        */
     }
 
-    void init() {
-        int map_base_ct = Basic::Bases::all_bases().size();
-        unused_workers.resize(map_base_ct);
-    }
-
-    void on_frame_update() {
-        resolve_dead_builders();
-        init_builds();
-        advance_builds();
-    }
-
+    /*
     bool worker_reserved_for_building(const BWAPI::Unit unit) {
         for (auto &builder : builders) {
             if (unit == builder) {return true;}
         }
         return false;
     }
+    */
+
+    void init() {
+        int map_base_ct = Basic::Bases::all_bases().size();
+    }
+
+    void on_frame_update() {
+        //resolve_dead_builders();
+        //init_builds();
+        //advance_builds();
+        ;
+    }
+
 }

@@ -88,5 +88,7 @@ namespace Movement::Move {
 
     const std::vector<BWAPI::TilePosition> get_path_tiles(int ID);
 
+    int get_waypoint(int ID);
+
     std::vector<int> get_valid_IDs();
 }

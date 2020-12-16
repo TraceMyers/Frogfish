@@ -55,8 +55,22 @@ namespace Production::Economy {
         std::vector<BWTimer *> reservation_timers;
         std::vector<int *> reserved_resources;
 
-        std::vector<std::vector<int>> build_order_sim_data;
-        std::vector<int> seconds_until_supply_block;
+        std::vector<std::pair<int, int>> sim_data;
+        std::vector<int> sim_making_IDs;
+        std::vector<int> sim_making_frames_left;
+        std::vector<BWAPI::UnitType> sim_making_types;
+        int sim_seconds_until_supply_block;
+        bool sim_supply_block_flag;
+        double
+            sim_minerals,
+            sim_gas,
+            sim_larva,
+            sim_supply_used,
+            sim_supply_total,
+            sim_mps,
+            sim_gps,
+            sim_lps,
+            sim_incoming_supply;
 
         void estimate_income() {
             larva_ct = 0;
@@ -116,201 +130,187 @@ namespace Production::Economy {
             supply_per_frame = supply_per_frame_period / (SUPPLY_FRAME_SECONDS * 24);
         }
 
-        // TODO: Account for tech requirements
-        std::vector<std::vector<int>> simulate(bool correct_for_supply_block=true, int sim_seconds=360) {
-            const double
-                ADD_DRONE_MPS = MPF_SIMPLE_CONST * 24,
-                ADD_DRONE_GPS = GPF_CONST * 24,
-                ADD_HATCH_LPS = LPF_CONST * 24;
-            double 
-                minerals = get_free_minerals(),
-                gas = get_free_gas(),
-                larva = larva_ct,
-                supply_used = self->supplyUsed(),
-                supply_total = self->supplyTotal(),
-                mps = minerals_per_frame * 24,
-                gps = gas_per_frame * 24,
-                lps = larva_per_frame * 24;
-            const int 
-                OVERLORD_MINERAL_COST = 100,
-                OVERLORD_SUPPLY_PROVIDED = 16,
-                SUPPLY_MAX = 400;
-            int
-                extractor_drone_sink = 0,
-                cur_make_ct = 0,
-                seconds_passed = 0,
-                pre_sim_making_ID = -100;
-            unsigned cur_ID = (unsigned)BuildOrder::current_index();
-
-            std::vector<int> making_IDs;
-            std::vector<int> making_frames_left;
-            std::vector<BWAPI::UnitType> making_types;
-
-            std::vector<std::vector<int>> ID_and_start_time;
+        void sim_init() {
             auto &self_units = Basic::Units::self_units();
+            int NON_SIM_MAKING_ID = -1000;
+
+            sim_making_IDs.clear();
+            sim_making_types.clear();
+            sim_making_frames_left.clear();
+
+            sim_minerals = get_free_minerals(),
+            sim_gas = get_free_gas(),
+            sim_larva = larva_ct,
+            sim_supply_used = self->supplyUsed(),
+            sim_supply_total = self->supplyTotal(),
+            sim_mps = minerals_per_frame * 24,
+            sim_gps = gas_per_frame * 24,
+            sim_lps = larva_per_frame * 24;
+            sim_incoming_supply = 0;
 
             for (int i = 0; i < self_units.size(); ++i) {
                 BWAPI::Unit u = self_units[i];
                 int remaining_time = u->getRemainingBuildTime(); 
                 if (u->getType() == BWAPI::UnitTypes::Zerg_Egg) {
-                    making_IDs.push_back(pre_sim_making_ID);
-                    making_types.push_back(u->getBuildType());
-                    making_frames_left.push_back(remaining_time);
-                    ++pre_sim_making_ID;
+                    sim_making_IDs.push_back(NON_SIM_MAKING_ID);
+                    const BWAPI::UnitType &build_type = u->getBuildType();
+                    if (build_type == BWAPI::UnitTypes::Zerg_Overlord) {
+                        sim_incoming_supply += 16;
+                    }
+                    sim_making_types.push_back(build_type);
+                    sim_making_frames_left.push_back(remaining_time);
+                    ++NON_SIM_MAKING_ID;
                 }
                 else if (u->getType() == BWAPI::UnitTypes::Zerg_Hatchery && remaining_time > 0) {
-                    making_IDs.push_back(pre_sim_making_ID);
-                    making_types.push_back(BWAPI::UnitTypes::Zerg_Hatchery);
-                    making_frames_left.push_back(remaining_time);
-                    ++pre_sim_making_ID;
+                    sim_incoming_supply += BWAPI::UnitTypes::Zerg_Hatchery.supplyProvided();
+                    sim_making_IDs.push_back(NON_SIM_MAKING_ID);
+                    sim_making_types.push_back(BWAPI::UnitTypes::Zerg_Hatchery);
+                    sim_making_frames_left.push_back(remaining_time);
+                    ++NON_SIM_MAKING_ID;
                 }
             }
-            
-            seconds_until_supply_block.clear();
+        }
 
-            while(cur_ID < BuildOrder::size() && seconds_passed < sim_seconds) {
-                auto &item = BuildOrder::get(cur_ID);
-                const BuildOrder::Item::ACTION &action = item.action();
+        bool sim_can_make_item(int cur_ID) {
+            auto &item = BuildOrder::get(cur_ID);
+            const BuildOrder::Item::ACTION &action = item.action();
+            int 
+                min_cost = item.mineral_cost(),
+                gas_cost = item.gas_cost(),
+                supply_cost = item.supply_cost(),
+                larva_cost = item.larva_cost(),
+            sim_supply_block_flag = (supply_cost > 0 && supply_cost > sim_supply_total - sim_supply_used);
+            if (
+                !sim_supply_block_flag
+                && min_cost <= sim_minerals
+                && gas_cost <= sim_gas 
+                && (larva_cost == 0 || sim_larva >= 1)
+            ) {
+                return true;
+            }
+            return false;
+        }
 
-                // TODO: Account for 200 supply max (probably by splitting supply - and supply + in item)
-                const BWAPI::UnitType &unit_type = item.unit_type();
-                int 
-                    min_cost = item.mineral_cost(),
-                    gas_cost = item.gas_cost(),
-                    supply_cost = item.supply_cost(),
-                    larva_cost = item.larva_cost(),
-                    make_ct = item.count();
-                bool
-                    supply_not_blocked = (supply_cost <= 0 || supply_cost <= supply_total - supply_used),
-                    supply_blocked_and_will_correct = (
-                        !supply_not_blocked
-                        && correct_for_supply_block
-                    );
-
-                if (
-                    min_cost <= minerals
-                    && gas_cost <= gas 
-                    && (larva_cost == 0 || larva >= 1)
-                    && (supply_not_blocked || supply_blocked_and_will_correct)
-                ) {
-                    if (supply_blocked_and_will_correct) {
-                        // if we run into an unplanned supply block, we put the overlord
-                        // into the sim asap and push things back if needed.
-                        while (supply_cost >= supply_total - supply_used) {
-                            if (supply_total >= SUPPLY_MAX) {
-                                supply_total = SUPPLY_MAX;
-                                break;
-                            }
-                            if (minerals < 100) {
-                                double deficit = 100 - minerals;
-                                int seconds_to_100_minerals = abs((int)round(deficit / mps)); 
-                                int frames_to_100_minerals = seconds_to_100_minerals * 24;
-                                int frames_passed = seconds_passed * 24;
-                                auto frames_it = making_frames_left.begin();
-                                while (frames_it != making_frames_left.end()) {
-                                    int available_frames = frames_passed - *frames_it;
-                                    if (available_frames >= 0 && available_frames < frames_to_100_minerals) {
-                                        *frames_it += frames_to_100_minerals;
-                                    }
-                                    ++frames_it;
-                                }
-                                for (auto ID_and_time : build_order_sim_data) {
-                                    int time_since_item_projected = seconds_passed - ID_and_time[1];
-                                    if (time_since_item_projected < seconds_to_100_minerals) {
-                                        ID_and_time[1] += seconds_to_100_minerals;
-                                    }
-                                }
-                            }
-                            seconds_until_supply_block.push_back(seconds_passed);
-                            minerals -= OVERLORD_MINERAL_COST;
-                            supply_total += OVERLORD_SUPPLY_PROVIDED;
-                        }
-                        if (min_cost > minerals) {continue;}
+        bool sim_remove_item(int ID) {
+            bool first_remove = false;
+            bool second_remove = false;
+            for (unsigned i = 0; i < sim_making_IDs.size(); ++i) {
+                if (ID == sim_making_IDs[i]) {
+                    int supply_provided = sim_making_types[i].supplyProvided();
+                    if (supply_provided > 0) {
+                        sim_incoming_supply -= supply_provided;
                     }
+                    sim_making_IDs.erase(sim_making_IDs.begin() + i);
+                    sim_making_types.erase(sim_making_types.begin() + i);
+                    sim_making_frames_left.erase(sim_making_frames_left.begin() + i);
+                    first_remove = true;
+                    break;
+                }
+            }
+            for (auto& it = sim_data.begin(); it < sim_data.end(); ++it) {
+                if ((*it).first == ID) {
+                    sim_data.erase(it);
+                    second_remove = true;
+                    break;
+                }
+            }
+            return first_remove && second_remove;
+        }
 
-                    minerals -= min_cost;
-                    gas -= gas_cost;
-                    supply_used += supply_cost;
-                    larva -= larva_cost;
-                    ++cur_make_ct;
+        void sim_add_item(int ID, int seconds_passed) {
+            auto &item = BuildOrder::get(ID);
+            sim_making_IDs.push_back(ID);
+            sim_making_types.push_back(item.unit_type());
+            sim_making_frames_left.push_back(item.unit_type().buildTime() + 10);
+            sim_data.push_back(std::pair<int, int>(ID, seconds_passed));
+        }
 
-                    if (
-                        action == BuildOrder::Item::MAKE
-                        || action == BuildOrder::Item::MORPH
-                        || action == BuildOrder::Item::BUILD
-                    ) {
-                        if (action == BuildOrder::Item::BUILD) {
-                            mps -= ADD_DRONE_MPS;
-                        }
-                        making_IDs.push_back(cur_ID);
-                        making_types.push_back(unit_type);
-                        making_frames_left.push_back(unit_type.buildTime() + USABLE_BUFFER);
-                    }
-                    else if (action == BuildOrder::Item::CANCEL) {
-                        int cancel_ID = item.cancel_index();
-                        auto ID_it = making_IDs.begin();
-                        auto type_it = making_types.begin();
-                        auto frames_it = making_frames_left.begin();
-                        for ( ; ID_it != making_IDs.end(); ++ID_it, ++type_it, ++frames_it) {
-                            if (*(ID_it) == cancel_ID) {
-                                if (unit_type.whatBuilds().first == BWAPI::UnitTypes::Zerg_Drone) {
-                                    mps += ADD_DRONE_MPS;
-                                }
-                                making_IDs.erase(ID_it);
-                                making_types.erase(type_it);
-                                making_frames_left.erase(frames_it);
-                                break;
-                            }
-                        }
-                    }
-                    ID_and_start_time.push_back(std::vector<int> {(int)cur_ID, seconds_passed});
-                    if (cur_make_ct == make_ct) {
-                        cur_make_ct = 0;
-                        ++cur_ID;
+        void sim_make_item(int cur_ID, int seconds_passed) {
+            auto &item = BuildOrder::get(cur_ID);
+            const auto &action = item.action();
+            if (item.supply_cost() != 0) {
+                sim_add_item(cur_ID, seconds_passed);
+                auto &type = item.unit_type();
+                int provided_supply = type.supplyProvided();
+                sim_making_IDs.push_back(cur_ID);
+                sim_making_types.push_back(type);
+                sim_making_frames_left.push_back(type.buildTime() + 10);
+                if (provided_supply > 0) {
+                    sim_incoming_supply += provided_supply;
+                    if (action == BuildOrder::Item::BUILD) {
+                        sim_supply_used -= 2;
                     }
                 }
                 else {
-                    ++seconds_passed;
-                    minerals += mps;
-                    gas += gps;
-                    larva += lps;
+                    sim_supply_used += item.supply_cost();
+                }
+            }
+            else if (action == BuildOrder::Item::CANCEL) {
+                bool successful_cancel = sim_remove_item(item.cancel_index());
+                if (successful_cancel) {
+                    sim_supply_used += item.supply_cost();
+                }
+            }
+            sim_minerals -= item.mineral_cost();
+            sim_gas -= item.gas_cost();
+            sim_larva -= item.larva_cost();
+        }
 
-                    auto ID_it = making_IDs.begin();
-                    auto type_it = making_types.begin();
-                    auto frames_it = making_frames_left.begin();
-                    for ( ; ID_it != making_IDs.end(); ++ID_it, ++type_it, ++frames_it) {
-                        *(frames_it) -= 24;
-                        if (*(frames_it) <= 0) {
-                            BWAPI::UnitType &finished_type = *(type_it);
-
-                            // TODO: fix gas assignment behavior
-                            supply_total += finished_type.supplyProvided();
-                            if (finished_type == BWAPI::UnitTypes::Zerg_Extractor) {
-                                extractor_drone_sink += 3;
-                            }
-                            else if (finished_type == BWAPI::UnitTypes::Zerg_Drone) {
-                                if (extractor_drone_sink > 0) {
-                                    gps += ADD_DRONE_GPS;
-                                    --extractor_drone_sink;
-                                }
-                                else {
-                                    mps += ADD_DRONE_MPS;
-                                }
-                            }
-                            else if (finished_type == BWAPI::UnitTypes::Zerg_Hatchery) {
-                                lps += ADD_HATCH_LPS;
-                            }
-
-                            ID_it = making_IDs.erase(ID_it);
-                            type_it = making_types.erase(type_it);
-                            frames_it = making_frames_left.erase(frames_it);
-                        }
-                        // iterates past end of vector otherwise due to erase
-                        if (ID_it == making_IDs.end()) { break; }
+        void sim_advance_making_items() {
+            for (unsigned i = 0; i < sim_making_IDs.size(); ++i) {
+                int making_frames_left = --sim_making_frames_left[i];
+                if (making_frames_left == 0) {
+                    int supply_provided = sim_making_types[i].supplyProvided();
+                    if (supply_provided > 0) {
+                        sim_supply_total += supply_provided;
+                        sim_incoming_supply -= supply_provided;
                     }
                 }
             }
-            return ID_and_start_time;
+        }
+
+        // TODO: Account for tech requirements
+        void simulate_build_order(int sim_seconds=180) {
+            const double
+                ADD_DRONE_MPS = MPF_SIMPLE_CONST * 24,
+                ADD_DRONE_GPS = GPF_CONST * 24,
+                ADD_HATCH_LPS = LPF_CONST * 24;
+            const int 
+                OVERLORD_MINERAL_COST = 100,
+                OVERLORD_SUPPLY_PROVIDED = 16,
+                OVERLORD_BUILD_TIME = 600 / 24,
+                SUPPLY_MAX = 400;
+            int seconds_passed = 0;
+            unsigned cur_ID = (unsigned)BuildOrder::current_index();
+            sim_seconds_until_supply_block = sim_seconds;
+
+            sim_init();
+            
+            while (cur_ID < BuildOrder::size() && seconds_passed < sim_seconds) {
+                bool can_start_next = sim_can_make_item(cur_ID);
+
+                // simply does not add overlords, theoretically or into the BO
+                // passing the buck... mostly because it makes sense
+                // partly to keep myself from turning into a skeleton here
+                if (can_start_next) {
+                    sim_make_item(cur_ID, seconds_passed);
+                    ++cur_ID;
+                }
+                else {
+                    if (   
+                        sim_supply_block_flag 
+                        && sim_incoming_supply <= 0 
+                        && sim_seconds_until_supply_block == sim_seconds
+                    ) {
+                        sim_seconds_until_supply_block = seconds_passed;
+                    }   
+                    sim_advance_making_items();
+                    sim_minerals += sim_mps;
+                    sim_gas += sim_gps;
+                    sim_larva += sim_lps;
+                    ++seconds_passed;
+                }
+            }
         }
     }
 
@@ -338,7 +338,7 @@ namespace Production::Economy {
             estimate_supply_per_frame();
             supply_frame_timer.restart();
         }
-        build_order_sim_data = simulate();
+        simulate_build_order();
     }
 
     double get_minerals_per_frame() {return minerals_per_frame;}
@@ -417,24 +417,17 @@ namespace Production::Economy {
         return false;
     }
 
-    const std::vector<std::vector<int>> &sim_data() {
-        return build_order_sim_data;
+    const std::vector<std::vector<int>> &get_sim_data() {
+        return sim_data;
     }
 
     void print_sim_data() {
         printf("---------------------------\n---------Sim Data:---------\n---------------------------\n\n");
-        for (auto &item : build_order_sim_data) {
-            int ID = item[0];
-            int time = item[1];
+        for (auto &item : sim_data) {
+            int ID = item.first;
+            int time = item.second;
             printf("Time: %d seconds\n", time);
             BuildOrder::print_item((unsigned)ID);
         }
-    }
-
-    int seconds_until_supply_blocked() {
-        if (seconds_until_supply_block.size() > 0) {
-            return seconds_until_supply_block[0];
-        }
-        else return -1;
     }
 }
