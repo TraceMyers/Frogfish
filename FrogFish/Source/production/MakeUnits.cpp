@@ -12,9 +12,9 @@ namespace Production::MakeUnits {
     namespace {
         // TODO: do some science, fix numbers!
         const int EXTRA_DELAY_FRAMES = 10;
-        const int OVERLORD_MAKE_SECONDS = 26;
+        const int OVERLORD_MAKE_SECONDS = 10;
         const int OVERLORD_COST = 100;
-        BWTimer enable_auto_insert_overlords;
+        BWTimer overlord_push_delay;
 
         // inserts one overlord if needed - only over the next interval where
         // there is no block on making overlords
@@ -43,7 +43,7 @@ namespace Production::MakeUnits {
                     if (!overlord_make_block) {
                         last_ID_can_insert = BO_ID;
                     }
-                    
+                   
                     int time_until_make = econ_sim_data[sim_index].second;
                     if (time_until_make >= target_time) {
                         if (last_ID_can_insert > 0) {
@@ -96,6 +96,10 @@ namespace Production::MakeUnits {
                         Basic::Units::set_utask(larva, Basic::Refs::MAKE);
                         Basic::Units::set_cmd_delay(larva, item.unit_type().buildTime() + EXTRA_DELAY_FRAMES);
                         BuildOrder::next();
+                        if (item.unit_type() == BWAPI::UnitTypes::Zerg_Overlord) {
+                            printf("here\n");
+                            overlord_push_delay.start(1, 0);
+                        }
                     }
                     else {
                         still_spending = false;
@@ -108,16 +112,16 @@ namespace Production::MakeUnits {
     }
 
     void init() {
-        // TODO: do a way with this hacky bullshit
-        enable_auto_insert_overlords.start(40, 0);
+        // TODO: do away with this hacky bullshit
+        overlord_push_delay.start(10, 0);
     }
 
     void on_frame_update() {
-        enable_auto_insert_overlords.on_frame_update();
+        spend_down();
         const std::vector<std::pair<int, int>> &econ_sim_data = Economy::get_sim_data();
-        if (enable_auto_insert_overlords.is_stopped()) {
+        overlord_push_delay.on_frame_update();
+        if (overlord_push_delay.is_stopped()) {
             auto_insert_overlords(econ_sim_data);
         }
-        spend_down();
     }
 }

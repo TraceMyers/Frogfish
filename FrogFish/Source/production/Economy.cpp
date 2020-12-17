@@ -146,6 +146,7 @@ namespace Production::Economy {
             supply_per_frame = supply_per_frame_period / (SUPPLY_FRAME_SECONDS * 24);
         }
 
+        // TODO: magic numbers in sim functions
         void sim_init() {
             sim_data.clear();
             sim_making_IDs.clear();
@@ -226,7 +227,7 @@ namespace Production::Economy {
             auto &item = BuildOrder::get(ID);
             sim_making_IDs.push_back(ID);
             sim_making_types.push_back(item.unit_type());
-            sim_making_frames_left.push_back(item.unit_type().buildTime() + 10);
+            sim_making_frames_left.push_back(item.unit_type().buildTime() + 24);
         }
 
         // subtract mps when make building
@@ -267,28 +268,38 @@ namespace Production::Economy {
         }
 
         void sim_advance_making_items() {
-            for (unsigned i = 0; i < sim_making_IDs.size(); ++i) {
-                sim_making_frames_left[i] -= 1;
-                int making_frames_left = sim_making_frames_left[i];
-                if (making_frames_left == 0) {
-                    auto& type = sim_making_types[i];
+            auto &frames_left_it = sim_making_frames_left.begin();
+            auto &IDs_it = sim_making_IDs.begin();
+            auto &types_it = sim_making_types.begin();
+            while (frames_left_it < sim_making_frames_left.end()) {
+                (*frames_left_it) -= 24;
+                int making_frames_left = *frames_left_it;
+                if (making_frames_left <= 0) {
+                    auto& type = *types_it;
                     int supply_provided = type.supplyProvided();
                     if (supply_provided > 0) {
                         sim_supply_total += supply_provided;
                         sim_incoming_supply -= supply_provided;
                     }
                     if (type == BWAPI::UnitTypes::Zerg_Drone) {
+                        // TODO: extractor sink
                         sim_mps += sim_add_drone_mps;
                     }
                     else if (type == BWAPI::UnitTypes::Zerg_Hatchery) {
                         sim_lps += sim_add_hatch_lps;
                     }
+                    frames_left_it = sim_making_frames_left.erase(frames_left_it);
+                    IDs_it = sim_making_IDs.erase(IDs_it);
+                    types_it = sim_making_types.erase(types_it);
+                    if (frames_left_it == sim_making_frames_left.end()) { break; }
                 }
+                ++frames_left_it;
+                ++IDs_it;
+                ++types_it;
             }
         }
 
         // TODO: Account for tech requirements
-        // TODO: for some reason, the sim is only going out a unit or so at the start
         void simulate_build_order(int sim_seconds=360) {
             const int 
                 OVERLORD_MINERAL_COST = 100,
@@ -312,8 +323,8 @@ namespace Production::Economy {
                     ++cur_ID;
                 }
                 else {
-                    //DBGMSG("sim larva: %.2f", sim_larva);
-                    //DBGMSG("sim minerals: %.2f", sim_minerals);
+                    //DBGMSG("sim supply block flag: %d", sim_supply_block_flag);
+                    //DBGMSG("sim incoming supply: %d", sim_incoming_supply);
                     if (   
                         sim_supply_block_flag 
                         && sim_incoming_supply <= 0 
