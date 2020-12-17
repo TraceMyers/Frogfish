@@ -2,43 +2,13 @@
 
 namespace Basic::Refs {
 
+
     namespace Zerg {
 
         const int TYPE_CT = 28;
         const int TECH_CT = 9;
         const int UPGRADE_CT = 16;
 
-        std::map<UnitType, UnitType> UNIT_REQ = {
-            {Zerg_Drone, None},
-            {Zerg_Zergling, Zerg_Spawning_Pool},
-            {Zerg_Hydralisk, Zerg_Hydralisk_Den},
-            {Zerg_Lurker, Zerg_Hydralisk_Den},
-            {Zerg_Ultralisk, Zerg_Ultralisk_Cavern},
-            {Zerg_Defiler, Zerg_Defiler_Mound},
-            {Zerg_Overlord, None},
-            {Zerg_Mutalisk, Zerg_Spire},
-            {Zerg_Scourge, Zerg_Spire},
-            {Zerg_Queen, Zerg_Queens_Nest},
-            {Zerg_Guardian, Zerg_Greater_Spire},
-            {Zerg_Devourer, Zerg_Greater_Spire},
-            {Zerg_Hatchery, None},
-            {Zerg_Creep_Colony, None},
-            {Zerg_Sunken_Colony, Zerg_Spawning_Pool},
-            {Zerg_Spore_Colony, Zerg_Spawning_Pool},
-            {Zerg_Extractor, None},
-            {Zerg_Spawning_Pool, None},
-            {Zerg_Evolution_Chamber, None},
-            {Zerg_Hydralisk_Den, Zerg_Spawning_Pool},
-            {Zerg_Lair, Zerg_Hatchery},
-            {Zerg_Spire, Zerg_Lair},
-            {Zerg_Queens_Nest, Zerg_Lair},
-            {Zerg_Hive, Zerg_Queens_Nest},
-            {Zerg_Greater_Spire, Zerg_Hive},
-            {Zerg_Nydus_Canal, Zerg_Hive},
-            {Zerg_Ultralisk_Cavern, Zerg_Hive},
-            {Zerg_Defiler_Mound, Zerg_Hive}
-        };
-        
         const char *NAMES[28] = {
             "drone",
             "zergling",
@@ -101,6 +71,37 @@ namespace Basic::Refs {
             BWAPI::UnitTypes::Zerg_Defiler_Mound
         };
 
+        const BWAPI::UnitType UNIT_REQ[28] = {
+            BWAPI::UnitTypes::None,
+            BWAPI::UnitTypes::Zerg_Spawning_Pool,
+            BWAPI::UnitTypes::Zerg_Hydralisk_Den,
+            BWAPI::UnitTypes::Zerg_Hydralisk_Den,
+            BWAPI::UnitTypes::Zerg_Ultralisk_Cavern,
+            BWAPI::UnitTypes::Zerg_Defiler_Mound,
+            BWAPI::UnitTypes::None,
+            BWAPI::UnitTypes::Zerg_Spire,
+            BWAPI::UnitTypes::Zerg_Spire,
+            BWAPI::UnitTypes::Zerg_Queens_Nest,
+            BWAPI::UnitTypes::Zerg_Greater_Spire,
+            BWAPI::UnitTypes::Zerg_Greater_Spire,
+            BWAPI::UnitTypes::None,
+            BWAPI::UnitTypes::None,
+            BWAPI::UnitTypes::Zerg_Spawning_Pool,
+            BWAPI::UnitTypes::Zerg_Spawning_Pool,
+            BWAPI::UnitTypes::None,
+            BWAPI::UnitTypes::None,
+            BWAPI::UnitTypes::None,
+            BWAPI::UnitTypes::Zerg_Spawning_Pool,
+            BWAPI::UnitTypes::Zerg_Hatchery,
+            BWAPI::UnitTypes::Zerg_Lair,
+            BWAPI::UnitTypes::Zerg_Lair,
+            BWAPI::UnitTypes::Zerg_Queens_Nest,
+            BWAPI::UnitTypes::Zerg_Hive,
+            BWAPI::UnitTypes::Zerg_Hive,
+            BWAPI::UnitTypes::Zerg_Hive,
+            BWAPI::UnitTypes::Zerg_Hive
+        };
+        
         const char* TECH_NAMES[9] = {
             "lurker_aspect",
             "parasite",
@@ -111,7 +112,6 @@ namespace Basic::Refs {
             "infestation",
             "dark_swarm",
             "spawn_broodlings"
-
         };
 
         const BWAPI::TechType TECH_TYPES[9] = {
@@ -125,6 +125,8 @@ namespace Basic::Refs {
             BWAPI::TechTypes::Dark_Swarm,
             BWAPI::TechTypes::Spawn_Broodlings
         };
+
+        const 
 
         const char* UPGRADE_NAMES[16] = {
             "adrenal_glands",

@@ -130,6 +130,8 @@ namespace Basic::Units {
                 UnitData &u_data = *ID_to_data[u->getID()];
                 if (u_data.type != u->getType()) {
                     _self_just_changed_type.add(u);
+                    set_cmd_delay(u, 16);
+                    set_utask(u, Basic::Refs::IDLE);
                 }
                 update_unit(u, u_data);
             }

@@ -1,5 +1,6 @@
 #include "BuildOrder.h"
 #include "../basic/References.h"
+#include "../test/TestMessage.h"
 #include <BWAPI.h>
 #include <fstream>
 #include <thread>
@@ -352,17 +353,18 @@ namespace Production::BuildOrder {
             const Item::ACTION& action = cur_item.action();
             if (action == Item::OVERLORD_MAKE_BLOCK_ON) {
                 overlord_make_block_on = true;
-                printf("BuildOrder::next(): Overlord make block *ON*\n");
+                DBGMSG("BuildOrder::next(): Overlord make block *ON*\n");
                 next();
             }
             else if (action == Item::OVERLORD_MAKE_BLOCK_OFF) {
                 overlord_make_block_on = false;
-                printf("BuildOrder::next(): Overlord make block *OFF*\n");
+                DBGMSG("BuildOrder::next(): Overlord make block *OFF*\n");
                 next();
             }
-            printf("BuildOrder::next(): advancing to %d\n", cur_index);
+            DBGMSG("BuildOrder::next(): advancing to %d\n", cur_index);
+            return;
         }
-        printf("BuildOrder::next(): Build order reached the end.\n");
+        DBGMSG("BuildOrder::next(): Build order reached the end.\n");
     }
 
     // unsafe - can cause read access error

@@ -6,5 +6,6 @@
 #include "../basic/Tech.h"
 
 namespace Production::MakeUnits {
+    void init();
     void on_frame_update();
 }

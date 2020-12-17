@@ -131,6 +131,7 @@
     <ClCompile Include="Source\basic\UnitArray.cpp" />
     <ClCompile Include="Source\basic\UnitData.cpp" />
     <ClCompile Include="Source\basic\Units.cpp" />
+    <ClCompile Include="Source\control\Workers.cpp" />
     <ClCompile Include="Source\Dll.cpp" />
     <ClCompile Include="Source\FrogFish.cpp" />
     <ClCompile Include="Source\movement\Move.cpp" />
@@ -140,6 +141,7 @@
     <ClCompile Include="Source\production\Economy.cpp" />
     <ClCompile Include="Source\production\GetTech.cpp" />
     <ClCompile Include="Source\production\MakeUnits.cpp" />
+    <ClCompile Include="Source\test\TestMessage.cpp" />
     <ClCompile Include="Source\test\TestMove.cpp" />
     <ClCompile Include="Source\utility\BWTimer.cpp" />
     <ClCompile Include="Source\utility\DebugDraw.cpp" />
@@ -176,6 +178,7 @@
     <ClInclude Include="Source\basic\UnitArray.h" />
     <ClInclude Include="Source\basic\UnitData.h" />
     <ClInclude Include="Source\basic\Units.h" />
+    <ClInclude Include="Source\control\Workers.h" />
     <ClInclude Include="Source\FrogFish.h" />
     <ClInclude Include="Source\movement\Move.h" />
     <ClInclude Include="Source\production\BuildGraph.h" />
@@ -184,6 +187,7 @@
     <ClInclude Include="Source\production\Economy.h" />
     <ClInclude Include="Source\production\GetTech.h" />
     <ClInclude Include="Source\production\MakeUnits.h" />
+    <ClInclude Include="Source\test\TestMessage.h" />
     <ClInclude Include="Source\test\TestMove.h" />
     <ClInclude Include="Source\utility\BWTimer.h" />
     <ClInclude Include="Source\utility\DebugDraw.h" />

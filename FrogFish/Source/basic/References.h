@@ -4,9 +4,6 @@
 #include <BWAPI.h>
 #include <map>
 
-using namespace BWAPI;
-using namespace BWAPI::UnitTypes;
-
 namespace Basic::Refs {
 
     enum UTASK {
@@ -42,7 +39,7 @@ namespace Basic::Refs {
     };
 
     namespace Zerg {
-        extern std::map<UnitType, UnitType> UNIT_REQ;
+        extern const BWAPI::UnitType UNIT_REQ[28];
         extern const int TYPE_CT;
         extern const int TECH_CT;
         extern const int UPGRADE_CT;

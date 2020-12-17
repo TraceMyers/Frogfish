@@ -13,6 +13,7 @@ namespace Production::GetTech {
         const int CMD_DELAY = 2;
 
         void init_tech() {
+            // TODO: doesn't check if end
             auto &build_item = BuildOrder::current_item();
             if (build_item.action() == BuildOrder::Item::TECH) {
                 const BWAPI::TechType &tech_type = build_item.tech_type();

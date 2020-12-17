@@ -13,6 +13,8 @@ namespace Basic::Tech {
 
     namespace {
         std::map<BWAPI::UnitType, bool> _self_can_make;
+        std::map<BWAPI::UnitType, bool> _self_can_upgrade;
+        std::map<BWAPI::UnitType, bool> _self_can_tech;
     }
 
     void on_frame_update() {
@@ -40,7 +42,7 @@ namespace Basic::Tech {
 
         for (int i = 0; i < Zerg::TYPE_CT; ++i) {
             auto &this_type = Zerg::TYPES[i];
-            auto &immediate_requirement = Zerg::UNIT_REQ[this_type];
+            auto &immediate_requirement = Zerg::UNIT_REQ[i];
             bool requirement_met = false;
             for (auto & structure : struct_types) {
                 if (

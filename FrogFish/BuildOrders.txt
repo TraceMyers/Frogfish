@@ -53,3 +53,7 @@ protoss 2_hatch_hydra
 13: upgrade, 1,  muscular_augments, null
 14: makeblockoff,   1,  overlord,         null
 ------------------------------------------------------
+
+terran test_auto_overlord_build
+0:  make,    50,  drone,             null
+------------------------------------------------------

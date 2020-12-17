@@ -3,12 +3,14 @@
 #include "../basic/Units.h"
 #include "../basic/Bases.h"
 #include "../utility/BWTimer.h"
+#include "../test/TestMessage.h"
 #include <BWAPI.h>
 #include <BWEM/bwem.h>
 #include <vector>
 #include <iostream>
 #include <fstream>
 #include <iomanip>
+#include "Windows.h"
 
 using namespace Production;
 
@@ -23,6 +25,7 @@ namespace Production::Economy {
         BWAPI::Player self;
         BWTimer update_calc_timer;
 
+        // TODO: make mpf/gpf dependent on more factors
         const int
             SUPPLY_FRAME_SECONDS = 8,
             SUPPLY_FRAME_CT = 3,
@@ -59,18 +62,26 @@ namespace Production::Economy {
         std::vector<int> sim_making_IDs;
         std::vector<int> sim_making_frames_left;
         std::vector<BWAPI::UnitType> sim_making_types;
-        int sim_seconds_until_supply_block;
-        bool sim_supply_block_flag;
-        double
+        int 
+            sim_seconds_until_supply_block,
+            sim_ID_at_supply_block,
+            sim_incoming_supply;
+        bool 
+            sim_supply_block_flag,
+            sim_just_added_overlord;
+        int
+            sim_supply_used,
+            sim_supply_total;
+        float
+            sim_larva,
             sim_minerals,
             sim_gas,
-            sim_larva,
-            sim_supply_used,
-            sim_supply_total,
             sim_mps,
             sim_gps,
             sim_lps,
-            sim_incoming_supply;
+            sim_add_drone_mps,
+            sim_add_drone_gps,
+            sim_add_hatch_lps;
 
         void estimate_income() {
             larva_ct = 0;
@@ -87,6 +98,8 @@ namespace Production::Economy {
 
                 int mineral_worker_ct = 0;
                 for (auto &worker : Basic::Bases::workers(base)) {
+                    /*
+                    // TODO: Use this
                     Basic::Units::UnitData unit_data = Basic::Units::data(worker);
                     if (unit_data.u_task == Basic::Refs::UTASK::MINERALS) {
                         ++mineral_worker_ct;
@@ -94,6 +107,8 @@ namespace Production::Economy {
                     else if (unit_data.u_task == Basic::Refs::UTASK::GAS) {
                         gas_per_frame += GPF_CONST;
                     }
+                    */
+                   ++mineral_worker_ct;
                 }
                 int mineral_ct = minerals.size(); 
 
@@ -111,6 +126,7 @@ namespace Production::Economy {
                         + min_sat_cu_fact * MPF_SATURATION_CU_COEF
                     )
                     * mineral_worker_ct;
+                DBGMSG("minerals per frame: %.2f\n", minerals_per_frame);
             }
         }
 
@@ -131,20 +147,21 @@ namespace Production::Economy {
         }
 
         void sim_init() {
-            auto &self_units = Basic::Units::self_units();
-            int NON_SIM_MAKING_ID = -1000;
-
+            sim_data.clear();
             sim_making_IDs.clear();
             sim_making_types.clear();
             sim_making_frames_left.clear();
 
-            sim_minerals = get_free_minerals(),
-            sim_gas = get_free_gas(),
-            sim_larva = larva_ct,
-            sim_supply_used = self->supplyUsed(),
-            sim_supply_total = self->supplyTotal(),
-            sim_mps = minerals_per_frame * 24,
-            sim_gps = gas_per_frame * 24,
+            auto &self_units = Basic::Units::self_units();
+            int NON_SIM_MAKING_ID = -1000;
+
+            sim_minerals = get_free_minerals();
+            sim_gas = get_free_gas();
+            sim_larva = (larva_ct == 0 ? 0.5 : larva_ct); // TODO: better? starting at 0.5 more accurate
+            sim_supply_used = self->supplyUsed();
+            sim_supply_total = self->supplyTotal();
+            sim_mps = minerals_per_frame * 24;
+            sim_gps = gas_per_frame * 24;
             sim_lps = larva_per_frame * 24;
             sim_incoming_supply = 0;
 
@@ -171,14 +188,14 @@ namespace Production::Economy {
             }
         }
 
-        bool sim_can_make_item(int cur_ID) {
-            auto &item = BuildOrder::get(cur_ID);
+        bool sim_can_make_item(const BuildOrder::Item& item, int cur_ID) {
             const BuildOrder::Item::ACTION &action = item.action();
             int 
                 min_cost = item.mineral_cost(),
                 gas_cost = item.gas_cost(),
                 supply_cost = item.supply_cost(),
-                larva_cost = item.larva_cost(),
+                larva_cost = item.larva_cost();
+
             sim_supply_block_flag = (supply_cost > 0 && supply_cost > sim_supply_total - sim_supply_used);
             if (
                 !sim_supply_block_flag
@@ -192,29 +209,17 @@ namespace Production::Economy {
         }
 
         bool sim_remove_item(int ID) {
-            bool first_remove = false;
-            bool second_remove = false;
+            bool remove_success = false;
             for (unsigned i = 0; i < sim_making_IDs.size(); ++i) {
                 if (ID == sim_making_IDs[i]) {
-                    int supply_provided = sim_making_types[i].supplyProvided();
-                    if (supply_provided > 0) {
-                        sim_incoming_supply -= supply_provided;
-                    }
                     sim_making_IDs.erase(sim_making_IDs.begin() + i);
                     sim_making_types.erase(sim_making_types.begin() + i);
                     sim_making_frames_left.erase(sim_making_frames_left.begin() + i);
-                    first_remove = true;
+                    remove_success = true;
                     break;
                 }
             }
-            for (auto& it = sim_data.begin(); it < sim_data.end(); ++it) {
-                if ((*it).first == ID) {
-                    sim_data.erase(it);
-                    second_remove = true;
-                    break;
-                }
-            }
-            return first_remove && second_remove;
+            return remove_success;
         }
 
         void sim_add_item(int ID, int seconds_passed) {
@@ -222,19 +227,16 @@ namespace Production::Economy {
             sim_making_IDs.push_back(ID);
             sim_making_types.push_back(item.unit_type());
             sim_making_frames_left.push_back(item.unit_type().buildTime() + 10);
-            sim_data.push_back(std::pair<int, int>(ID, seconds_passed));
         }
 
-        void sim_make_item(int cur_ID, int seconds_passed) {
-            auto &item = BuildOrder::get(cur_ID);
+        // subtract mps when make building
+        void sim_make_item(const BuildOrder::Item& item, int cur_ID, int seconds_passed) {
+            sim_data.push_back(std::pair<int, int>(cur_ID, seconds_passed));
             const auto &action = item.action();
+            auto &type = item.unit_type();
             if (item.supply_cost() != 0) {
                 sim_add_item(cur_ID, seconds_passed);
-                auto &type = item.unit_type();
                 int provided_supply = type.supplyProvided();
-                sim_making_IDs.push_back(cur_ID);
-                sim_making_types.push_back(type);
-                sim_making_frames_left.push_back(type.buildTime() + 10);
                 if (provided_supply > 0) {
                     sim_incoming_supply += provided_supply;
                     if (action == BuildOrder::Item::BUILD) {
@@ -249,6 +251,14 @@ namespace Production::Economy {
                 bool successful_cancel = sim_remove_item(item.cancel_index());
                 if (successful_cancel) {
                     sim_supply_used += item.supply_cost();
+                    int provided_supply = type.supplyProvided();
+                    sim_incoming_supply -= provided_supply;
+                }
+                else {
+                    printf("econ sim - unsuccessful cancel of item\n***\n");
+                    BuildOrder::print_item(cur_ID);
+                    printf("***\n");
+                    return;
                 }
             }
             sim_minerals -= item.mineral_cost();
@@ -258,23 +268,28 @@ namespace Production::Economy {
 
         void sim_advance_making_items() {
             for (unsigned i = 0; i < sim_making_IDs.size(); ++i) {
-                int making_frames_left = --sim_making_frames_left[i];
+                sim_making_frames_left[i] -= 1;
+                int making_frames_left = sim_making_frames_left[i];
                 if (making_frames_left == 0) {
-                    int supply_provided = sim_making_types[i].supplyProvided();
+                    auto& type = sim_making_types[i];
+                    int supply_provided = type.supplyProvided();
                     if (supply_provided > 0) {
                         sim_supply_total += supply_provided;
                         sim_incoming_supply -= supply_provided;
+                    }
+                    if (type == BWAPI::UnitTypes::Zerg_Drone) {
+                        sim_mps += sim_add_drone_mps;
+                    }
+                    else if (type == BWAPI::UnitTypes::Zerg_Hatchery) {
+                        sim_lps += sim_add_hatch_lps;
                     }
                 }
             }
         }
 
         // TODO: Account for tech requirements
-        void simulate_build_order(int sim_seconds=180) {
-            const double
-                ADD_DRONE_MPS = MPF_SIMPLE_CONST * 24,
-                ADD_DRONE_GPS = GPF_CONST * 24,
-                ADD_HATCH_LPS = LPF_CONST * 24;
+        // TODO: for some reason, the sim is only going out a unit or so at the start
+        void simulate_build_order(int sim_seconds=360) {
             const int 
                 OVERLORD_MINERAL_COST = 100,
                 OVERLORD_SUPPLY_PROVIDED = 16,
@@ -282,28 +297,31 @@ namespace Production::Economy {
                 SUPPLY_MAX = 400;
             int seconds_passed = 0;
             unsigned cur_ID = (unsigned)BuildOrder::current_index();
-            sim_seconds_until_supply_block = sim_seconds;
+            sim_seconds_until_supply_block = -1;
+            sim_ID_at_supply_block = -1;
+            sim_add_drone_mps = MPF_SIMPLE_CONST * 24;
+            sim_add_drone_gps = GPF_CONST * 24;
+            sim_add_hatch_lps = LPF_CONST * 24;
 
             sim_init();
             
             while (cur_ID < BuildOrder::size() && seconds_passed < sim_seconds) {
-                bool can_start_next = sim_can_make_item(cur_ID);
-
-                // simply does not add overlords, theoretically or into the BO
-                // passing the buck... mostly because it makes sense
-                // partly to keep myself from turning into a skeleton here
-                if (can_start_next) {
-                    sim_make_item(cur_ID, seconds_passed);
+                auto &item = BuildOrder::get(cur_ID);
+                if (sim_can_make_item(item, cur_ID)) {
+                    sim_make_item(item, cur_ID, seconds_passed);
                     ++cur_ID;
                 }
                 else {
+                    //DBGMSG("sim larva: %.2f", sim_larva);
+                    //DBGMSG("sim minerals: %.2f", sim_minerals);
                     if (   
                         sim_supply_block_flag 
                         && sim_incoming_supply <= 0 
-                        && sim_seconds_until_supply_block == sim_seconds
                     ) {
                         sim_seconds_until_supply_block = seconds_passed;
-                    }   
+                        sim_ID_at_supply_block = cur_ID;
+                        break;
+                    }
                     sim_advance_making_items();
                     sim_minerals += sim_mps;
                     sim_gas += sim_gps;
@@ -339,6 +357,26 @@ namespace Production::Economy {
             supply_frame_timer.restart();
         }
         simulate_build_order();
+        /*
+        if (sim_data.size() > 0) {
+            print_sim_data();
+        }
+        */
+        sim_just_added_overlord = false;
+    }
+
+    void add_delay_to_build_order_sim(unsigned start_index, int delay_seconds, bool push_indices) {
+        for (unsigned i = start_index; i < sim_data.size(); ++i) {
+            auto& sim_item = sim_data[i];
+            if (push_indices) {
+                sim_item.first += 1;
+            }
+            sim_item.second += delay_seconds;
+        }
+    }
+
+    void sim_set_just_added_overlord_flag_true() {
+        sim_just_added_overlord = true;
     }
 
     double get_minerals_per_frame() {return minerals_per_frame;}
@@ -360,6 +398,8 @@ namespace Production::Economy {
     int get_free_minerals() {return self->minerals() - reserved_minerals;}
 
     int get_free_gas() {return self->gas() - reserved_gas;}
+
+    bool supply_blocked() {return self->supplyUsed() >= self->supplyTotal();}
 
     // returns reference ID
     // allows current resources - reserved resources to go negative
@@ -417,17 +457,28 @@ namespace Production::Economy {
         return false;
     }
 
-    const std::vector<std::vector<int>> &get_sim_data() {
+    int seconds_until_supply_blocked() {
+        return sim_seconds_until_supply_block;
+    }
+
+    int build_order_ID_at_supply_block() {
+        return sim_ID_at_supply_block;
+    }
+
+    const std::vector<std::pair<int, int>> &get_sim_data() {
         return sim_data;
     }
 
-    void print_sim_data() {
+    void print_sim_data(int limit) {
+        int count = 0;
         printf("---------------------------\n---------Sim Data:---------\n---------------------------\n\n");
         for (auto &item : sim_data) {
             int ID = item.first;
             int time = item.second;
             printf("Time: %d seconds\n", time);
             BuildOrder::print_item((unsigned)ID);
+            ++count;
+            if (count == limit) { break; }
         }
     }
 }

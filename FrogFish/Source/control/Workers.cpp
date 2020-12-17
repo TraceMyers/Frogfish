@@ -1,6 +1,7 @@
 #include "Workers.h"
 #include "../basic/Bases.h"
 #include "../basic/Units.h"
+#include "../basic/References.h"
 #include <BWEM/bwem.h>
 #include <BWAPI.h>
 
@@ -10,20 +11,21 @@ namespace Control::Workers {
 //     std::vector<FUnit> making_extractors;
 // }
 
-// void send_idle_workers_to_mine(BaseStorage &base_storage) {
-//     const std::vector<FBase> &self_bases = base_storage.get_self_bases();
-//     for (auto base : self_bases) {
-//         const std::vector<FUnit> &workers = base->get_workers();
-//         for (auto worker : workers) {
-//             if (worker->f_task == FrogUnit::FTASKS::IDLE && worker->is_ready()) {
-//                 auto bwapi_unit = worker->bwapi_u();
-//                 bwapi_unit->gather(bwapi_unit->getClosestUnit(Filter::IsMineralField));
-//                 worker->f_task = FrogUnit::FTASKS::MINE_MINERALS;
-//                 worker->set_cmd_delay(2);
-//             }
-//         }
-//     }
-// }
+void send_idle_workers_to_mine() {
+    const std::vector<const BWEM::Base *>& bases = Basic::Bases::self_bases();
+    for (auto base : bases) {
+        const std::vector<BWAPI::Unit> &workers = Basic::Bases::workers(base);
+        int counter = 0;
+        for (auto worker : workers) {
+            auto &unit_data = Basic::Units::data(worker);
+            if (unit_data.u_task == Basic::Refs::IDLE && unit_data.cmd_ready) {
+                worker->gather(worker->getClosestUnit(Filter::IsMineralField));
+                Basic::Units::set_utask(worker, Basic::Refs::MINERALS);
+                Basic::Units::set_cmd_delay(worker, 2);
+            }
+        }
+    }
+}
 
 // void send_mineral_workers_to_gas(
 //     BaseStorage &base_storage,

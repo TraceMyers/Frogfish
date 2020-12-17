@@ -11,6 +11,8 @@
 #include "production/Construction.h"
 #include "movement/Move.h"
 #include "test/TestMove.h"
+#include "test/TestMessage.h"
+#include "control/Workers.h"
 //#include "production/GetTech.h"
 #include <BWAPI.h>
 #include <iostream>
@@ -47,8 +49,10 @@ void FrogFish::onStart() {
     Production::BuildGraph::init();
     Production::Economy::init();
     Production::Construction::init();
-    Production::BuildOrder::load("protoss", "2_hatch_hydra");
+    Production::BuildOrder::load("terran", "test_auto_overlord_build");
     Production::BuildOrder::print();
+    Production::MakeUnits::init();
+    Test::Message::init(15);
     timer.start(5,0);
 }
 
@@ -65,7 +69,7 @@ void FrogFish::onFrame() {
     Production::BuildGraph::on_frame_update();
     Production::Economy::on_frame_update();
     Production::MakeUnits::on_frame_update();
-    Production::Construction::on_frame_update();
+    //Production::Construction::on_frame_update();
     //Production::GetTech::on_frame_update();
 
 	Movement::Move::on_frame_update();
@@ -78,7 +82,10 @@ void FrogFish::onFrame() {
     //Utility::DebugDraw::draw_build_nodes();
     Utility::DebugDraw::draw_all_movement_paths();
 
+    Test::Message::on_frame_update();
     // send idle workers to mine minerals (needs to move up)
+    Control::Workers::send_idle_workers_to_mine();
+
     timer.on_frame_update();
     if (timer.is_stopped()) {
         // timer.restart();

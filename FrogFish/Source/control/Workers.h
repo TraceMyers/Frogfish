@@ -3,5 +3,5 @@
 
 
 namespace Control::Workers {
-    void on_frame_update();
+    void send_idle_workers_to_mine();
 }
