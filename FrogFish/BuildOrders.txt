@@ -17,7 +17,7 @@ protoss 12_hatch
 1:  make,   5,  drone,         null
 2:  make,   1,  overlord,      null
 3:  make,   3,  drone,         null
-4:  build,  1,  hatchery,      null
+4:  build,  1,  hatchery,      -1
 5:  build,  1,  spawning_pool, null
 6:  make,   4,  drone,         null
 7:  make,   2,  zergling,      null
@@ -55,5 +55,5 @@ protoss 2_hatch_hydra
 ------------------------------------------------------
 
 terran test_auto_overlord_build
-0:  make,    50,  drone,             null
+0:  make,    200,  drone,             null
 ------------------------------------------------------

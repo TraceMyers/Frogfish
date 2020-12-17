@@ -8,6 +8,9 @@
 
 using namespace Basic;
 
+// TODO: change Build Order to linked list implementation to work better with manipulation
+//      ^ outweighs befefits of random access?
+
 namespace Production::BuildOrder { 
 
     Item::Item(
@@ -370,6 +373,12 @@ namespace Production::BuildOrder {
     // unsafe - can cause read access error
     const Item &get(int i) {
         return items[i];
+    }
+
+    void move(int from, int to) {
+        auto& item = items[from];
+        items.erase(items.begin() + from);
+        items.insert(items.begin() + to, item);
     }
 
     bool overlord_make_block() {

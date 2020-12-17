@@ -109,6 +109,7 @@ namespace Production::BuildOrder {
     const Item &    current_item();
     void            next();
     const Item &    get(int i);
+    void            move(int from, int to);
     bool            overlord_make_block();
     unsigned        size();
     bool            finished();

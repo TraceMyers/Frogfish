@@ -225,9 +225,15 @@ namespace Production::Economy {
 
         void sim_add_item(int ID, int seconds_passed) {
             auto &item = BuildOrder::get(ID);
+            auto &type = item.unit_type();
             sim_making_IDs.push_back(ID);
-            sim_making_types.push_back(item.unit_type());
-            sim_making_frames_left.push_back(item.unit_type().buildTime() + 24);
+            sim_making_types.push_back(type);
+            if (type == BWAPI::UnitTypes::Zerg_Drone) {
+                sim_making_frames_left.push_back(item.unit_type().buildTime() + 72);
+            }
+            else {
+                sim_making_frames_left.push_back(item.unit_type().buildTime() + 10);
+            }
         }
 
         // subtract mps when make building

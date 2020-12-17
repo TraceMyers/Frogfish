@@ -23,7 +23,6 @@ using namespace Filter;
 // TODO:
 //  - near total refactor with neat namespaces, better task organization; generally
 //  in need of an organization style
-//      - DELETE 500+ lines
 //  - need to expand the features of pathfinding beyond simply providing paths.
 //  - pathfinding needs to solve problems like: getting a unit from point a
 //  to point b while avoiding potential and known danger. This would mean things like
@@ -32,6 +31,7 @@ using namespace Filter;
 //  for the unit to attempt without army intervention
 //  - For now, pathing just needs to handle moving units from a to b with either
 //  attacking or not attacking in mind
+//  - unsupervised learning of build types
 
 BWTimer timer;
 
@@ -40,7 +40,7 @@ BWTimer timer;
 void FrogFish::onStart() {
     Broodwar->sendText("Hello Sailor!");
     Broodwar->enableFlag(Flag::UserInput);
-    Broodwar->setLocalSpeed(20);
+    Broodwar->setLocalSpeed(10);
     Broodwar->setCommandOptimizationLevel(2);
     onStart_alloc_debug_console();
     onStart_send_workers_to_mine();
@@ -49,7 +49,7 @@ void FrogFish::onStart() {
     Production::BuildGraph::init();
     Production::Economy::init();
     Production::Construction::init();
-    Production::BuildOrder::load("terran", "test_auto_overlord_build");
+    Production::BuildOrder::load("protoss", "12_hatch");
     Production::BuildOrder::print();
     Production::MakeUnits::init();
     Test::Message::init(15);
