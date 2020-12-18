@@ -12,6 +12,7 @@ using namespace Basic;
 //      ^ outweighs befefits of random access?
 // TODO: add a removal scheduler, just like with units/bases, where all other dealies have
 // a frame to check whether or not an item is being removed
+// TODO: put econ sim data in build order items
 
 namespace Production::BuildOrder { 
 
@@ -32,6 +33,8 @@ namespace Production::BuildOrder {
 
     namespace {
 
+        int item_ID_counter = 0;
+
         struct InternalItem : public Item {
 
             InternalItem(
@@ -47,6 +50,7 @@ namespace Production::BuildOrder {
                 set_gas_cost();
                 set_supply_cost();
                 set_larva_cost();
+                _ID = item_ID_counter++;
             }
 
             void set_mineral_cost() {
@@ -171,7 +175,8 @@ namespace Production::BuildOrder {
 
         void _insert_next(InternalItem item) {
             items.insert(items.begin() + cur_index, item);
-        }       
+        }
+
     }
 
     void load(const char *_race, const char *build_name) {
@@ -286,6 +291,10 @@ namespace Production::BuildOrder {
                     }
                 }
             }
+        }
+        if (items.size() > 0 && items[0].action() == Item::ACTION::OVERLORD_MAKE_BLOCK_ON) {
+            overlord_make_block_on = true;
+            next();
         }
         in_file.close();
     }

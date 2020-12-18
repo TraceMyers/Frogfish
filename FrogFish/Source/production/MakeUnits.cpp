@@ -20,20 +20,23 @@ namespace Production::MakeUnits {
         // there is no block on making overlords
         // TODO: inserting overlords can significantly delay construction; units on way to build
         // site need to be potentially pulled back
+        // TODO: overlord make block -> overlord make ban
         void auto_insert_overlords(const std::vector<std::pair<int, int>> &econ_sim_data) {
             int supply_block_seconds = Economy::seconds_until_supply_blocked();
             if (0 <= supply_block_seconds && supply_block_seconds < 100) { // < 0 means no block over sim duration
-                int supply_block_ID = Economy::build_order_ID_at_supply_block();
+                int supply_block_index = Economy::build_order_index_at_supply_block();
                 bool overlord_make_block = BuildOrder::overlord_make_block();
-                float minerals_per_sec = Economy::get_minerals_per_sec();
-                int cur_ID = BuildOrder::current_index();
-                int last_ID_can_insert = (overlord_make_block ? -1 : cur_ID);
+                int cur_index = BuildOrder::current_index();
+                int last_index_can_insert = (overlord_make_block ? -1 : cur_index);
                 int supply_block_sim_index = econ_sim_data.size() - 1;
                 int target_time = supply_block_seconds - OVERLORD_MAKE_SECONDS;
-                bool successful_insert = false;
 
-                for (unsigned BO_ID = cur_ID, sim_index = 0; BO_ID < supply_block_ID; ++BO_ID, ++sim_index) {
-                    const BuildOrder::Item &item = BuildOrder::get(BO_ID);
+                for (
+                    unsigned BO_index = cur_index, sim_index = 0; 
+                    BO_index < supply_block_index; 
+                    ++BO_index, ++sim_index
+                ) {
+                    const BuildOrder::Item &item = BuildOrder::get(BO_index);
                     if (item.action() == BuildOrder::Item::OVERLORD_MAKE_BLOCK_ON) {
                         overlord_make_block = true;
                     }
@@ -41,17 +44,17 @@ namespace Production::MakeUnits {
                         overlord_make_block = false;
                     }
                     if (!overlord_make_block) {
-                        last_ID_can_insert = BO_ID;
+                        last_index_can_insert = BO_index + 1;
                     }
                    
                     int time_until_make = econ_sim_data[sim_index].second;
                     if (time_until_make >= target_time) {
-                        if (last_ID_can_insert > 0) {
+                        if (last_index_can_insert > 0) {
                             bool moved_late_overlord_back = false;
-                            for (int i = last_ID_can_insert; i < BuildOrder::size(); ++i) {
+                            for (int i = last_index_can_insert; i < BuildOrder::size(); ++i) {
                                 auto &item = BuildOrder::get(i);
                                 if (item.unit_type() == BWAPI::UnitTypes::Zerg_Overlord) {
-                                    BuildOrder::move(i, last_ID_can_insert);
+                                    BuildOrder::move(i, last_index_can_insert);
                                     moved_late_overlord_back = true;
                                     break;
                                 }
@@ -63,25 +66,22 @@ namespace Production::MakeUnits {
                                     BWAPI::TechTypes::None,
                                     BWAPI::UpgradeTypes::None,
                                     -1,
-                                    last_ID_can_insert
+                                    last_index_can_insert
                                 );
                             }
+
+                            float minerals_per_sec = Economy::get_minerals_per_sec();
                             int overlord_delay_seconds = (int)((1/minerals_per_sec) * OVERLORD_COST);
                             Economy::add_delay_to_build_order_sim(
-                                last_ID_can_insert + 1, 
-                                overlord_delay_seconds, 
-                                true
+                                last_index_can_insert + 1, 
+                                overlord_delay_seconds
                             );
-                            Economy::sim_set_just_added_overlord_flag_true();
-                            successful_insert = true;
-                            break;
+
+                            return;
                         }
                     }
                 }
-
-                if (!successful_insert) {
-                    DBGMSG("auto_insert_overlords(): unsolvable block!\n");
-                }
+                DBGMSG("auto_insert_overlords(): unsolvable block!\n");
             }
         }
 

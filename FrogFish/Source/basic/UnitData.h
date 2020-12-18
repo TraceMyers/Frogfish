@@ -7,6 +7,9 @@
 
 using namespace Basic::Refs;
 
+// TODO: move back to wrapper class?
+// TODO: use bit field for statuses
+
 namespace Basic::Units {
 
     UTYPE get_utype(BWAPI::Unit u);

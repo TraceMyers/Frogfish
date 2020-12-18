@@ -17,6 +17,7 @@ namespace Basic::Units {
     void            clear_newly_stored_and_removed();
     void            set_utask (BWAPI::Unit u, UTASK task);
     void            set_cmd_delay(BWAPI::Unit u, int cmd_delay_frames);
+    void            set_build_status(BWAPI::Unit u, BUILD_STATUS status);
     const UnitArray &self_units();
     const UnitArray &enemy_units();
     const UnitData  &data(BWAPI::Unit u);

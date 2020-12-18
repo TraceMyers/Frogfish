@@ -69,7 +69,7 @@ void FrogFish::onFrame() {
     Production::BuildGraph::on_frame_update();
     Production::Economy::on_frame_update();
     Production::MakeUnits::on_frame_update();
-    //Production::Construction::on_frame_update();
+    Production::Construction::on_frame_update();
     //Production::GetTech::on_frame_update();
 
 	Movement::Move::on_frame_update();

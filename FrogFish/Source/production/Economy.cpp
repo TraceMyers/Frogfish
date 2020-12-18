@@ -59,16 +59,15 @@ namespace Production::Economy {
         std::vector<int *> reserved_resources;
 
         std::vector<std::pair<int, int>> sim_data;
-        std::vector<int> sim_making_IDs;
+        std::vector<int> sim_making_indices;
         std::vector<int> sim_making_frames_left;
         std::vector<BWAPI::UnitType> sim_making_types;
         int 
             sim_seconds_until_supply_block,
-            sim_ID_at_supply_block,
+            sim_index_at_supply_block,
             sim_incoming_supply;
         bool 
-            sim_supply_block_flag,
-            sim_just_added_overlord;
+            sim_supply_block_flag;
         int
             sim_supply_used,
             sim_supply_total;
@@ -149,7 +148,7 @@ namespace Production::Economy {
         // TODO: magic numbers in sim functions
         void sim_init() {
             sim_data.clear();
-            sim_making_IDs.clear();
+            sim_making_indices.clear();
             sim_making_types.clear();
             sim_making_frames_left.clear();
 
@@ -170,7 +169,7 @@ namespace Production::Economy {
                 BWAPI::Unit u = self_units[i];
                 int remaining_time = u->getRemainingBuildTime(); 
                 if (u->getType() == BWAPI::UnitTypes::Zerg_Egg) {
-                    sim_making_IDs.push_back(NON_SIM_MAKING_ID);
+                    sim_making_indices.push_back(NON_SIM_MAKING_ID);
                     const BWAPI::UnitType &build_type = u->getBuildType();
                     if (build_type == BWAPI::UnitTypes::Zerg_Overlord) {
                         sim_incoming_supply += 16;
@@ -181,7 +180,7 @@ namespace Production::Economy {
                 }
                 else if (u->getType() == BWAPI::UnitTypes::Zerg_Hatchery && remaining_time > 0) {
                     sim_incoming_supply += BWAPI::UnitTypes::Zerg_Hatchery.supplyProvided();
-                    sim_making_IDs.push_back(NON_SIM_MAKING_ID);
+                    sim_making_indices.push_back(NON_SIM_MAKING_ID);
                     sim_making_types.push_back(BWAPI::UnitTypes::Zerg_Hatchery);
                     sim_making_frames_left.push_back(remaining_time);
                     ++NON_SIM_MAKING_ID;
@@ -189,7 +188,7 @@ namespace Production::Economy {
             }
         }
 
-        bool sim_can_make_item(const BuildOrder::Item& item, int cur_ID) {
+        bool sim_can_make_item(const BuildOrder::Item& item) {
             const BuildOrder::Item::ACTION &action = item.action();
             int 
                 min_cost = item.mineral_cost(),
@@ -209,11 +208,11 @@ namespace Production::Economy {
             return false;
         }
 
-        bool sim_remove_item(int ID) {
+        bool sim_remove_item(int index) {
             bool remove_success = false;
-            for (unsigned i = 0; i < sim_making_IDs.size(); ++i) {
-                if (ID == sim_making_IDs[i]) {
-                    sim_making_IDs.erase(sim_making_IDs.begin() + i);
+            for (unsigned i = 0; i < sim_making_indices.size(); ++i) {
+                if (index == sim_making_indices[i]) {
+                    sim_making_indices.erase(sim_making_indices.begin() + i);
                     sim_making_types.erase(sim_making_types.begin() + i);
                     sim_making_frames_left.erase(sim_making_frames_left.begin() + i);
                     remove_success = true;
@@ -223,10 +222,10 @@ namespace Production::Economy {
             return remove_success;
         }
 
-        void sim_add_item(int ID, int seconds_passed) {
-            auto &item = BuildOrder::get(ID);
+        void sim_add_item(int index, int seconds_passed) {
+            auto &item = BuildOrder::get(index);
             auto &type = item.unit_type();
-            sim_making_IDs.push_back(ID);
+            sim_making_indices.push_back(index);
             sim_making_types.push_back(type);
             if (type == BWAPI::UnitTypes::Zerg_Drone) {
                 sim_making_frames_left.push_back(item.unit_type().buildTime() + 72);
@@ -237,12 +236,12 @@ namespace Production::Economy {
         }
 
         // subtract mps when make building
-        void sim_make_item(const BuildOrder::Item& item, int cur_ID, int seconds_passed) {
-            sim_data.push_back(std::pair<int, int>(cur_ID, seconds_passed));
+        void sim_make_item(const BuildOrder::Item& item, int index, int seconds_passed) {
+            sim_data.push_back(std::pair<int, int>(item.ID(), seconds_passed));
             const auto &action = item.action();
             auto &type = item.unit_type();
             if (item.supply_cost() != 0) {
-                sim_add_item(cur_ID, seconds_passed);
+                sim_add_item(index, seconds_passed);
                 int provided_supply = type.supplyProvided();
                 if (provided_supply > 0) {
                     sim_incoming_supply += provided_supply;
@@ -263,7 +262,7 @@ namespace Production::Economy {
                 }
                 else {
                     printf("econ sim - unsuccessful cancel of item\n***\n");
-                    BuildOrder::print_item(cur_ID);
+                    BuildOrder::print_item(index);
                     printf("***\n");
                     return;
                 }
@@ -275,7 +274,7 @@ namespace Production::Economy {
 
         void sim_advance_making_items() {
             auto &frames_left_it = sim_making_frames_left.begin();
-            auto &IDs_it = sim_making_IDs.begin();
+            auto &IDs_it = sim_making_indices.begin();
             auto &types_it = sim_making_types.begin();
             while (frames_left_it < sim_making_frames_left.end()) {
                 (*frames_left_it) -= 24;
@@ -295,7 +294,7 @@ namespace Production::Economy {
                         sim_lps += sim_add_hatch_lps;
                     }
                     frames_left_it = sim_making_frames_left.erase(frames_left_it);
-                    IDs_it = sim_making_IDs.erase(IDs_it);
+                    IDs_it = sim_making_indices.erase(IDs_it);
                     types_it = sim_making_types.erase(types_it);
                     if (frames_left_it == sim_making_frames_left.end()) { break; }
                 }
@@ -313,20 +312,20 @@ namespace Production::Economy {
                 OVERLORD_BUILD_TIME = 600 / 24,
                 SUPPLY_MAX = 400;
             int seconds_passed = 0;
-            unsigned cur_ID = (unsigned)BuildOrder::current_index();
+            unsigned sim_index = (unsigned)BuildOrder::current_index();
             sim_seconds_until_supply_block = -1;
-            sim_ID_at_supply_block = -1;
+            sim_index_at_supply_block = -1;
             sim_add_drone_mps = MPF_SIMPLE_CONST * 24;
             sim_add_drone_gps = GPF_CONST * 24;
             sim_add_hatch_lps = LPF_CONST * 24;
 
             sim_init();
             
-            while (cur_ID < BuildOrder::size() && seconds_passed < sim_seconds) {
-                auto &item = BuildOrder::get(cur_ID);
-                if (sim_can_make_item(item, cur_ID)) {
-                    sim_make_item(item, cur_ID, seconds_passed);
-                    ++cur_ID;
+            while (sim_index < BuildOrder::size() && seconds_passed < sim_seconds) {
+                auto &item = BuildOrder::get(sim_index);
+                if (sim_can_make_item(item)) {
+                    sim_make_item(item, sim_index, seconds_passed);
+                    ++sim_index;
                 }
                 else {
                     //DBGMSG("sim supply block flag: %d", sim_supply_block_flag);
@@ -336,7 +335,7 @@ namespace Production::Economy {
                         && sim_incoming_supply <= 0 
                     ) {
                         sim_seconds_until_supply_block = seconds_passed;
-                        sim_ID_at_supply_block = cur_ID;
+                        sim_index_at_supply_block = sim_index;
                         break;
                     }
                     sim_advance_making_items();
@@ -379,21 +378,13 @@ namespace Production::Economy {
             print_sim_data();
         }
         */
-        sim_just_added_overlord = false;
     }
 
-    void add_delay_to_build_order_sim(unsigned start_index, int delay_seconds, bool push_indices) {
+    void add_delay_to_build_order_sim(unsigned start_index, int delay_seconds) {
         for (unsigned i = start_index; i < sim_data.size(); ++i) {
             auto& sim_item = sim_data[i];
-            if (push_indices) {
-                sim_item.first += 1;
-            }
             sim_item.second += delay_seconds;
         }
-    }
-
-    void sim_set_just_added_overlord_flag_true() {
-        sim_just_added_overlord = true;
     }
 
     double get_minerals_per_frame() {return minerals_per_frame;}
@@ -478,8 +469,8 @@ namespace Production::Economy {
         return sim_seconds_until_supply_block;
     }
 
-    int build_order_ID_at_supply_block() {
-        return sim_ID_at_supply_block;
+    int build_order_index_at_supply_block() {
+        return sim_index_at_supply_block;
     }
 
     const std::vector<std::pair<int, int>> &get_sim_data() {

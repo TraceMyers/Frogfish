@@ -231,6 +231,12 @@ namespace Basic::Units {
 
     }
 
+    void set_build_status(BWAPI::Unit u, BUILD_STATUS status) {
+        int ID = u->getID();
+        auto &unit_data = ID_to_data[ID];
+        unit_data->build_status = status;
+    }
+
     const UnitArray &self_units() {
         return _self_units;
     }

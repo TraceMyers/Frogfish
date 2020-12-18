@@ -67,6 +67,12 @@ namespace Production::BuildOrder {
         int supply_cost() const {
             return _supply_cost;
         }
+        
+        int ID() const {
+            return _ID;
+        }
+
+        inline bool operator==(const Item& a) const {return a.ID() == this->ID();}
 
         /* PROTECTED */
         protected:
@@ -80,6 +86,7 @@ namespace Production::BuildOrder {
         int _gas_cost = 0;
         int _larva_cost = 0;
         int _supply_cost = 0;
+        int _ID = 0;
     };
 
     void            load(const char *_race, const char *build_name);

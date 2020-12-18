@@ -1,6 +1,8 @@
 #include "ConstructionPlanning.h"
 #include "../production/BuildGraph.h"
 #include "../basic/Bases.h"
+#include "../basic/Units.h"
+#include "../basic/UnitData.h"
 #include "../test/TestMessage.h"
 #include "BWEM/bwem.h"
 
@@ -34,8 +36,7 @@ namespace Strategy::ConstructionPlanning {
     }
 
     // TODO: use logic to make decisions
-    int make_construction_plan(const Production::BuildOrder::Item& item) {
-
+    int Strategy::ConstructionPlanning::make_construction_plan(const Production::BuildOrder::Item& item) {
         const std::vector<const BWEM::Base *> &bases = Basic::Bases::self_bases();
         const BWEM::Base *construction_base = nullptr;
         const BWAPI::Unit *builder_ptr = nullptr;
@@ -45,12 +46,25 @@ namespace Strategy::ConstructionPlanning {
             auto &base_workers = Basic::Bases::workers(base);
             if (base_workers.size() > 0) {
                 construction_base = base;
+                for (auto worker : base_workers) {
+                    auto& worker_data = Basic::Units::data(worker);
+                    if (worker_data.u_task == Basic::Refs::MINERALS && worker_data.build_status == NONE) {
+                        builder_ptr = &worker;
+                        break;
+                    }
+                }
+            }
+            if (construction_base != nullptr && builder_ptr != nullptr) {
                 break;
             }
         }
-        if (!construction_base) {
+        if (construction_base == nullptr) {
             DBGMSG("Couldn't find base for construction! Building type: %s", type.c_str());
             return NO_BASE;
+        }
+        else if (builder_ptr == nullptr) {
+            DBGMSG("Couldn't find builder for construction! Building type: %s", type.c_str());
+            return NO_BUILDER;
         }
         if (type == BWAPI::UnitTypes::Zerg_Extractor) {
             build_tp = Production::BuildGraph::get_geyser_tilepos(construction_base);
@@ -62,8 +76,16 @@ namespace Strategy::ConstructionPlanning {
                 type.tileHeight()
             );
         }
+        if (!build_tp) {
+            DBGMSG("Couldn't find builder for construction! Building type: %s", type.c_str());
+            return NO_LOCATION;
+        }
 
         int plan_ID = get_free_plans_index();
+        plans[plan_ID].set_base(construction_base);
+        plans[plan_ID].set_builder(*builder_ptr);
+        plans[plan_ID].set_item(item);
+        plans[plan_ID].set_tilepos(build_tp);
 
         return plan_ID;
     }
@@ -72,37 +94,28 @@ namespace Strategy::ConstructionPlanning {
         return plans[ID];
     }
 
+    bool plan_exists(const Production::BuildOrder::Item &item) {
+        uint64_t field_checker = 1;
+        int i = 0;
+        while(field_checker > 0) {
+            if (field_checker & used_plans_field) {
+                if(plans[i].get_item() == item) {
+                    return true; 
+                }
+            }
+            field_checker <<= 1;
+            ++i;
+        }
+        return false;
+    }
+
     void destroy_plan(int ID) {
         int ID_field_num = 1 << ID;
 
         #ifdef _DEBUG
-        assert(ID >= 0 && ID < 64 && ID_field_num & used_plans_field);
+        assert(ID >= 0 && ID < 64 && (ID_field_num & used_plans_field));
         #endif
 
         used_plans_field ^= ID_field_num;
-    }
-
-    BWAPI::TilePosition get_construction_location(const BuildOrder::Item& item) {
-        const std::vector<const BWEM::Base *> &bases = Basic::Bases::self_bases();
-        const BWEM::Base *construction_base = nullptr;
-        const BWAPI::UnitType& type = item.unit_type();
-        for (auto &base : bases) {
-            if (Basic::Bases::workers(base).size() > 0) {
-                construction_base = base;
-                break;
-            }
-        }
-        if (!construction_base) {
-            DBGMSG("Couldn't find base for construction! Building type: %s", type.c_str());
-            return BWAPI::TilePositions::None;
-        }
-        if (type == BWAPI::UnitTypes::Zerg_Extractor) {
-            return Production::BuildGraph::get_geyser_tilepos(construction_base);
-        }
-        return Production::BuildGraph::get_build_tilepos(
-            construction_base, 
-            type.tileWidth(), 
-            type.tileHeight()
-        );
     }
 }

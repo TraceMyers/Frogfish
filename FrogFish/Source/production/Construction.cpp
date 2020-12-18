@@ -6,6 +6,7 @@
 #include "../basic/Bases.h"
 #include "../basic/Units.h"
 #include "../strategy/ConstructionPlanning.h"
+#include "../test/TestMessage.h"
 #include <BWEB/BWEB.h>
 #include <BWAPI.h>
 #include <assert.h>
@@ -16,49 +17,37 @@
 // - periodically check if building is still feasible while status == WAITING
 //      - request scouts for locations out of vision
 
-namespace Production::Construction {
 
+using namespace Strategy;
+
+namespace Production::Construction {
     namespace {
 
-        std::vector<BWAPI::Unit>                builders;
-        std::vector<int>                        build_order_IDs;
+        std::vector<int>                        construction_plan_IDs;
         std::vector<int>                        move_IDs;
         const int                               FINISH_BUILD_FRAMES = 30;
         const int                               BUILD_CMD_DELAY = 2;
+        const int                               NOT_FOUND = -1;
+        BWTimer                                 shit_timer;
 
-        bool already_cached(int build_ID) {
-            for (auto &ID : build_order_IDs) {
-                if (ID == build_ID) {return true;}
-            }
-            return false;
-        }
-
-        const std::vector<int> *get_relevant_sim_data(
-            int build_ID, 
-            const std::vector<std::vector<int>> &econ_sim_data
+        int get_seconds_until_build(
+            int item_ID, 
+            const std::vector<std::pair<int, int>> &econ_sim_data
         ) {
             for (auto &data_item : econ_sim_data) {
-                if (data_item[0] == build_ID) {
-                    return &data_item;
+                if (data_item.first == item_ID) {
+                    return data_item.second;
                 }
             }
-            return nullptr;
+            return NOT_FOUND;
         }
 
-        /*
-        // temp process, temp params (just creating good func names and stand-in processes)
-        const BWAPI::Unit select_unused_worker(int base_index) {
-            auto &base_unused_workers = unused_workers[base_index];
-            auto &builder = base_unused_workers[base_unused_workers.size() - 1];
-            base_unused_workers.erase(base_unused_workers.end() - 1);
-            return builder;
-        }
-
+    /*
         void remove_build(int constr_ID) {
             if (statuses[constr_ID] == BUILDING) {
                 builders[constr_ID]->cancelConstruction();
                 // important for extractors. can't wait until it's done automatically next frame
-                // or get read access vioation
+                // or get read access violation
                 Basic::Bases::remove_struct_from_owner_base(builders[constr_ID]);
             }
             else if (statuses[constr_ID] == GIVEN_BUILD_CMD)   {
@@ -96,71 +85,52 @@ namespace Production::Construction {
                 }
             }
         }
+    */
 
         void init_builds() {
-            auto &econ_sim_data = Economy::sim_data();
-            bool updated_unused_workers = false;
+            const std::vector<std::pair<int, int>> &econ_sim_data = Economy::get_sim_data();
             
-            for (unsigned build_ID = BuildOrder::current_index(); build_ID < BuildOrder::size(); ++build_ID) {
-                const BuildOrder::Item &build_item = BuildOrder::get(build_ID);
-                const std::vector<int> *item_sim_data_ptr = get_relevant_sim_data(build_ID, econ_sim_data);
+            int build_index = BuildOrder::current_index();
+            for (auto& sim_item : econ_sim_data) {
+                const BuildOrder::Item &build_item = BuildOrder::get(build_index);
                 if (
                     build_item.action() == BuildOrder::Item::BUILD 
-                    && !already_cached(build_ID) 
-                    && item_sim_data_ptr != nullptr
+                    && !ConstructionPlanning::plan_exists(build_item) 
                 ) {
-                    if (!updated_unused_workers) {
-                        update_unused_workers();
-                        updated_unused_workers = true;
-                    }
-                    auto &bases = Basic::Bases::self_bases();
-                    int base_index = select_base_for_construction(bases);
-                    if (base_index == -1) {
-                        return;
-                    }
-                    auto &base = bases[base_index];
-                    BWAPI::Unit builder = select_unused_worker(base_index);
-                    BWAPI::TilePosition build_tp;
-                    if (build_item.unit_type() == BWAPI::UnitTypes::Zerg_Hatchery) {
-                        // TODO: handle hatchery building/placement
-                        const BWAPI::UnitType &build_type = build_item.unit_type();
-                        build_tp = BuildGraph::get_build_tilepos(
-                            base, 
-                            build_type.tileWidth(),
-                            build_type.tileHeight()
+                    int plan_ID = ConstructionPlanning::make_construction_plan(build_item);
+                    if (plan_ID < 0) {
+                        DBGMSG(
+                            "Construction::init_builds(): build order item ID %d Error %d\n",
+                            build_item.ID(),
+                            plan_ID
                         );
-                    }
-                    else if (build_item.unit_type() == BWAPI::UnitTypes::Zerg_Extractor) {
-                        build_tp = BuildGraph::get_geyser_tilepos(base);
-                    }
-                    else {
-                        const BWAPI::UnitType &build_type = build_item.unit_type();
-                        build_tp = BuildGraph::get_build_tilepos(
-                            base, 
-                            build_type.tileWidth(),
-                            build_type.tileHeight()
-                        );
-                    }
-                    printf("calling move to %d, %d\n", build_tp);
-                    int move_ID = Movement::Move::move(builder, build_tp, false, true);
+                        continue;
+                    } 
+                    const ConstructionPlanning::ConstructionPlan &plan = ConstructionPlanning::get_plan(plan_ID);
+                    const BWAPI::TilePosition& tp = plan.get_tilepos();
+                    const BWAPI::Unit& builder = plan.get_builder();
+                    int move_ID = Movement::Move::move(builder, tp, false, true);
                     if (move_ID < 0) {
-                        printf("(%d, %d)\n", build_tp.x, build_tp.y);
-                        printf("***Construction::init_builds(): PATHING ERROR!***\n");
+                        DBGMSG("Construction::init_builds(): pathing error to (%d, %d)\n", tp.x, tp.y);
                         // TODO: pathing error! need to deal with this somehow
                         continue;
                     }
+                    //auto& unit_data = Basic::Units::data(builder);
+                    //Basic::Units::set_build_status(builder, Basic::Refs::BUILD_STATUS::RESERVED);
 
-                    builders.push_back(builder);
-                    build_bases.push_back(base);
-                    build_locations.push_back(build_tp);
-                    build_order_IDs.push_back(build_ID);
                     move_IDs.push_back(move_ID);
-                    statuses.push_back(WAITING);
+                    construction_plan_IDs.push_back(plan_ID);
                 } 
+                ++build_index;
+                // TODO: CRASH why do I have to do this? Misalignment?
+                if (build_index >= BuildOrder::size()) { break; }
             }
         }
 
+        // TODO: account for bad or messed up time predictions, deaths, etc.
         void advance_builds() {
+            // TODO: canceling
+            /*
             auto &cur_build_item = BuildOrder::current_item();
             if (cur_build_item.action() == BuildOrder::Item::CANCEL) {
                 int cancel_build_ID = cur_build_item.cancel_index();
@@ -174,97 +144,104 @@ namespace Production::Construction {
                 // Advance the build order even if it's too late to cancel
                 BuildOrder::next();
             }
-            for (int i = 0; i < build_order_IDs.size(); ++i) {
-                if (statuses[i] == WAITING) {
-                    int move_ID = move_IDs[i];
-                    int travel_time = Movement::Move::remaining_frames(move_ID);
-                    const std::vector<int> *item_sim_data_ptr = get_relevant_sim_data(
-                        build_order_IDs[i], 
-                        Economy::sim_data()
-                    );
-                    if (item_sim_data_ptr != nullptr) {
-                        int start_build_frames = (*item_sim_data_ptr)[1] * 24;
+            */
+            auto& construction_plan_IDs_it = construction_plan_IDs.begin();
+            auto& move_IDs_it = move_IDs.begin();
+            while (construction_plan_IDs_it < construction_plan_IDs.end()) {
+                int plan_ID = *construction_plan_IDs_it;
+                auto& plan = ConstructionPlanning::get_plan(plan_ID);
+                const BWAPI::Unit& builder = plan.get_builder();
+                const Basic::Units::UnitData builder_data = Basic::Units::data(builder);
+                auto& build_status = builder_data.build_status;
+                if (build_status == BUILD_STATUS::RESERVED) {
+                    auto& build_item = plan.get_item();
+                    auto& sim_data = Production::Economy::get_sim_data();
+                    int build_time = get_seconds_until_build(build_item.ID(), sim_data);
+                    if (build_time != NOT_FOUND) {
+                        int move_ID = *move_IDs_it;
+                        int travel_time = Movement::Move::remaining_frames(move_ID);
+                        int start_build_frames = build_time * 24;
                         if (start_build_frames <= travel_time) {
                             Movement::Move::start(move_ID);
-                            BWAPI::Unit builder = builders[i];
-                            Basic::Units::set_utask(builder, Basic::Refs::BUILD);
-                            statuses[i] = MOVING;
+                            Basic::Units::set_utask(builder, UTASK::BUILD);
+                            Basic::Units::set_build_status(builder, BUILD_STATUS::MOVING);
+                            DBGMSG("Construction::advance_builds(): moving\n");
                         }
                     }
                     else {
-                        // TODO: address error
+                        DBGMSG("Construction::advance_builds() maybe an error but maybe not?\n");
+                        // TODO: address potential error
                     }
                 }
-                else if (statuses[i] == MOVING) {
-                    //printf("ID: %d: moving\n", i);
-                    int move_ID = move_IDs[i];
+                else if (build_status == BUILD_STATUS::MOVING) {
+                    int move_ID = *move_IDs_it;
                     // TODO: account for potential move errors
                     if (Movement::Move::get_status(move_ID) == Movement::Move::DESTINATION) {
-                        statuses[i] = AT_SITE;
+                        Basic::Units::set_build_status(builder, BUILD_STATUS::AT_SITE);
                         Movement::Move::remove(move_ID);
+                        DBGMSG("Construction::advance_builds(): at site\n");
                     }
                 }
-                else if (statuses[i] == AT_SITE) {
-                    printf("ID: %d: at site\n", i);
+                else if (build_status == BUILD_STATUS::AT_SITE) {
+                    auto& build_item = plan.get_item();
                     if (
-                        cur_build_item.mineral_cost() <= Economy::get_free_minerals()
-                        && cur_build_item.gas_cost() <= Economy::get_free_gas()
+                        BuildOrder::current_item() == build_item
+                        && build_item.mineral_cost() <= Economy::get_free_minerals()
+                        && build_item.gas_cost() <= Economy::get_free_gas()
                     ) {
                         // TODO: final check that building here is OK
-                        const BWAPI::UnitType &build_type = cur_build_item.unit_type();
-                        const BWAPI::TilePosition &build_loc = build_locations[i];
-                        BWAPI::Unit builder = builders[i];
+                        const BWAPI::UnitType &build_type = build_item.unit_type();
+                        const BWAPI::TilePosition &build_loc = plan.get_tilepos();
                         builder->build(build_type, build_loc);
-                        statuses[i] = GIVEN_BUILD_CMD;
+                        Basic::Units::set_build_status(builder, BUILD_STATUS::GIVEN_BUILD_CMD);
                         Basic::Units::set_cmd_delay(builder, BUILD_CMD_DELAY);
+                        DBGMSG("Construction::advance_builds(): given build cmd\n");
                     }
                 }
-                else if (statuses[i] == GIVEN_BUILD_CMD) {
-                    printf("ID: %d: given build cmd\n", i);
-                    const BWAPI::Unit &builder = builders[i];
+                else if (build_status == BUILD_STATUS::GIVEN_BUILD_CMD) {
                     const BWAPI::UnitType unit_type = builder->getType();
                     if (unit_type.isBuilding()) {
-                        statuses[i] = BUILDING;
+                        Basic::Units::set_build_status(builder, BUILD_STATUS::BUILDING);
                         Basic::Units::set_cmd_delay(builder, unit_type.buildTime() + FINISH_BUILD_FRAMES);
+                        DBGMSG("building\n");
+                        BuildOrder::next();
                     }
                     // TODO: deal with not advancing to 'BUILDING' status after some time
                 }
-                else if (statuses[i] == BUILDING) {
-                    printf("ID: %d: building\n", i);
-                    const BWAPI::Unit &builder = builders[i];
+                else if (build_status == BUILD_STATUS::BUILDING) {
                     auto &unit_data = Basic::Units::data(builder);
-                    if (unit_data.cmd_ready) {statuses[i] = COMPLETED;}
-                    if (BuildOrder::current_index() == build_order_IDs[i]) {
-                        BuildOrder::next();
+                    if (unit_data.cmd_ready) {
+                        Basic::Units::set_build_status(builder, BUILD_STATUS::COMPLETED);
+                        DBGMSG("finished building\n");
                     }
                 }
-                else if (statuses[i] == COMPLETED) {
-                    printf("ID: %d: finished building\n", i);
+                else if (build_status == COMPLETED) {
                     // status is COMPLETED for one frame to allow for other sections to use that
                     // information
-                    remove_build(build_order_IDs[i]);
+                    // remove_build(build_order_IDs[i]);
+                    ConstructionPlanning::destroy_plan(plan_ID);
+                    construction_plan_IDs_it = construction_plan_IDs.erase(construction_plan_IDs_it);
+                    move_IDs_it = move_IDs.erase(move_IDs_it);
+                    if (construction_plan_IDs_it == construction_plan_IDs.end()) {
+                        break;
+                    }
                 }
+                ++construction_plan_IDs_it;
+                ++move_IDs_it;
             }
         }
-        */
     }
 
-    bool worker_reserved_for_building(const BWAPI::Unit unit) {
-        for (auto &builder : builders) {
-            if (unit == builder) {return true;}
-        }
-        return false;
-    }
-
+    // TODO: use?
     void init() {
-        int map_base_ct = Basic::Bases::all_bases().size();
+        shit_timer.start(1, 0);
     }
 
     void on_frame_update() {
-        //resolve_dead_builders();
-        //init_builds();
-        //advance_builds();
-        ;
+        shit_timer.on_frame_update();
+        if (shit_timer.is_stopped()) {
+            init_builds();
+            advance_builds();
+        }
     }
-
 }
