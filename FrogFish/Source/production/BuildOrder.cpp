@@ -10,6 +10,8 @@ using namespace Basic;
 
 // TODO: change Build Order to linked list implementation to work better with manipulation
 //      ^ outweighs befefits of random access?
+// TODO: add a removal scheduler, just like with units/bases, where all other dealies have
+// a frame to check whether or not an item is being removed
 
 namespace Production::BuildOrder { 
 

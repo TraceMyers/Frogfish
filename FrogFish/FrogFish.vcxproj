@@ -141,6 +141,7 @@
     <ClCompile Include="Source\production\Economy.cpp" />
     <ClCompile Include="Source\production\GetTech.cpp" />
     <ClCompile Include="Source\production\MakeUnits.cpp" />
+    <ClCompile Include="Source\strategy\ConstructionPlanning.cpp" />
     <ClCompile Include="Source\test\TestMessage.cpp" />
     <ClCompile Include="Source\test\TestMove.cpp" />
     <ClCompile Include="Source\utility\BWTimer.cpp" />
@@ -187,6 +188,7 @@
     <ClInclude Include="Source\production\Economy.h" />
     <ClInclude Include="Source\production\GetTech.h" />
     <ClInclude Include="Source\production\MakeUnits.h" />
+    <ClInclude Include="Source\strategy\ConstructionPlanning.h" />
     <ClInclude Include="Source\test\TestMessage.h" />
     <ClInclude Include="Source\test\TestMove.h" />
     <ClInclude Include="Source\utility\BWTimer.h" />

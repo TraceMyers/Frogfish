@@ -5,6 +5,7 @@
 #include "../movement/Move.h"
 #include "../basic/Bases.h"
 #include "../basic/Units.h"
+#include "../strategy/ConstructionPlanning.h"
 #include <BWEB/BWEB.h>
 #include <BWAPI.h>
 #include <assert.h>
@@ -32,44 +33,6 @@ namespace Production::Construction {
             return false;
         }
 
-        void update_unused_workers() {
-            auto &bases = Basic::Bases::self_bases();
-            for (unsigned i = 0; i < bases.size(); ++i) {
-                auto &base = bases[i];
-                auto &base_unused_workers = unused_workers[i];
-                base_unused_workers = Basic::Bases::workers(base);
-                for (
-                    auto worker_it = base_unused_workers.begin(); 
-                    worker_it != base_unused_workers.end(); 
-                    ++worker_it
-                ) {
-                    auto &worker = *worker_it;
-                    auto &worker_data = Basic::Units::data(worker);
-                    bool reached_last_worker = false;
-                    // TODO: make better decision about whether or not the worker is fit to build
-                    if (worker_data.u_task != MINERALS) {
-                        worker_it = base_unused_workers.erase(worker_it);
-                        if (worker_it == base_unused_workers.end()) {
-                            break;
-                        }
-                        continue;
-                    }
-                    else for (auto &builder : builders) {
-                        if (builder == *worker_it) {
-                            worker_it = base_unused_workers.erase(worker_it);
-                            if (worker_it == base_unused_workers.end()) {
-                                reached_last_worker = true;
-                            }
-                            break;
-                        }
-                    }
-                    if (reached_last_worker) {
-                        break;
-                    }
-                }
-            }
-        }
-
         const std::vector<int> *get_relevant_sim_data(
             int build_ID, 
             const std::vector<std::vector<int>> &econ_sim_data
@@ -82,20 +45,7 @@ namespace Production::Construction {
             return nullptr;
         }
 
-        // temp process, temp params (just creating good func names and stand-in processes)
-        int select_base_for_construction(const std::vector<const BWEM::Base *> &bases) {
-            // CRASH: returns bad int when no unused workers
-            for (unsigned j = 0; j < bases.size(); ++j) {
-                auto &base = bases[j];
-                auto &base_unused_workers = unused_workers[j];
-                int base_unused_workers_size = base_unused_workers.size();
-                if (base_unused_workers_size > 0) {
-                    return j;
-                }
-            }
-            return -1;
-        }
-
+        /*
         // temp process, temp params (just creating good func names and stand-in processes)
         const BWAPI::Unit select_unused_worker(int base_index) {
             auto &base_unused_workers = unused_workers[base_index];
@@ -296,6 +246,7 @@ namespace Production::Construction {
                 }
             }
         }
+        */
     }
 
     bool worker_reserved_for_building(const BWAPI::Unit unit) {
