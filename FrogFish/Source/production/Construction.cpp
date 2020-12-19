@@ -223,13 +223,24 @@ namespace Production::Construction {
                     }
                 }
                 else if (build_status == BUILD_STATUS::GIVEN_BUILD_CMD) {
+                    DBGMSG("**1\n");
                     const BWAPI::UnitType unit_type = builder->getType();
+                    auto &unit_data = Basic::Units::data(builder);
                     if (unit_type.isBuilding()) {
+                        DBGMSG("**2\n");
                         // TODO: remove buildgraph reservation
                         Basic::Units::set_build_status(builder, BUILD_STATUS::BUILDING);
                         Basic::Units::set_cmd_delay(builder, unit_type.buildTime() + FINISH_BUILD_FRAMES);
-                        DBGMSG("building\n");
+                        DBGMSG("Construction::advance_builds(): building\n");
                         BuildOrder::next();
+                    }
+                    else if (unit_data.cmd_ready) {
+                        DBGMSG("**3\n");
+                        auto& build_item = plan.get_item();
+                        const BWAPI::UnitType &build_type = build_item.unit_type();
+                        const BWAPI::TilePosition &build_loc = plan.get_tilepos();
+                        builder->build(build_type, build_loc);
+                        Basic::Units::set_cmd_delay(builder, BUILD_CMD_DELAY);
                     }
                     // TODO: deal with not advancing to 'BUILDING' status after some time
                 }
@@ -237,7 +248,7 @@ namespace Production::Construction {
                     auto &unit_data = Basic::Units::data(builder);
                     if (unit_data.cmd_ready) {
                         Basic::Units::set_build_status(builder, BUILD_STATUS::COMPLETED);
-                        DBGMSG("finished building\n");
+                        DBGMSG("Construction::advance_builds(): finished building\n");
                     }
                 }
                 else if (build_status == COMPLETED) {
@@ -265,7 +276,7 @@ namespace Production::Construction {
 
     void on_frame_update() {
         shit_timer.on_frame_update();
-        if (shit_timer.is_stopped()) {
+        if (shit_timer.is_stopped() && !BuildOrder::finished()) {
             init_builds();
             advance_builds();
         }

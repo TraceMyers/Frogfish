@@ -3,6 +3,7 @@
 #include "../basic/Units.h"
 #include "../utility/FrogMath.h"
 #include "../FrogFish.h"
+#include "../test/TestMessage.h"
 #include <BWAPI.h>
 #include <BWEB/BWEB.h>
 #include <math.h>
@@ -193,15 +194,17 @@ namespace Movement::Move {
             // TODO: Assumes progress? Forseeable bugs
             dist_remain -= avg_pos.getApproxDistance(prev_pos);
             prev_pos = avg_pos;
+            /*
             if (waypoint_check_timer.is_stopped()) {
                 check_waypoint_path.createUnitPath(nearest_valid_pos(avg_pos), target_pos);
                 if (!check_waypoint_path.isReachable()) {
-					printf("unreachable waypoint\n");
+					DBGMSG("unreachable waypoint\n");
                     status = UNREACHABLE_WAYPOINT;
                     return;
                 }
                 waypoint_check_timer.start(0, WAYPOINT_REACHABLE_CHECK_INTERVAL);
             }
+            */
 
             int distance_to_target = avg_tilepos.getApproxDistance(target_tilepos);
             if (distance_to_target <= tile_radius) {
@@ -233,6 +236,7 @@ namespace Movement::Move {
                     }
                 }
                 else {
+                    DBGMSG("Waiting for cohesion\n");
                     int wait_frames_left = wait_timer.get_frames_left();
                     if (wait_frames_left == 1)      {status = COHESION_WAIT_TIMEOUT;}
                     else if (wait_frames_left == 0) {wait_timer.start(0, COHESION_WAIT_MAX_FRAMES);}
@@ -240,6 +244,7 @@ namespace Movement::Move {
             }
             else for (auto unit_it = group.begin(); unit_it != group.end(); ++unit_it) {
                 auto &unit = *unit_it;
+                // TODO: probably have to use unit just removed registry
                 if (!unit->exists()) {
                     unit_it = group.erase(unit_it);
                     continue;

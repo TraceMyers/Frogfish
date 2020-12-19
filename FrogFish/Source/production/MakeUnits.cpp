@@ -91,6 +91,7 @@ namespace Production::MakeUnits {
             for (auto &base : Basic::Bases::self_bases()) {
                 for (auto &larva : Basic::Bases::larva(base)) {
                     if (BuildOrder::finished()) {
+                        DBGMSG("MakeUnits::spend_down(): Build order finished\n");
                         still_spending = false;
                         break;
                     }
@@ -108,7 +109,6 @@ namespace Production::MakeUnits {
                         Basic::Units::set_cmd_delay(larva, item.unit_type().buildTime() + EXTRA_DELAY_FRAMES);
                         BuildOrder::next();
                         if (item.unit_type() == BWAPI::UnitTypes::Zerg_Overlord) {
-                            printf("here\n");
                             overlord_push_delay.start(1, 0);
                         }
                     }
@@ -128,11 +128,13 @@ namespace Production::MakeUnits {
     }
 
     void on_frame_update() {
-        spend_down();
-        const std::vector<std::pair<int, int>> &econ_sim_data = Economy::get_sim_data();
-        overlord_push_delay.on_frame_update();
-        if (overlord_push_delay.is_stopped()) {
-            auto_insert_overlords(econ_sim_data);
+        if (!BuildOrder::finished()) {
+            spend_down();
+            const std::vector<std::pair<int, int>> &econ_sim_data = Economy::get_sim_data();
+            overlord_push_delay.on_frame_update();
+            if (overlord_push_delay.is_stopped()) {
+                auto_insert_overlords(econ_sim_data);
+            }
         }
     }
 }
