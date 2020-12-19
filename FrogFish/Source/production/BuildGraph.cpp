@@ -9,9 +9,10 @@ using namespace Basic;
 namespace Production::BuildGraph {
 
 // TODO: to scan for nodes that can build out, look for nodes missing edges, rather than
-// trying ot build out from just any node. Do this at one base per frame
+// trying to build out from just any node. Do this at one base per frame
 // TODO: inventory scanning algorithm from Unreal first person game helpful?
-// TODO: fix resource node flagging
+// TODO: create more effective system for stopping units from building between hatch & resources;
+//       allow for exceptions in special circumstances
 // TODO: use 'occupied' status for nodes
 // TODO: unreserve site function
 

@@ -11,13 +11,6 @@
 #include <BWAPI.h>
 #include <assert.h>
 
-// TODO:
-// - make smart decisions about where to build
-// - make smart decisions about which worker to build with
-// - periodically check if building is still feasible while status == WAITING
-//      - request scouts for locations out of vision
-
-
 using namespace Strategy;
 
 namespace Production::Construction {
@@ -147,7 +140,8 @@ namespace Production::Construction {
             }
         }
 
-        // TODO: account for bad or messed up time predictions, deaths, etc.
+        // TODO: account for bad or messed up time predictions
+        // TODO: account for deaths
         void advance_builds() {
             // TODO: canceling
             /*
@@ -213,7 +207,6 @@ namespace Production::Construction {
                         && build_item.mineral_cost() <= Economy::get_free_minerals()
                         && build_item.gas_cost() <= Economy::get_free_gas()
                     ) {
-                        // TODO: final check that building here is OK
                         const BWAPI::UnitType &build_type = build_item.unit_type();
                         const BWAPI::TilePosition &build_loc = plan.get_tilepos();
                         builder->build(build_type, build_loc);
@@ -252,8 +245,7 @@ namespace Production::Construction {
                     }
                 }
                 else if (build_status == COMPLETED) {
-                    // status is COMPLETED for one frame to allow for other sections to use that
-                    // information
+                    // TODO: builds just compeleted registry
                     ConstructionPlanning::destroy_plan(plan_ID);
                     buildgraph_reservation_IDs_it = buildgraph_reservation_IDs.erase(buildgraph_reservation_IDs_it);
                     construction_plan_IDs_it = construction_plan_IDs.erase(construction_plan_IDs_it);
@@ -269,7 +261,7 @@ namespace Production::Construction {
         }
     }
 
-    // TODO: use?
+    // TODO: figure out a way to not have to wait for a second
     void init() {
         shit_timer.start(1, 0);
     }

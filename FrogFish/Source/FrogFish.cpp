@@ -21,21 +21,11 @@
 
 using namespace Filter;
 // TODO:
-//  - near total refactor with neat namespaces, better task organization; generally
-//  in need of an organization style
-//  - need to expand the features of pathfinding beyond simply providing paths.
-//  - pathfinding needs to solve problems like: getting a unit from point a
-//  to point b while avoiding potential and known danger. This would mean things like
-//  risk-averse pathing, (moderately well-)known & seen danger avoidance, and
-//  connecting with battle sim to decide if any path between a and b is too dangerous
-//  for the unit to attempt without army intervention
-//  - For now, pathing just needs to handle moving units from a to b with either
-//  attacking or not attacking in mind
-//  - unsupervised learning of build types
+//  - unsupervised learning of build order types
+//  - fish puns 
+//  - Arty the FrogFish animation in upper left corner
 
 BWTimer timer;
-
-// TODO: fish puns 
 
 void FrogFish::onStart() {
     Broodwar->sendText("Hello Sailor!");

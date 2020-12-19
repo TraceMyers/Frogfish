@@ -275,7 +275,7 @@ void draw_all_movement_paths() {
                 BWAPI::Position(path_tiles[waypoint_no]),
                 BWAPI::Colors::Green
             );
-            Broodwar->drawCircleMap(BWAPI::Position(path_tiles[path_tiles.size() - 1]), 7, BWAPI::Colors::Yellow);
+            Broodwar->drawCircleMap(BWAPI::Position(path_tiles[path_tiles.size() - 2]), 7, BWAPI::Colors::Yellow);
         }
     }
 }

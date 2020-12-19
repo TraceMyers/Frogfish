@@ -6,6 +6,10 @@
 #include <BWAPI.h>
 
 // TODO: implement enemy as well
+// TODO: implement for upgrades
+// TODO: implement for tech
+// TODO: make sim-able
+
 using namespace Basic;
 using namespace Basic::Refs;
 

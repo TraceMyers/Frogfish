@@ -14,6 +14,8 @@ using namespace Basic;
 // a frame to check whether or not an item is being removed
 // TODO: put econ sim data in build order items
 
+// TODO: add overlord make block flag to build item
+
 namespace Production::BuildOrder { 
 
     Item::Item(

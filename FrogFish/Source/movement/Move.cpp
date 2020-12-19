@@ -298,13 +298,9 @@ namespace Movement::Move {
             unused_group_IDs.erase(unused_group_IDs.end() - 1);
         }
         else {
-            // DEBUG
-            printf("move(): using new group id\n");
             BWEB::Path p = BWEB::Path();
             p.createUnitPath(BWAPI::Position(src), BWAPI::Position(dest));
-            printf("move(): src: %d, %d, dest: %d, %d\n", src.x, src.y, dest.x, dest.y);
             if (!p.isReachable()) {return UNREACHABLE_DEST;}
-            printf("move(): p is reachable\n");
             if (attack) {
                 if (wait) {statuses.push_back(WAITING_ATTACK);}
                 else      {statuses.push_back(ATTACK_MOVING);}
@@ -376,7 +372,6 @@ namespace Movement::Move {
         while (group_it != groups.end()) {
             STATUS &status = *status_it;
             if (status == MOVING || status == ATTACK_MOVING) {
-                //printf("Movement::on_frame_update(), moving\n");
                 auto &group = *group_it;
                 auto &path = *path_it;
                 auto &radius = *cohesion_radii_it;
@@ -423,8 +418,8 @@ namespace Movement::Move {
         return waypoints[ID];
     }
 
+    // returns a vector of IDs that can be used to call get_group() and get_path_tiles()
     std::vector<int> get_valid_IDs() {
-        // returns a vector of IDs that can be used to call get_group() and get_path_tiles()
         std::vector<int> IDs;
         for (unsigned i = 0; i < statuses.size(); ++i) {
             if (statuses[i] != UNUSED_GROUP) {

@@ -15,7 +15,8 @@
 using namespace Production;
 
 // TODO: redo mining regression accounting for distance
-// TODO: revise reservations to use build order ID's
+// TODO: take into account how long until next larva before econ sim starts; get rid of 0.5 if larva_ct = 0
+// TODO: shelf reservations; make note that they need to be updated with BO Item ID's, not indices
 
 namespace Production::Economy {
 
@@ -25,7 +26,6 @@ namespace Production::Economy {
         BWAPI::Player self;
         BWTimer update_calc_timer;
 
-        // TODO: make mpf/gpf dependent on more factors
         const int
             SUPPLY_FRAME_SECONDS = 8,
             SUPPLY_FRAME_CT = 3,
@@ -157,7 +157,7 @@ namespace Production::Economy {
 
             sim_minerals = get_free_minerals();
             sim_gas = get_free_gas();
-            sim_larva = (larva_ct == 0 ? 0.5 : larva_ct); // TODO: better? starting at 0.5 more accurate
+            sim_larva = (larva_ct == 0 ? 0.5 : larva_ct);
             sim_supply_used = self->supplyUsed();
             sim_supply_total = self->supplyTotal();
             sim_mps = minerals_per_frame * 24;
@@ -235,7 +235,7 @@ namespace Production::Economy {
             }
         }
 
-        // subtract mps when make building
+        // TODO: subtract mps when make building
         void sim_make_item(const BuildOrder::Item& item, int index, int seconds_passed) {
             sim_data.push_back(std::pair<int, int>(item.ID(), seconds_passed));
             const auto &action = item.action();

@@ -18,9 +18,6 @@ namespace Production::MakeUnits {
 
         // inserts one overlord if needed - only over the next interval where
         // there is no block on making overlords
-        // TODO: inserting overlords can significantly delay construction; units on way to build
-        // site need to be potentially pulled back
-        // TODO: overlord make block -> overlord make ban
         void auto_insert_overlords(const std::vector<std::pair<int, int>> &econ_sim_data) {
             int supply_block_seconds = Economy::seconds_until_supply_blocked();
             if (0 <= supply_block_seconds && supply_block_seconds < 100) { // < 0 means no block over sim duration
