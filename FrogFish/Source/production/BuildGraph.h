@@ -47,13 +47,11 @@ namespace Production::BuildGraph {
     bool                        base_has_graph(const BWEM::Base *base);
     BWAPI::TilePosition         get_build_tilepos(const BWEM::Base *base, int width, int height);
     BWAPI::TilePosition         get_geyser_tilepos(const BWEM::Base *base);
-    bool                        make_reservation(
-                                    int ID,
+    int                         make_reservation(
                                     const BWEM::Base *b,
                                     const BWAPI::TilePosition &tilepos, 
                                     int width, 
-                                    int height, 
-                                    int seconds
+                                    int height
                                 );
     void                        free_data();
 }

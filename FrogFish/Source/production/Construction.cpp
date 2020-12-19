@@ -25,6 +25,7 @@ namespace Production::Construction {
 
         std::vector<int>                        construction_plan_IDs;
         std::vector<int>                        move_IDs;
+        std::vector<int>                        buildgraph_reservation_IDs;
         const int                               FINISH_BUILD_FRAMES = 30;
         const int                               BUILD_CMD_DELAY = 2;
         const int                               NOT_FOUND = -1;
@@ -105,21 +106,40 @@ namespace Production::Construction {
                             plan_ID
                         );
                         continue;
-                    } 
+                    }
                     const ConstructionPlanning::ConstructionPlan &plan = ConstructionPlanning::get_plan(plan_ID);
                     const BWAPI::TilePosition& tp = plan.get_tilepos();
                     const BWAPI::Unit& builder = plan.get_builder();
                     int move_ID = Movement::Move::move(builder, tp, false, true);
                     if (move_ID < 0) {
-                        DBGMSG("Construction::init_builds(): pathing error to (%d, %d)\n", tp.x, tp.y);
                         // TODO: pathing error! need to deal with this somehow
+                        DBGMSG("Construction::init_builds(): pathing error to (%d, %d)\n", tp.x, tp.y);
+                        ConstructionPlanning::destroy_plan(plan_ID);
                         continue;
                     }
-                    //auto& unit_data = Basic::Units::data(builder);
-                    //Basic::Units::set_build_status(builder, Basic::Refs::BUILD_STATUS::RESERVED);
+
+                    // reserve build space
+                    const BWAPI::UnitType &type = build_item.unit_type();
+                    int buildgraph_res_ID = BuildGraph::make_reservation(
+                        plan.get_base(),
+                        tp,
+                        type.tileWidth(),
+                        type.tileHeight()
+                    );
+                    if (buildgraph_res_ID < 0) {
+                        DBGMSG("Construction::init_builds(): buildgraph res error to (%d, %d)\n", tp.x, tp.y);
+                        ConstructionPlanning::destroy_plan(plan_ID);
+                        Movement::Move::remove(move_ID);
+                        continue;
+                    }
+                    // reserve builder drone
+                    auto& unit_data = Basic::Units::data(builder);
+                    Basic::Units::set_build_status(builder, Basic::Refs::BUILD_STATUS::RESERVED);
+
 
                     move_IDs.push_back(move_ID);
                     construction_plan_IDs.push_back(plan_ID);
+                    buildgraph_reservation_IDs.push_back(buildgraph_res_ID);
                 } 
                 ++build_index;
                 // TODO: CRASH why do I have to do this? Misalignment?
@@ -147,6 +167,8 @@ namespace Production::Construction {
             */
             auto& construction_plan_IDs_it = construction_plan_IDs.begin();
             auto& move_IDs_it = move_IDs.begin();
+            auto& buildgraph_reservation_IDs_it = buildgraph_reservation_IDs.begin();
+            DBGMSG("Construction::advance_builds(): plans size: %d\n", construction_plan_IDs.size());
             while (construction_plan_IDs_it < construction_plan_IDs.end()) {
                 int plan_ID = *construction_plan_IDs_it;
                 auto& plan = ConstructionPlanning::get_plan(plan_ID);
@@ -178,6 +200,8 @@ namespace Production::Construction {
                     // TODO: account for potential move errors
                     if (Movement::Move::get_status(move_ID) == Movement::Move::DESTINATION) {
                         Basic::Units::set_build_status(builder, BUILD_STATUS::AT_SITE);
+                        // Could result in errors where bad ID is used, since the 
+                        // bad move ID is kept for vector concurrency; might move this to the end
                         Movement::Move::remove(move_ID);
                         DBGMSG("Construction::advance_builds(): at site\n");
                     }
@@ -201,6 +225,7 @@ namespace Production::Construction {
                 else if (build_status == BUILD_STATUS::GIVEN_BUILD_CMD) {
                     const BWAPI::UnitType unit_type = builder->getType();
                     if (unit_type.isBuilding()) {
+                        // TODO: remove buildgraph reservation
                         Basic::Units::set_build_status(builder, BUILD_STATUS::BUILDING);
                         Basic::Units::set_cmd_delay(builder, unit_type.buildTime() + FINISH_BUILD_FRAMES);
                         DBGMSG("building\n");
@@ -218,14 +243,15 @@ namespace Production::Construction {
                 else if (build_status == COMPLETED) {
                     // status is COMPLETED for one frame to allow for other sections to use that
                     // information
-                    // remove_build(build_order_IDs[i]);
                     ConstructionPlanning::destroy_plan(plan_ID);
+                    buildgraph_reservation_IDs_it = buildgraph_reservation_IDs.erase(buildgraph_reservation_IDs_it);
                     construction_plan_IDs_it = construction_plan_IDs.erase(construction_plan_IDs_it);
                     move_IDs_it = move_IDs.erase(move_IDs_it);
                     if (construction_plan_IDs_it == construction_plan_IDs.end()) {
                         break;
                     }
                 }
+                ++buildgraph_reservation_IDs_it;
                 ++construction_plan_IDs_it;
                 ++move_IDs_it;
             }

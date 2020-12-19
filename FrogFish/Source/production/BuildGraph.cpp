@@ -10,8 +10,10 @@ namespace Production::BuildGraph {
 
 // TODO: to scan for nodes that can build out, look for nodes missing edges, rather than
 // trying ot build out from just any node. Do this at one base per frame
+// TODO: inventory scanning algorithm from Unreal first person game helpful?
 // TODO: fix resource node flagging
 // TODO: use 'occupied' status for nodes
+// TODO: unreserve site function
 
     namespace {
         static const int    MAX_BASES = 30;
@@ -28,6 +30,8 @@ namespace Production::BuildGraph {
         const int           CHUNK_SIZE = 30;
         int                 start_chunk[MAX_BASES] {0};
         int                 end_chunk[MAX_BASES] {CHUNK_SIZE};
+
+        int                 reservation_ID_counter = 0;
 
         void set_resource_blocking_angles(int base_index) {
             const BWEM::Base *base = Bases::all_bases()[base_index];
@@ -463,13 +467,11 @@ namespace Production::BuildGraph {
         return BWAPI::TilePosition(-1, -1);
     }
 
-    bool make_reservation(
-        int ID,
+    int make_reservation(
         const BWEM::Base *b,
         const BWAPI::TilePosition &tilepos, 
         int width, 
-        int height, 
-        int seconds
+        int height
     ) {
         bool valid_reservation = false;
         auto &bases = Bases::all_bases();
@@ -478,12 +480,12 @@ namespace Production::BuildGraph {
                 BNode upper_left = valid_build_path(std::distance(bases.begin(), base), tilepos, width, height);
                 if (upper_left != nullptr) {
                     set_build_path_reserved_status(upper_left, width, height, true);
-                    valid_reservation = true;
+                    return reservation_ID_counter++;
                 }
                 break;
             }
         }
-        return valid_reservation;
+        return -1;
     }
 
     void free_data() {

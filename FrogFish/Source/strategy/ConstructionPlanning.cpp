@@ -39,22 +39,22 @@ namespace Strategy::ConstructionPlanning {
     int Strategy::ConstructionPlanning::make_construction_plan(const Production::BuildOrder::Item& item) {
         const std::vector<const BWEM::Base *> &bases = Basic::Bases::self_bases();
         const BWEM::Base *construction_base = nullptr;
-        const BWAPI::Unit *builder_ptr = nullptr;
+        BWAPI::Unit builder;
         const BWAPI::UnitType& type = item.unit_type();
         BWAPI::TilePosition build_tp;
         for (auto &base : bases) {
             auto &base_workers = Basic::Bases::workers(base);
             if (base_workers.size() > 0) {
                 construction_base = base;
-                for (auto worker : base_workers) {
+                for (auto &worker : base_workers) {
                     auto& worker_data = Basic::Units::data(worker);
                     if (worker_data.u_task == Basic::Refs::MINERALS && worker_data.build_status == NONE) {
-                        builder_ptr = &worker;
+                        builder = worker;
                         break;
                     }
                 }
             }
-            if (construction_base != nullptr && builder_ptr != nullptr) {
+            if (construction_base != nullptr && builder != nullptr) {
                 break;
             }
         }
@@ -62,7 +62,7 @@ namespace Strategy::ConstructionPlanning {
             DBGMSG("Couldn't find base for construction! Building type: %s", type.c_str());
             return NO_BASE;
         }
-        else if (builder_ptr == nullptr) {
+        else if (builder == nullptr) {
             DBGMSG("Couldn't find builder for construction! Building type: %s", type.c_str());
             return NO_BUILDER;
         }
@@ -83,7 +83,7 @@ namespace Strategy::ConstructionPlanning {
 
         int plan_ID = get_free_plans_index();
         plans[plan_ID].set_base(construction_base);
-        plans[plan_ID].set_builder(*builder_ptr);
+        plans[plan_ID].set_builder(builder);
         plans[plan_ID].set_item(item);
         plans[plan_ID].set_tilepos(build_tp);
 

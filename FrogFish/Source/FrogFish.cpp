@@ -78,8 +78,8 @@ void FrogFish::onFrame() {
     // send mineral workers to gas
 
     Utility::DebugDraw::draw_units();
-    //Utility::DebugDraw::draw_bases();
-    //Utility::DebugDraw::draw_build_nodes();
+    Utility::DebugDraw::draw_bases();
+    Utility::DebugDraw::draw_build_nodes();
     Utility::DebugDraw::draw_all_movement_paths();
 
     Test::Message::on_frame_update();
