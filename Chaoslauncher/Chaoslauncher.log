@@ -136,3 +136,95 @@
 12/20/2020 2:55:58 PM 25408 ApplyPatch for BWAPI 4.4.0 Injector [DEBUG]
 12/20/2020 2:55:58 PM 25408 ApplyPatch for W-MODE 1.02
 12/20/2020 2:55:58 PM 25408 Starting Starcraft completed
+12/20/2020 3:54:33 PM 25408 Startbutton
+12/20/2020 3:54:33 PM 25408 Starting Game Starcraft 1.16.1 C:\ProgramData\bwapi\starcraft\StarCraft.exe
+12/20/2020 3:54:33 PM 25408 BWAPI 4.4.0 Injector [DEBUG] Version  Compatible
+12/20/2020 3:54:33 PM 25408 W-MODE 1.02 Version 1.0.2 Compatible
+12/20/2020 3:54:33 PM 25408 Obtained DebugPrivilege
+12/20/2020 3:54:33 PM 25408 CreateProcess
+12/20/2020 3:54:33 PM 25408 Call ScSuspended for all active Plugins
+12/20/2020 3:54:33 PM 25408 ApplyPatchSuspended for BWAPI 4.4.0 Injector [DEBUG]
+12/20/2020 3:54:34 PM 25408 ApplyPatchSuspended for W-MODE 1.02
+12/20/2020 3:54:34 PM 25408 ResumeThread
+12/20/2020 3:54:34 PM 25408 WaitForInputIdle
+12/20/2020 3:54:35 PM 25408 Call ScWindowCreated for all active Plugins
+12/20/2020 3:54:35 PM 25408 ApplyPatch for BWAPI 4.4.0 Injector [DEBUG]
+12/20/2020 3:54:35 PM 25408 ApplyPatch for W-MODE 1.02
+12/20/2020 3:54:35 PM 25408 Starting Starcraft completed
+12/20/2020 3:55:08 PM 25408 Startbutton
+12/20/2020 3:55:08 PM 25408 Starting Game Starcraft 1.16.1 C:\ProgramData\bwapi\starcraft\StarCraft.exe
+12/20/2020 3:55:08 PM 25408 BWAPI 4.4.0 Injector [DEBUG] Version  Compatible
+12/20/2020 3:55:08 PM 25408 W-MODE 1.02 Version 1.0.2 Compatible
+12/20/2020 3:55:08 PM 25408 Obtained DebugPrivilege
+12/20/2020 3:55:08 PM 25408 CreateProcess
+12/20/2020 3:55:08 PM 25408 Call ScSuspended for all active Plugins
+12/20/2020 3:55:08 PM 25408 ApplyPatchSuspended for BWAPI 4.4.0 Injector [DEBUG]
+12/20/2020 3:55:09 PM 25408 ApplyPatchSuspended for W-MODE 1.02
+12/20/2020 3:55:09 PM 25408 ResumeThread
+12/20/2020 3:55:09 PM 25408 WaitForInputIdle
+12/20/2020 3:55:09 PM 25408 Call ScWindowCreated for all active Plugins
+12/20/2020 3:55:09 PM 25408 ApplyPatch for BWAPI 4.4.0 Injector [DEBUG]
+12/20/2020 3:55:09 PM 25408 ApplyPatch for W-MODE 1.02
+12/20/2020 3:55:09 PM 25408 Starting Starcraft completed
+12/20/2020 3:57:03 PM 25408 Startbutton
+12/20/2020 3:57:03 PM 25408 Starting Game Starcraft 1.16.1 C:\ProgramData\bwapi\starcraft\StarCraft.exe
+12/20/2020 3:57:03 PM 25408 BWAPI 4.4.0 Injector [DEBUG] Version  Compatible
+12/20/2020 3:57:03 PM 25408 W-MODE 1.02 Version 1.0.2 Compatible
+12/20/2020 3:57:03 PM 25408 Obtained DebugPrivilege
+12/20/2020 3:57:03 PM 25408 CreateProcess
+12/20/2020 3:57:03 PM 25408 Call ScSuspended for all active Plugins
+12/20/2020 3:57:03 PM 25408 ApplyPatchSuspended for BWAPI 4.4.0 Injector [DEBUG]
+12/20/2020 3:57:04 PM 25408 ApplyPatchSuspended for W-MODE 1.02
+12/20/2020 3:57:04 PM 25408 ResumeThread
+12/20/2020 3:57:04 PM 25408 WaitForInputIdle
+12/20/2020 3:57:04 PM 25408 Call ScWindowCreated for all active Plugins
+12/20/2020 3:57:04 PM 25408 ApplyPatch for BWAPI 4.4.0 Injector [DEBUG]
+12/20/2020 3:57:04 PM 25408 ApplyPatch for W-MODE 1.02
+12/20/2020 3:57:04 PM 25408 Starting Starcraft completed
+12/20/2020 3:58:59 PM 25408 Startbutton
+12/20/2020 3:58:59 PM 25408 Starting Game Starcraft 1.16.1 C:\ProgramData\bwapi\starcraft\StarCraft.exe
+12/20/2020 3:58:59 PM 25408 BWAPI 4.4.0 Injector [DEBUG] Version  Compatible
+12/20/2020 3:58:59 PM 25408 W-MODE 1.02 Version 1.0.2 Compatible
+12/20/2020 3:58:59 PM 25408 Obtained DebugPrivilege
+12/20/2020 3:58:59 PM 25408 CreateProcess
+12/20/2020 3:58:59 PM 25408 Call ScSuspended for all active Plugins
+12/20/2020 3:58:59 PM 25408 ApplyPatchSuspended for BWAPI 4.4.0 Injector [DEBUG]
+12/20/2020 3:59:00 PM 25408 ApplyPatchSuspended for W-MODE 1.02
+12/20/2020 3:59:00 PM 25408 ResumeThread
+12/20/2020 3:59:00 PM 25408 WaitForInputIdle
+12/20/2020 3:59:00 PM 25408 Call ScWindowCreated for all active Plugins
+12/20/2020 3:59:00 PM 25408 ApplyPatch for BWAPI 4.4.0 Injector [DEBUG]
+12/20/2020 3:59:00 PM 25408 ApplyPatch for W-MODE 1.02
+12/20/2020 3:59:00 PM 25408 Starting Starcraft completed
+12/20/2020 4:04:52 PM 25408 Startbutton
+12/20/2020 4:04:52 PM 25408 Exception at: Global ExceptionHandler class: Exception msg: Starcraft is already running
+12/20/2020 4:06:59 PM 25408 Startbutton
+12/20/2020 4:06:59 PM 25408 Starting Game Starcraft 1.16.1 C:\ProgramData\bwapi\starcraft\StarCraft.exe
+12/20/2020 4:06:59 PM 25408 BWAPI 4.4.0 Injector [DEBUG] Version  Compatible
+12/20/2020 4:06:59 PM 25408 W-MODE 1.02 Version 1.0.2 Compatible
+12/20/2020 4:06:59 PM 25408 Obtained DebugPrivilege
+12/20/2020 4:06:59 PM 25408 CreateProcess
+12/20/2020 4:06:59 PM 25408 Call ScSuspended for all active Plugins
+12/20/2020 4:06:59 PM 25408 ApplyPatchSuspended for BWAPI 4.4.0 Injector [DEBUG]
+12/20/2020 4:07:00 PM 25408 ApplyPatchSuspended for W-MODE 1.02
+12/20/2020 4:07:00 PM 25408 ResumeThread
+12/20/2020 4:07:00 PM 25408 WaitForInputIdle
+12/20/2020 4:07:00 PM 25408 Call ScWindowCreated for all active Plugins
+12/20/2020 4:07:00 PM 25408 ApplyPatch for BWAPI 4.4.0 Injector [DEBUG]
+12/20/2020 4:07:00 PM 25408 ApplyPatch for W-MODE 1.02
+12/20/2020 4:07:00 PM 25408 Starting Starcraft completed
+12/20/2020 4:08:13 PM 25408 Startbutton
+12/20/2020 4:08:13 PM 25408 Starting Game Starcraft 1.16.1 C:\ProgramData\bwapi\starcraft\StarCraft.exe
+12/20/2020 4:08:13 PM 25408 BWAPI 4.4.0 Injector [DEBUG] Version  Compatible
+12/20/2020 4:08:13 PM 25408 W-MODE 1.02 Version 1.0.2 Compatible
+12/20/2020 4:08:13 PM 25408 Obtained DebugPrivilege
+12/20/2020 4:08:13 PM 25408 CreateProcess
+12/20/2020 4:08:13 PM 25408 Call ScSuspended for all active Plugins
+12/20/2020 4:08:13 PM 25408 ApplyPatchSuspended for BWAPI 4.4.0 Injector [DEBUG]
+12/20/2020 4:08:14 PM 25408 ApplyPatchSuspended for W-MODE 1.02
+12/20/2020 4:08:14 PM 25408 ResumeThread
+12/20/2020 4:08:14 PM 25408 WaitForInputIdle
+12/20/2020 4:08:14 PM 25408 Call ScWindowCreated for all active Plugins
+12/20/2020 4:08:14 PM 25408 ApplyPatch for BWAPI 4.4.0 Injector [DEBUG]
+12/20/2020 4:08:14 PM 25408 ApplyPatch for W-MODE 1.02
+12/20/2020 4:08:14 PM 25408 Starting Starcraft completed

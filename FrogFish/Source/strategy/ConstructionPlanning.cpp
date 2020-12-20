@@ -39,7 +39,7 @@ namespace Strategy::ConstructionPlanning {
     int Strategy::ConstructionPlanning::make_construction_plan(const Production::BuildOrder::Item& item) {
         const std::vector<const BWEM::Base *> &bases = Basic::Bases::self_bases();
         const BWEM::Base *construction_base = nullptr;
-        BWAPI::Unit builder;
+        BWAPI::Unit builder = nullptr;
         const BWAPI::UnitType& type = item.unit_type();
         BWAPI::TilePosition build_tp;
         for (auto &base : bases) {
@@ -94,19 +94,19 @@ namespace Strategy::ConstructionPlanning {
         return plans[ID];
     }
 
-    bool plan_exists(const Production::BuildOrder::Item &item) {
+    int find_plan(const Production::BuildOrder::Item &item) {
         uint64_t field_checker = 1;
         int i = 0;
         while(field_checker > 0) {
             if (field_checker & used_plans_field) {
                 if(plans[i].get_item() == item) {
-                    return true; 
+                    return i; 
                 }
             }
             field_checker <<= 1;
             ++i;
         }
-        return false;
+        return (int)NO_PLAN;
     }
 
     void destroy_plan(int ID) {

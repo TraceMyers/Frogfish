@@ -49,14 +49,15 @@ namespace Strategy::ConstructionPlanning {
     enum CONSTRUCTION_PLAN_ERRORS {
         NO_BASE = -1,
         NO_BUILDER = -2,
-        NO_LOCATION = -3
+        NO_LOCATION = -3,
+        NO_PLAN = -4
     };
 
     int                     make_construction_plan(const Production::BuildOrder::Item& item);
 
     const ConstructionPlan& get_plan(int ID);
 
-    bool                    plan_exists(const Production::BuildOrder::Item &item);
+    int                     find_plan(const Production::BuildOrder::Item &item);
 
     void                    destroy_plan(int ID);
 }
