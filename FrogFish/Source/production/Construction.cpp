@@ -24,18 +24,6 @@ namespace Production::Construction {
         const int                               NOT_FOUND = -1;
         BWTimer                                 shit_timer;
 
-        int get_seconds_until_build(
-            int item_ID, 
-            const std::vector<std::pair<int, int>> &econ_sim_data
-        ) {
-            for (auto &data_item : econ_sim_data) {
-                if (data_item.first == item_ID) {
-                    return data_item.second;
-                }
-            }
-            return NOT_FOUND;
-        }
-
     /*
         void remove_build(int constr_ID) {
             if (statuses[constr_ID] == BUILDING) {
@@ -82,10 +70,11 @@ namespace Production::Construction {
     */
 
         void init_builds() {
-            const std::vector<std::pair<int, int>> &econ_sim_data = Economy::get_sim_data();
-            
-            int build_index = BuildOrder::current_index();
-            for (auto& sim_item : econ_sim_data) {
+            for (
+                unsigned build_index = BuildOrder::current_index(); 
+                build_index < BuildOrder::size(); 
+                ++build_index
+            ) {
                 const BuildOrder::Item &build_item = BuildOrder::get(build_index);
                 if (
                     build_item.action() == BuildOrder::Item::BUILD 
@@ -129,14 +118,10 @@ namespace Production::Construction {
                     auto& unit_data = Basic::Units::data(builder);
                     Basic::Units::set_build_status(builder, Basic::Refs::BUILD_STATUS::RESERVED);
 
-
                     move_IDs.push_back(move_ID);
                     construction_plan_IDs.push_back(plan_ID);
                     buildgraph_reservation_IDs.push_back(buildgraph_res_ID);
                 } 
-                ++build_index;
-                // TODO: CRASH why do I have to do this? Misalignment?
-                if (build_index >= BuildOrder::size()) { break; }
             }
         }
 
@@ -171,8 +156,7 @@ namespace Production::Construction {
                 auto& build_status = builder_data.build_status;
                 if (build_status == BUILD_STATUS::RESERVED) {
                     auto& build_item = plan.get_item();
-                    auto& sim_data = Production::Economy::get_sim_data();
-                    int build_time = get_seconds_until_build(build_item.ID(), sim_data);
+                    int build_time = build_item.seconds_until_make();
                     if (build_time != NOT_FOUND) {
                         int move_ID = *move_IDs_it;
                         int travel_time = Movement::Move::remaining_frames(move_ID);

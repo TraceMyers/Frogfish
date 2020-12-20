@@ -13,6 +13,8 @@ namespace Production::BuildOrder {
         END
     };
 
+    const int NO_PREDICTION = -1;
+
     struct Item {
 
         /* PUBLIC */
@@ -81,6 +83,10 @@ namespace Production::BuildOrder {
             return _ID;
         }
 
+        int seconds_until_make() const {
+            return _seconds_until_make;
+        }
+
         inline bool operator==(const Item& a) const {return a.ID() == this->ID();}
 
         /* PROTECTED */
@@ -97,6 +103,7 @@ namespace Production::BuildOrder {
         int _larva_cost = 0;
         int _supply_cost = 0;
         int _ID = 0;
+        int _seconds_until_make = 0;
     };
 
     void            load(const char *_race, const char *build_name);
@@ -133,6 +140,7 @@ namespace Production::BuildOrder {
     bool            can_insert_overlords();
     unsigned        size();
     bool            finished();
+    void            set_seconds_until_make(int index, int seconds);
     void            print(unsigned int start=0);
     void            print_item(unsigned int i);
 

@@ -39,7 +39,7 @@ void FrogFish::onStart() {
     Production::BuildGraph::init();
     Production::Economy::init();
     Production::Construction::init();
-    Production::BuildOrder::load("terran", "test_overlord_make_ban");
+    Production::BuildOrder::load("terran", "3_hatch_pool");
     Production::BuildOrder::print();
     Production::MakeUnits::init();
     Test::Message::init(15);

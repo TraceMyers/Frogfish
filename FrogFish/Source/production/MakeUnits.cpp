@@ -18,14 +18,13 @@ namespace Production::MakeUnits {
 
         // inserts one overlord if needed - only over the next interval where
         // there is no block on making overlords
-        void auto_insert_overlords(const std::vector<std::pair<int, int>> &econ_sim_data) {
+        void auto_insert_overlords() {
             int supply_block_seconds = Economy::seconds_until_supply_blocked();
             if (0 <= supply_block_seconds && supply_block_seconds < 100) { // < 0 means no block over sim duration
                 int supply_block_index = Economy::build_order_index_at_supply_block();
                 bool can_insert_overlord = BuildOrder::can_insert_overlords();
                 int cur_index = BuildOrder::current_index();
-                int last_index_can_insert = (can_insert_overlord ? -1 : cur_index);
-                int supply_block_sim_index = econ_sim_data.size() - 1;
+                int insert_index = (can_insert_overlord ? -1 : cur_index);
                 int target_time = supply_block_seconds - OVERLORD_MAKE_SECONDS;
 
                 for (
@@ -41,41 +40,41 @@ namespace Production::MakeUnits {
                         can_insert_overlord = false;
                     }
                     if (!can_insert_overlord) {
-                        last_index_can_insert = BO_index;
+                        insert_index = BO_index;
                     }
                    
-                    int time_until_make = econ_sim_data[sim_index].second;
-                    if (time_until_make >= target_time) {
-                        if (last_index_can_insert > 0) {
-                            bool moved_late_overlord_back = false;
-                            for (int i = last_index_can_insert; i < BuildOrder::size(); ++i) {
-                                auto &item = BuildOrder::get(i);
-                                if (item.unit_type() == BWAPI::UnitTypes::Zerg_Overlord) {
-                                    BuildOrder::move(i, last_index_can_insert);
-                                    moved_late_overlord_back = true;
-                                    break;
-                                }
+                    int time_until_make = item.seconds_until_make();
+                    if (time_until_make >= target_time && insert_index > 0) {
+                        bool moved_late_overlord_sooner = false;
+                        for (int i = insert_index; i < BuildOrder::size(); ++i) {
+                            auto &item = BuildOrder::get(i);
+                            if (item.unit_type() == BWAPI::UnitTypes::Zerg_Overlord) {
+                                BuildOrder::move(i, insert_index);
+                                moved_late_overlord_sooner = true;
+                                break;
                             }
-                            if (!moved_late_overlord_back) {
-                                BuildOrder::insert(
-                                    BuildOrder::Item::MAKE,
-                                    BWAPI::UnitTypes::Zerg_Overlord,
-                                    BWAPI::TechTypes::None,
-                                    BWAPI::UpgradeTypes::None,
-                                    -1,
-                                    last_index_can_insert
-                                );
-                            }
-
-                            float minerals_per_sec = Economy::get_minerals_per_sec();
-                            int overlord_delay_seconds = (int)((1/minerals_per_sec) * OVERLORD_COST);
-                            Economy::add_delay_to_build_order_sim(
-                                last_index_can_insert + 1, 
-                                overlord_delay_seconds
-                            );
-
-                            return;
                         }
+                        if (!moved_late_overlord_sooner) {
+                            BuildOrder::insert(
+                                BuildOrder::Item::MAKE,
+                                BWAPI::UnitTypes::Zerg_Overlord,
+                                BWAPI::TechTypes::None,
+                                BWAPI::UpgradeTypes::None,
+                                -1,
+                                insert_index
+                            );
+                        }
+
+                        float minerals_per_sec = Economy::get_minerals_per_sec();
+                        int overlord_delay_seconds = (int)((1/minerals_per_sec) * OVERLORD_COST);
+                        for (unsigned i = insert_index + 1; i < BuildOrder::size(); ++i) {
+                            int old_prediction = BuildOrder::get(i).seconds_until_make();
+                            if (old_prediction == BuildOrder::NO_PREDICTION) {
+                                break;
+                            }
+                            BuildOrder::set_seconds_until_make(i, old_prediction + overlord_delay_seconds);
+                        }
+                        return;
                     }
                 }
                 DBGMSG("auto_insert_overlords(): unsolvable block!\n");
@@ -127,10 +126,9 @@ namespace Production::MakeUnits {
     void on_frame_update() {
         if (!BuildOrder::finished()) {
             spend_down();
-            const std::vector<std::pair<int, int>> &econ_sim_data = Economy::get_sim_data();
             overlord_push_delay.on_frame_update();
             if (overlord_push_delay.is_stopped()) {
-                auto_insert_overlords(econ_sim_data);
+                auto_insert_overlords();
             }
         }
     }

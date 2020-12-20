@@ -58,7 +58,6 @@ namespace Production::Economy {
         std::vector<BWTimer *> reservation_timers;
         std::vector<int *> reserved_resources;
 
-        std::vector<std::pair<int, int>> sim_data;
         std::vector<int> sim_making_indices;
         std::vector<int> sim_making_frames_left;
         std::vector<BWAPI::UnitType> sim_making_types;
@@ -147,7 +146,6 @@ namespace Production::Economy {
 
         // TODO: magic numbers in sim functions
         void sim_init() {
-            sim_data.clear();
             sim_making_indices.clear();
             sim_making_types.clear();
             sim_making_frames_left.clear();
@@ -234,7 +232,7 @@ namespace Production::Economy {
 
         // TODO: subtract mps when make building
         void sim_make_item(const BuildOrder::Item& item, int index, int seconds_passed) {
-            sim_data.push_back(std::pair<int, int>(item.ID(), seconds_passed));
+            BuildOrder::set_seconds_until_make(index, seconds_passed);
             auto action = item.action();
             auto type = item.unit_type();
             if (item.supply_cost() != 0) {
@@ -342,6 +340,9 @@ namespace Production::Economy {
                     ++seconds_passed;
                 }
             }
+            for (unsigned i = sim_index; i < BuildOrder::size(); ++i) {
+                BuildOrder::set_seconds_until_make(i, BuildOrder::NO_PREDICTION);
+            }
         }
     }
 
@@ -370,18 +371,6 @@ namespace Production::Economy {
             supply_frame_timer.restart();
         }
         simulate_build_order();
-        /*
-        if (sim_data.size() > 0) {
-            print_sim_data();
-        }
-        */
-    }
-
-    void add_delay_to_build_order_sim(unsigned start_index, int delay_seconds) {
-        for (unsigned i = start_index; i < sim_data.size(); ++i) {
-            auto& sim_item = sim_data[i];
-            sim_item.second += delay_seconds;
-        }
     }
 
     double get_minerals_per_frame() {return minerals_per_frame;}
@@ -468,22 +457,5 @@ namespace Production::Economy {
 
     int build_order_index_at_supply_block() {
         return sim_index_at_supply_block;
-    }
-
-    const std::vector<std::pair<int, int>> &get_sim_data() {
-        return sim_data;
-    }
-
-    void print_sim_data(int limit) {
-        int count = 0;
-        printf("---------------------------\n---------Sim Data:---------\n---------------------------\n\n");
-        for (auto &item : sim_data) {
-            int ID = item.first;
-            int time = item.second;
-            printf("Time: %d seconds\n", time);
-            BuildOrder::print_item((unsigned)ID);
-            ++count;
-            if (count == limit) { break; }
-        }
     }
 }

@@ -8,13 +8,10 @@
 
 using namespace Basic;
 
-// TODO: change Build Order to linked list implementation to work better with manipulation
-//      ^ outweighs befefits of random access?
+// MAYBE: change Build Order to linked list implementation to work better with manipulation
 // TODO: add a removal scheduler, just like with units/bases, where all other dealies have
-// a frame to check whether or not an item is being removed
+//          a frame to check whether or not an item is being removed
 // TODO: put econ sim data in build order items
-
-// TODO: add overlord insert ban flag to build item
 
 namespace Production::BuildOrder { 
 
@@ -55,6 +52,10 @@ namespace Production::BuildOrder {
                 set_supply_cost();
                 set_larva_cost();
                 _ID = item_ID_counter++;
+            }
+
+            void set_seconds_until_make(int seconds) {
+                _seconds_until_make = seconds;
             }
 
             void set_mineral_cost() {
@@ -412,6 +413,10 @@ namespace Production::BuildOrder {
 
     bool finished() {
         return (unsigned)cur_index >= items.size();
+    }
+
+    void set_seconds_until_make(int index, int seconds) {
+        items[index].set_seconds_until_make(seconds);
     }
 
     void print(unsigned int start) {
