@@ -35,7 +35,7 @@ namespace Production::BuildOrder {
             BWAPI::UnitType u_type,
             BWAPI::TechType tch_type,
             BWAPI::UpgradeType up_type,
-            int cancel_i,
+            int cancel_ID,
             OVERLORD_INSERT_BAN ovie_ban
         );
 
@@ -59,8 +59,8 @@ namespace Production::BuildOrder {
             return _overlord_insert_ban;
         }
 
-        int cancel_index() const {
-            return _cancel_index;
+        int cancel_ID() const {
+            return _cancel_ID;
         }
 
         int mineral_cost() const {
@@ -97,7 +97,7 @@ namespace Production::BuildOrder {
         BWAPI::TechType _tech_type;
         BWAPI::UpgradeType _upgrade_type;
         OVERLORD_INSERT_BAN _overlord_insert_ban = OVERLORD_INSERT_BAN::NONE;
-        int _cancel_index;
+        int _cancel_ID;
         int _mineral_cost = 0;
         int _gas_cost = 0;
         int _larva_cost = 0;
@@ -113,7 +113,7 @@ namespace Production::BuildOrder {
                         BWAPI::UnitType _unit_type,
                         BWAPI::TechType _tech_type,
                         BWAPI::UpgradeType _upgrade_type,
-                        int _cancel_index,
+                        int _cancel_ID,
                         OVERLORD_INSERT_BAN ban=OVERLORD_INSERT_BAN::NONE
                     );
     void            insert(
@@ -121,7 +121,7 @@ namespace Production::BuildOrder {
                         BWAPI::UnitType _unit_type,
                         BWAPI::TechType _tech_type,
                         BWAPI::UpgradeType _upgrade_type,
-                        int _cancel_index,
+                        int _cancel_ID,
                         int insert_index,
                         OVERLORD_INSERT_BAN ban=OVERLORD_INSERT_BAN::NONE
                     );
@@ -130,13 +130,14 @@ namespace Production::BuildOrder {
                         BWAPI::UnitType _unit_type,
                         BWAPI::TechType _tech_type,
                         BWAPI::UpgradeType _upgrade_type,
-                        int _cancel_index,
+                        int _cancel_ID,
                         OVERLORD_INSERT_BAN ban=OVERLORD_INSERT_BAN::NONE
                     );
     int             current_index();
     const Item &    current_item();
     void            next();
     const Item &    get(int i);
+    int             find_by_ID(int ID, bool from_current=true);
     void            move(int from, int to);
     void            remove(unsigned i);
     void            remove(const Item& item);

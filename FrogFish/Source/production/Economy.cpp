@@ -249,16 +249,20 @@ namespace Production::Economy {
                 }
             }
             else if (action == BuildOrder::Item::CANCEL) {
-                bool successful_cancel = sim_remove_item(item.cancel_index());
-                if (successful_cancel) {
-                    sim_supply_used += item.supply_cost();
-                    int provided_supply = type.supplyProvided();
-                    sim_incoming_supply -= provided_supply;
+                int cancel_ID = item.cancel_ID(),
+                    cancel_index = BuildOrder::find_by_ID(cancel_ID);
+                bool successful_cancel = false;
+                
+                if (cancel_index >= 0) {
+                    successful_cancel = sim_remove_item(cancel_index);
+                    if (successful_cancel) {
+                        sim_supply_used += item.supply_cost();
+                        int provided_supply = type.supplyProvided();
+                        sim_incoming_supply -= provided_supply;
+                    }
                 }
-                else {
-                    printf("econ sim - unsuccessful cancel of item\n***\n");
-                    BuildOrder::print_item(index);
-                    printf("***\n");
+                if (!successful_cancel) {
+                    DBGMSG("econ sim - unsuccessful cancel of item, ID %d\n", cancel_ID);
                     return;
                 }
             }

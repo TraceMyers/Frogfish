@@ -20,14 +20,14 @@ namespace Production::BuildOrder {
         BWAPI::UnitType u_type,
         BWAPI::TechType tch_type,
         BWAPI::UpgradeType up_type,
-        int cancel_i,
+        int cancel_ID,
         OVERLORD_INSERT_BAN ovie_ban
     ) :
         _action(act),
         _unit_type(u_type),
         _tech_type(tch_type),
         _upgrade_type(up_type),
-        _cancel_index(cancel_i),
+        _cancel_ID(cancel_ID),
         _overlord_insert_ban(ovie_ban)
     {}
 
@@ -42,10 +42,10 @@ namespace Production::BuildOrder {
                 BWAPI::UnitType u_type,
                 BWAPI::TechType tch_type,
                 BWAPI::UpgradeType up_type,
-                int cancel_i,
+                int cancel_ID,
                 OVERLORD_INSERT_BAN ovie_ban
             ) : 
-                Item (act, u_type, tch_type, up_type, cancel_i, ovie_ban)
+                Item (act, u_type, tch_type, up_type, cancel_ID, ovie_ban)
             {
                 set_mineral_cost();
                 set_gas_cost();
@@ -206,7 +206,7 @@ namespace Production::BuildOrder {
                             BWAPI::TechType _tech_type = BWAPI::TechTypes::None;
                             BWAPI::UpgradeType _upgrade_type = BWAPI::UpgradeTypes::None;
                             int _count = 1;
-                            int _cancel_index = -1;
+                            int _cancel_ID = -1;
                             OVERLORD_INSERT_BAN ban;
 
                             in_file >> word;
@@ -269,7 +269,8 @@ namespace Production::BuildOrder {
                             in_file >> word;
                             word.pop_back();
                             if (word != "null") {
-                                _cancel_index = std::stoi(word);
+                                // loading from file, index == ID
+                                _cancel_ID = std::stoi(word);
                             }
 
                             in_file >> word;
@@ -289,7 +290,7 @@ namespace Production::BuildOrder {
                                     _unit_type,
                                     _tech_type,
                                     _upgrade_type,
-                                    _cancel_index,
+                                    _cancel_ID,
                                     ban
                                 );
                             }
@@ -313,7 +314,7 @@ namespace Production::BuildOrder {
         BWAPI::UnitType u_type,
         BWAPI::TechType tch_type,
         BWAPI::UpgradeType up_type,
-        int cancel_i,
+        int cancel_ID,
         OVERLORD_INSERT_BAN ban
     ) {
         InternalItem item(
@@ -321,7 +322,7 @@ namespace Production::BuildOrder {
             u_type,
             tch_type,
             up_type,
-            cancel_i,
+            cancel_ID,
             ban
         );
         _push(item);
@@ -332,7 +333,7 @@ namespace Production::BuildOrder {
         BWAPI::UnitType u_type,
         BWAPI::TechType tch_type,
         BWAPI::UpgradeType up_type,
-        int cancel_i,
+        int cancel_ID,
         int insert_index,
         OVERLORD_INSERT_BAN ban
     ) {
@@ -341,7 +342,7 @@ namespace Production::BuildOrder {
             u_type,
             tch_type,
             up_type,
-            cancel_i,
+            cancel_ID,
             ban
         );
         _insert(item, insert_index);
@@ -352,7 +353,7 @@ namespace Production::BuildOrder {
         BWAPI::UnitType u_type,
         BWAPI::TechType tch_type,
         BWAPI::UpgradeType up_type,
-        int cancel_i,
+        int cancel_ID,
         OVERLORD_INSERT_BAN ban
     ) {
         InternalItem item(
@@ -360,7 +361,7 @@ namespace Production::BuildOrder {
             u_type,
             tch_type,
             up_type,
-            cancel_i,
+            cancel_ID,
             ban
         );
         _insert_next(item);
@@ -376,7 +377,7 @@ namespace Production::BuildOrder {
     }
 
     void next() {
-        int items_size = items.size();
+        unsigned items_size = items.size();
         if (cur_index < items_size) {
             ++cur_index;
         }
@@ -400,6 +401,16 @@ namespace Production::BuildOrder {
     // unsafe - can cause read access error
     const Item &get(int i) {
         return items[i];
+    }
+
+    int find_by_ID(int ID, bool from_current) {
+        int i = (from_current ? cur_index : 0);
+        for ( ; i < items.size(); ++i) {
+            if (items[i].ID() == ID) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     void move(int from, int to) {
@@ -491,7 +502,7 @@ namespace Production::BuildOrder {
                     std::cout << item.upgrade_type();
                 }
         }
-        std::cout << "\n\tCancel Index: " << item.cancel_index();
+        std::cout << "\n\tCancel Index: " << item.cancel_ID();
         std::cout << "\n\tMineral Cost: " << item.mineral_cost();
         std::cout << "\n\tGas Cost:     " << item.gas_cost();
         std::cout << "\n\tLarva Cost:   " << item.larva_cost();

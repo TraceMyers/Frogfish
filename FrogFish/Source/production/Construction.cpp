@@ -84,22 +84,23 @@ namespace Production::Construction {
         // TODO: account for bad or messed up time predictions
         // TODO: account for deaths
         void advance_builds() {
-            // if there is a 'cancel' build order item, do the cancel!
-            /*
             auto &cur_build_item = BuildOrder::current_item();
             if (cur_build_item.action() == BuildOrder::Item::CANCEL) {
-                int cancel_build_ID = cur_build_item.cancel_index();
-                for (unsigned i = 0; i < build_order_IDs.size(); ++i) {
-                    if (build_order_IDs[i] == cancel_build_ID) {
-                        canceled_builders.push_back(builders[i]);
-                        remove_build(i);
-                        break;
-                    }
+                int cancel_build_ID = cur_build_item.cancel_ID();
+                const auto &cancel_index = BuildOrder::find_by_ID(cancel_build_ID);
+                if (cancel_index >= 0) {
+                    cancel_build(BuildOrder::get(cancel_index));
                 }
-                // Advance the build order even if it's too late to cancel
+                else {
+                    DBGMSG(
+                        "Construction::advance_builds(): bad cancel index %d from ID %d\n", 
+                        cancel_index, 
+                        cancel_build_ID
+                    );
+                }
+                // Advance the build order even if cancel doesn't work
                 BuildOrder::next();
             }
-            */
             auto construction_plan_IDs_it = construction_plan_IDs.begin();
             auto move_IDs_it = move_IDs.begin();
             auto buildgraph_reservation_IDs_it = buildgraph_reservation_IDs.begin();

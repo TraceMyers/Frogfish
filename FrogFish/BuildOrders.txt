@@ -55,3 +55,10 @@ terran test_overlord_make_ban
 1:  build,   1,  hatchery,          null,   null
 2:  make,    5,  drone,             null,   off
 ------------------------------------------------------
+
+terran test_cancel_build
+0:  make,   5,  drone,          null,   null
+1:  build,  1,  hatchery,       null,   null  
+2:  cancel, 1,  hatchery,       5,      null
+3:  build,  1,  spawning_pool,  null,   null
+4:  cancel, 1,  spawning_pool,  8,      null
