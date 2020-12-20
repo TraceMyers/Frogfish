@@ -26,7 +26,7 @@ namespace Basic {
         /* PRIVATE */
         private:
         
-        static const int UNITARRAY_INIT_SIZE = 50;
+        static const int UNITARRAY_INIT_SIZE = 100;
         static const int UNITARRAY_RESIZE_CONST = 100;
         BWAPI::Unit *    array;
         int              internal_size;

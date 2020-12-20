@@ -39,6 +39,15 @@ namespace BWEB
         /// <summary> Creates a path from the source to the target using BFS, your provided walkable function, and directional vector. </summary>
         void bfsPath(const BWAPI::Position source, const BWAPI::Position target, std::function <bool(const BWAPI::TilePosition)> collision, std::vector<BWAPI::TilePosition> directions);
 
+        /// added by Trace Myers without permission of the creator of BWEB
+        void clear() {
+            tiles.clear();
+            dist = 0.0;
+            reachable = false;
+            source = BWAPI::TilePositions::Invalid;
+            target = BWAPI::TilePositions::Invalid;
+        }
+
         ///
         BWAPI::TilePosition getSource() { return source; }
         BWAPI::TilePosition getTarget() { return target; }

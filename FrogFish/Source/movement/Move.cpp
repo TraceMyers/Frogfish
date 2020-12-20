@@ -28,7 +28,7 @@ namespace Movement::Move {
         std::vector<int>                        unused_group_IDs;
         BWEB::Path                              check_waypoint_path;
 
-        const int MOVE_CMD_DELAY_FRAMES = 2,
+        const int MOVE_CMD_DELAY_FRAMES = 4,
                   COHESION_WAIT_MAX_FRAMES = 48, // wait frames before timeout = this - 1
                   WAYPOINT_REACHABLE_CHECK_INTERVAL = 5;
 
@@ -144,7 +144,7 @@ namespace Movement::Move {
                   space_buffer_factor = 1.2f,
                   radius = 
                     (ceilf(sqrtf(units_size)) * sqrtf(2 * max_avg_dim * max_avg_dim * space_buffer_factor)) 
-                    / 2.0f;
+                    / 1.5f;
             return radius * cohesion_factor;
         }
 
@@ -277,6 +277,7 @@ namespace Movement::Move {
         int unused_group_IDs_size = unused_group_IDs.size();
         if (unused_group_IDs_size > 0) {
             group_ID = unused_group_IDs[unused_group_IDs_size - 1];
+            paths[group_ID].clear();
             paths[group_ID].createUnitPath(BWAPI::Position(src), BWAPI::Position(dest));
             if (!paths[group_ID].isReachable()) {return UNREACHABLE_DEST;}
             if (attack) {
@@ -416,6 +417,14 @@ namespace Movement::Move {
 
     int get_waypoint(int ID) {
         return waypoints[ID];
+    }
+
+    BWAPI::Position get_avg_position(int ID) {
+        return previous_positions[ID];
+    }
+
+    int get_cohesion_radius(int ID) {
+        return cohesion_radii[ID];
     }
 
     // returns a vector of IDs that can be used to call get_group() and get_path_tiles()

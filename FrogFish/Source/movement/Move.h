@@ -34,11 +34,11 @@ namespace Movement::Move {
     };
 
     const int COHENSION_NUM_VALS = 5;
-    const double C_MIN = 10000000.0,
-                 C_LOW = 5.2,
-                 C_MED = 2.6,
-                 C_HIGH = 1.4,
-                 C_MAX = 1.0;
+    const double C_MIN = 13.0,
+                 C_LOW = 8.2,
+                 C_MED = 4.8,
+                 C_HIGH = 3.0,
+                 C_MAX = 2.5;
     const double COHESION_SCALE[] {C_MIN, C_LOW, C_MED, C_HIGH, C_MAX};
 
     // Moves a group of units along a path to the nearest valid tileposition to the given 
@@ -89,6 +89,10 @@ namespace Movement::Move {
     const std::vector<BWAPI::TilePosition> get_path_tiles(int ID);
 
     int get_waypoint(int ID);
+
+    BWAPI::Position get_avg_position(int ID);
+
+    int get_cohesion_radius(int ID);
 
     std::vector<int> get_valid_IDs();
 }

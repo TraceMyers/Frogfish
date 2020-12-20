@@ -2,6 +2,7 @@
 #include "../basic/Units.h"
 #include "../movement/Move.h"
 #include "../Frogfish.h"
+#include "TestMessage.h"
 #include "BWEM/bwem.h"
 
 namespace Test::Move {
@@ -13,18 +14,24 @@ namespace Test::Move {
         int moved_unit_ID = -1;
         bool move_unit_to_map_center_complete = false;
 
+        bool gathered_group = false;
+        int moved_group_ID = -1;
+        int destination_index = 0;
+        BWAPI::TilePosition oh_the_places [3];
+        std::vector<BWAPI::Unit> moving_units;
+        bool move_group_around_complete = false;
     }
 
     void move_unit_to_map_center() {
         if (!moved_unit_a) {
             auto &self_units = Basic::Units::self_units();
             const BWAPI::TilePosition &size = the_map.Size();
-            BWAPI::TilePosition half_size (size.x / 2, size.y / 2);
+            BWAPI::TilePosition map_center (size.x / 2, size.y / 2);
 
             for (int i = 0; i < self_units.size(); ++i) {
                 const BWAPI::Unit& u = self_units[i];
                 if (u->getType() == BWAPI::UnitTypes::Zerg_Drone) {
-                    moved_unit_ID = Movement::Move::move(u, half_size);
+                    moved_unit_ID = Movement::Move::move(u, map_center);
                     moved_unit_a = true;
                     break;
                 }
@@ -48,6 +55,55 @@ namespace Test::Move {
                 }
 
                 move_unit_to_map_center_complete = true;
+            }
+        }
+    }
+
+    void move_group_around_the_map() {
+        if (!gathered_group) {
+            auto &self_units = Basic::Units::self_units();
+            const BWAPI::TilePosition &size = the_map.Size();
+            oh_the_places[0] = BWAPI::TilePosition(size.x / 2, size.y / 2);
+            oh_the_places[1] = BWAPI::TilePosition(10, 10);
+            oh_the_places[2] = BWAPI::TilePosition(size.x - 10, size.y - 10); 
+            
+            for (int i = 0; i < self_units.size(); ++i) {
+                const BWAPI::Unit& u = self_units[i];
+                if (u->getType() == BWAPI::UnitTypes::Zerg_Drone) {
+                    bool already_cached = false;
+                    for (auto &cached_unit : moving_units) {
+                        if (cached_unit == u) {
+                            already_cached = false;
+                            break;
+                        }
+                    }
+                    if (!already_cached) {
+                        moving_units.push_back(u);
+                    }
+                }
+            }
+            if (moving_units.size() == 4) {
+                gathered_group = true;
+                moved_group_ID = Movement::Move::move(moving_units, oh_the_places[0], false, false, Movement::Move::C_MED);
+            }
+        }
+        else if (!move_group_around_complete) {
+            bool reached_dest = (Movement::Move::get_status(moved_group_ID) == Movement::Move::DESTINATION);
+            if (reached_dest) {
+                bool remove_success = Movement::Move::remove(moved_group_ID);
+                if (remove_success) {
+                    DBGMSG("SUCCESS: Successfully removed move group!\n");
+                    destination_index++;
+                    if (destination_index >= 3) {
+                        move_group_around_complete = true;
+                        return;
+                    }
+                    moved_group_ID = Movement::Move::move(moving_units, oh_the_places[destination_index], false, false, Movement::Move::C_MED);
+                }
+                else {
+                    DBGMSG("ERROR: Did not successfully remove move group!\n");
+                    move_group_around_complete = true;
+                }
             }
         }
     }
