@@ -250,7 +250,7 @@ namespace Production::Economy {
             }
             else if (action == BuildOrder::Item::CANCEL) {
                 int cancel_ID = item.cancel_ID(),
-                    cancel_index = BuildOrder::find_by_ID(cancel_ID);
+                    cancel_index = BuildOrder::find_by_ID(cancel_ID, false);
                 bool successful_cancel = false;
                 
                 if (cancel_index >= 0) {
@@ -262,6 +262,7 @@ namespace Production::Economy {
                     }
                 }
                 if (!successful_cancel) {
+                    // TODO: investigate why canceling irl triggers this
                     DBGMSG("econ sim - unsuccessful cancel of item, ID %d\n", cancel_ID);
                     return;
                 }

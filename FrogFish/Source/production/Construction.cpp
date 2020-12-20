@@ -87,7 +87,7 @@ namespace Production::Construction {
             auto &cur_build_item = BuildOrder::current_item();
             if (cur_build_item.action() == BuildOrder::Item::CANCEL) {
                 int cancel_build_ID = cur_build_item.cancel_ID();
-                const auto &cancel_index = BuildOrder::find_by_ID(cancel_build_ID);
+                const auto &cancel_index = BuildOrder::find_by_ID(cancel_build_ID, false);
                 if (cancel_index >= 0) {
                     cancel_build(BuildOrder::get(cancel_index));
                 }
