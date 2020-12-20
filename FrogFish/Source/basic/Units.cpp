@@ -32,11 +32,14 @@ namespace Basic::Units {
 
         std::map<int, UnitData *> ID_to_data;
 
+        BWAPI::Player self;
+        BWAPI::Player enemy;
+
         void store_queued() {
             BWAPI::Unit u;
             for (int i = 0; i < store_buff.size(); ++i) {
                 u = store_buff[i];
-                if (u->getPlayer() == Broodwar->self()) {
+                if (u->getPlayer() == self) {
                     int ID = u->getID();
                     if (std::find(self_IDs.begin(), self_IDs.end(), ID) == self_IDs.end()) {
                         self_IDs.push_back(ID);
@@ -45,7 +48,7 @@ namespace Basic::Units {
                         _self_just_stored.add(u);
                     }
                 }
-                else if (u->getPlayer() == Broodwar->enemy()) {
+                else if (u->getPlayer() == enemy) {
                     int ID = u->getID();
                     if (std::find(enemy_IDs.begin(), enemy_IDs.end(), ID) == enemy_IDs.end()) {
                         enemy_IDs.push_back(ID);
@@ -81,10 +84,10 @@ namespace Basic::Units {
         void schedule_removals() {
             for (int i = 0; i < remove_buff.size(); ++i) {
                 BWAPI::Unit u = remove_buff[i];
-                if (u->getPlayer() == Broodwar->self()) {
+                if (u->getPlayer() == self) {
                     schedule_self_remove(u);        
                 }
-                else if (u->getPlayer() == Broodwar->enemy()) {
+                else if (u->getPlayer() == enemy) {
                     schedule_enemy_remove(u);        
                 }
             }
@@ -162,6 +165,8 @@ namespace Basic::Units {
                     && Broodwar->isVisible(u_data.tilepos)
                 ) {
                     if (u_data.u_type == UTYPE::STRUCT) {
+                        // TODO: might not want to assume lifted w/ terran structure, but need
+                        //       code to account for possibility
                         schedule_enemy_remove(u);
                     }
                     else {
@@ -192,6 +197,11 @@ namespace Basic::Units {
             _enemy_just_moved.clear();
         }
 
+    }
+
+    void init() {
+        self = Broodwar->self();
+        enemy = Broodwar->enemy();
     }
 
     void on_frame_update() {

@@ -353,6 +353,7 @@ namespace Production::Economy {
     }
 
     void on_frame_update() {
+        /* [shelved in case it becomes useful]
         int reservation_ct = reservation_timers.size();
         std::vector<int> kill_res_IDs(reservation_ct);
         for (int i = 0; i < reservation_ct; ++i) {
@@ -364,6 +365,7 @@ namespace Production::Economy {
         for (auto _ID : kill_res_IDs) {
             end_reservation(_ID);
         }
+        */
         estimate_income();
         supply_frame_timer.on_frame_update();
         if (supply_frame_timer.is_stopped()) {
@@ -395,6 +397,15 @@ namespace Production::Economy {
 
     bool supply_blocked() {return self->supplyUsed() >= self->supplyTotal();}
 
+    int seconds_until_supply_blocked() {
+        return sim_seconds_until_supply_block;
+    }
+
+    int build_order_index_at_supply_block() {
+        return sim_index_at_supply_block;
+    }
+
+    /** [shelved in case it becomes useful]
     // returns reference ID
     // allows current resources - reserved resources to go negative
     void make_reservation(unsigned ID, int reservation_seconds) {
@@ -450,12 +461,5 @@ namespace Production::Economy {
         }
         return false;
     }
-
-    int seconds_until_supply_blocked() {
-        return sim_seconds_until_supply_block;
-    }
-
-    int build_order_index_at_supply_block() {
-        return sim_index_at_supply_block;
-    }
+    **/
 }

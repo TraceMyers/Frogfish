@@ -25,12 +25,13 @@ namespace Production::Economy {
     int             get_free_minerals();
     int             get_free_gas();
     bool            supply_blocked();
+    int             seconds_until_supply_blocked();
+    int             build_order_index_at_supply_block();
+
+    /** [shelved in case it becomes useful]
     unsigned int    make_reservation(int minerals, int gas, int reservation_seconds);
     bool            reservation_alive(unsigned ID);
     bool            end_reservation(unsigned ID);   
     bool            extend_reservation(unsigned ID, int seconds);
-    void            print_sim_data(int limit=3);
-    int             seconds_until_supply_blocked();
-    int             build_order_index_at_supply_block();
-    const std::vector<std::pair<int, int>> &get_sim_data();
+    **/
 }

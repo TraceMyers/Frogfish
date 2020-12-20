@@ -10,7 +10,7 @@
 using namespace Basic::Refs;
 
 namespace Basic::Units {
-
+    void            init();
     void            on_frame_update();
     void            queue_store(const BWAPI::Unit u);
     void            queue_remove(const BWAPI::Unit u);

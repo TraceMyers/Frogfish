@@ -170,7 +170,6 @@ namespace Movement::Move {
             }
         }
 
-        // TODO: account for unit size
         // TODO: fairly major refactor; warts obvious
         void move_group(
             std::vector<BWAPI::Unit> &group,
@@ -208,7 +207,6 @@ namespace Movement::Move {
 
             int distance_to_target = avg_tilepos.getApproxDistance(target_tilepos);
             if (distance_to_target <= tile_radius) {
-                // DEBUG NOTE: in here
                 bool wait_for_cohesion = false;
                 for (auto unit_it = group.begin(); unit_it != group.end(); ++unit_it) {
                     auto &unit = *unit_it;
