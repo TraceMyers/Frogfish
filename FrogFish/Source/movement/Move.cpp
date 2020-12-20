@@ -157,7 +157,7 @@ namespace Movement::Move {
             return radius * cohesion_factor;
         }
 
-        void move_unit(BWAPI::Unit unit, const BWAPI::Position &target_pos, const STATUS &status) {
+        inline void move_unit(BWAPI::Unit unit, const BWAPI::Position &target_pos, const STATUS &status) {
             if (status == ATTACK_MOVING) {unit->patrol(target_pos);}
             else                         {unit->move(target_pos);}
             Basic::Units::set_cmd_delay(unit, MOVE_CMD_DELAY_FRAMES);
@@ -196,8 +196,6 @@ namespace Movement::Move {
             BWTimer &wait_timer,
             BWTimer &waypoint_check_timer
         ) {
-            double tile_radius = radius / 32.0f;
-            if (tile_radius < 3) { tile_radius = 3.0f; }
             std::vector<BWAPI::TilePosition> &path_tiles = path.getTiles();
             BWAPI::TilePosition target_tilepos = path_tiles[waypoint]; 
             BWAPI::Position target_pos (target_tilepos.x * 32, target_tilepos.y * 32);
@@ -208,7 +206,7 @@ namespace Movement::Move {
             prev_pos = avg_pos;
             const Basic::UnitArray &units_just_destroyed = Basic::Units::self_just_destroyed();
 
-            if (dist_to_target_pos <= tile_radius) {
+            if (dist_to_target_pos <= radius) {
                 bool wait_for_cohesion = false;
                 for (auto unit_it = group.begin(); unit_it < group.end(); ++unit_it) {
                     auto &unit = *unit_it;
@@ -224,10 +222,9 @@ namespace Movement::Move {
                 if (!wait_for_cohesion) {
                     wait_timer.start(0, 0);
                     ++waypoint;
-                    // TODO: path_tiles ends up with origin as last node... why?
-                    // results in vector out of range crash, too
+                    // The last waypoint is the origin for some reason. Ask McRave
                     if (waypoint == path_tiles.size() - 1) {
-                        end_attack_move(group, target_pos);
+                        if (status == ATTACK_MOVING) {end_attack_move(group, target_pos);}
                         status = DESTINATION;
                     }
                 }
