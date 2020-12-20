@@ -1,4 +1,5 @@
 #pragma once
+#pragma message("including TestMove")
 
 namespace Test::Move {
     void move_unit_to_map_center();

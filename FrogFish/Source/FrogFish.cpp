@@ -24,6 +24,7 @@ using namespace Filter;
 //  - unsupervised learning of build order types
 //  - fish puns 
 //  - Arty the FrogFish animation in upper left corner
+//  - Commander pipeline
 
 BWTimer timer;
 
@@ -77,6 +78,9 @@ void FrogFish::onFrame() {
     // send idle workers to mine minerals (needs to move up)
     Control::Workers::send_idle_workers_to_mine();
 
+    // if a module is going to check whether or not an item has been removed this frame
+    // it needs to check before this update
+    Production::BuildOrder::on_frame_update();
     timer.on_frame_update();
     if (timer.is_stopped()) {
         // timer.restart();

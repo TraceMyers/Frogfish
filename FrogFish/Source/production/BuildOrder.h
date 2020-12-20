@@ -106,6 +106,7 @@ namespace Production::BuildOrder {
         int _seconds_until_make = 0;
     };
 
+    void            on_frame_update();
     void            load(const char *_race, const char *build_name);
     void            push(
                         Item::ACTION _action,
@@ -137,6 +138,10 @@ namespace Production::BuildOrder {
     void            next();
     const Item &    get(int i);
     void            move(int from, int to);
+    void            remove(unsigned i);
+    void            remove(const Item& item);
+    const Item &    just_removed_get(unsigned i);
+    int             just_removed_size();
     bool            can_insert_overlords();
     unsigned        size();
     bool            finished();

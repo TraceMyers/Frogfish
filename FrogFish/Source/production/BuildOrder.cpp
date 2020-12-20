@@ -149,10 +149,11 @@ namespace Production::BuildOrder {
     }
 
     namespace {
+        unsigned                    cur_index;
         std::string                 race;
         std::string                 name;
         std::vector<InternalItem>   items;
-        unsigned                    cur_index;
+        std::vector<InternalItem>   items_just_removed;
         Item                        end_item(
                                         Item::ACTION::NONE, 
                                         BWAPI::UnitTypes::None,
@@ -175,6 +176,10 @@ namespace Production::BuildOrder {
             items.insert(items.begin() + cur_index, item);
         }
 
+    }
+
+    void on_frame_update() {
+        items_just_removed.clear();
     }
 
     void load(const char *_race, const char *build_name) {
@@ -398,9 +403,38 @@ namespace Production::BuildOrder {
     }
 
     void move(int from, int to) {
-        auto& item = items[from];
+        InternalItem item = items[from];
         items.erase(items.begin() + from);
         items.insert(items.begin() + to, item);
+    }
+
+    // careful using while iterating; good for removing single items
+    void remove(unsigned i) {
+        InternalItem &item = items[i];
+        items_just_removed.push_back(item);
+        items.erase(items.begin() + i);
+    }
+
+    // careful using while iterating; good for removing a list of items collected for removal
+    // post-loop
+    void remove(const Item& item) {
+        for (auto item_it = items.begin(); item_it < items.end(); ++item_it) {
+            auto &_item = *item_it;
+            if (_item == item) {
+                items.erase(item_it);
+                break;
+            }
+        }
+    }
+    
+    // MAYBE: iterator functions for fast/easy removal? Might not need
+
+    const Item &just_removed_get(unsigned i) {
+        return items_just_removed[i];
+    }
+
+    int just_removed_size() {
+        return items_just_removed.size();
     }
 
     bool can_insert_overlords() {

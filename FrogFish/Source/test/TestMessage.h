@@ -1,7 +1,8 @@
 #pragma once
+#pragma message("including TestMessage")
 
-#include "string.h"
-#include "stdio.h"
+#include <string.h>
+#include <stdio.h>
 
 #define DBGMSG Test::Message::unique_buffered_messages_add
 

@@ -55,7 +55,7 @@ namespace Movement::Move {
                 BWAPI::TilePosition dest,
                 bool attack=false,
                 bool wait=false,
-                float group_cohesion=C_MED
+                double group_cohesion=C_MED
             );
 
     // Turns a single unit into a group of one and calls the std::vector<BWAPI::Unit> move()

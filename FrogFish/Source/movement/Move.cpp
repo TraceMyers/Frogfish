@@ -10,31 +10,40 @@
 
 
 // TODO: air unit move/attack move
+// TODO: move_group() units decelerating at waypoints
+
+#define REMOVE_IF_DESTROYED(_unit, _unit_it, _group, _units_just_destroyed) {\
+    if (_units_just_destroyed.find(_unit) >= 0) {\
+        _unit_it = _group.erase(_unit_it);\
+        if (_unit_it == _group.end()) {break;}\
+        else                        {continue;}\
+    }\
+}
 
 namespace Movement::Move {
 
     namespace {
 
         std::vector<std::vector<BWAPI::Unit>>   groups;
-        std::vector<float>                      cohesion_radii;
+        std::vector<double>                     cohesion_radii;
         std::vector<STATUS>                     statuses;
         std::vector<BWEB::Path>                 paths;
         std::vector<int>                        waypoints;
-        std::vector<int>                        distance_remaining;
+        std::vector<double>                     distance_remaining;
         std::vector<BWAPI::Position>            previous_positions;
-        std::vector<float>                      average_speeds;
+        std::vector<double>                     average_speeds;
         std::vector<BWTimer>                    cohesion_wait_timers;
         std::vector<BWTimer>                    waypoint_reachable_timers;
         std::vector<int>                        unused_group_IDs;
         BWEB::Path                              check_waypoint_path;
 
-        const int MOVE_CMD_DELAY_FRAMES = 4,
+        const int MOVE_CMD_DELAY_FRAMES = 2,
                   COHESION_WAIT_MAX_FRAMES = 48, // wait frames before timeout = this - 1
                   WAYPOINT_REACHABLE_CHECK_INTERVAL = 5;
 
         
         bool surrounding_tilepositions_walkable(const BWAPI::TilePosition &search_tp) {
-            // TODO: remove ridiculous number of redundant checks
+            // TODO: remove ridiculous number of redundant checks between this and nearest_valid_tilepos()
             BWAPI::TilePosition nearby_tiles[8] = {
                 BWAPI::TilePosition(search_tp.x + 1, search_tp.y),
                 BWAPI::TilePosition(search_tp.x - 1, search_tp.y),
@@ -131,19 +140,19 @@ namespace Movement::Move {
             return BWAPI::Position(nearest_valid_tilepos(BWAPI::TilePosition(dest)));
         }
 
-        float calculate_cohesion_radius(std::vector<BWAPI::Unit> &units, float cohesion_factor) {
+        double calculate_cohesion_radius(std::vector<BWAPI::Unit> &units, double cohesion_factor) {
             int group_width = 0, group_height = 0;
             for (auto &unit : units) {
                 group_width += unit->getRight() - unit->getLeft();
                 group_height += unit->getBottom() - unit->getTop();
             }
             int units_size = units.size();
-            float average_width = (float)group_width / units_size,
-                  average_height = (float)group_height / units_size,
+            double average_width = (double)group_width / units_size,
+                  average_height = (double)group_height / units_size,
                   max_avg_dim = (average_width > average_height ? average_width : average_height),
                   space_buffer_factor = 1.2f,
                   radius = 
-                    (ceilf(sqrtf(units_size)) * sqrtf(2 * max_avg_dim * max_avg_dim * space_buffer_factor)) 
+                    (ceil(sqrt(units_size)) * sqrt(2 * max_avg_dim * max_avg_dim * space_buffer_factor)) 
                     / 1.5f;
             return radius * cohesion_factor;
         }
@@ -154,15 +163,19 @@ namespace Movement::Move {
             Basic::Units::set_cmd_delay(unit, MOVE_CMD_DELAY_FRAMES);
         }
 
-        // Only for attack-moving units that never engage. Since attack-moving units are moved
-        // with patrol, to avoid a patrol at the very end, the units are told to stop.
+        // Only for attack-moving units that never engage along the way. Since attack-moving units 
+        // are moved with patrol, to avoid a patrol at the very end, they are given an attack_move
+        // or move command at the end.
         void end_attack_move(std::vector<BWAPI::Unit> group, const BWAPI::Position &target_pos) {
             for (auto &unit : group) {
                 BWAPI::UnitType &type = unit->getType();
-                // TODO: probably others. Units that can't attack-move
                 if (
                     type == BWAPI::UnitTypes::Zerg_Lurker
                     || type == BWAPI::UnitTypes::Zerg_Defiler
+                    /* if used for air 
+                    || type == BWAPI::UnitTypes::Zerg_Overlord
+                    || type == BWAPI::UnitTypes::Zerg_Queen
+                    */
                 ) {
                     unit->move(target_pos);
                 }
@@ -170,53 +183,38 @@ namespace Movement::Move {
             }
         }
 
-        // TODO: fairly major refactor; warts obvious
+        // TODO: fairly major refactor; warts obvious (IP)
+        // TODO: find a way to periodically verify pathing; might just clear and remake?
         void move_group(
             std::vector<BWAPI::Unit> &group,
             BWEB::Path &path,
-            const float &radius,
+            const double &radius,
             STATUS &status,
             int &waypoint,
-            int &dist_remain,
+            double &dist_remain,
             BWAPI::Position &prev_pos,
             BWTimer &wait_timer,
             BWTimer &waypoint_check_timer
         ) {
-            float tile_radius = radius / 32.0f;
+            double tile_radius = radius / 32.0f;
             if (tile_radius < 3) { tile_radius = 3.0f; }
             std::vector<BWAPI::TilePosition> &path_tiles = path.getTiles();
             BWAPI::TilePosition target_tilepos = path_tiles[waypoint]; 
             BWAPI::Position target_pos (target_tilepos.x * 32, target_tilepos.y * 32);
-            BWAPI::TilePosition avg_tilepos = Utility::FrogMath::average_tileposition(group);
-            // TODO: (prev used avg tilepos, innacurate by factor of 32 ofc; better solution?)
             BWAPI::Position avg_pos = Utility::FrogMath::average_position(group);
-            // TODO: Assumes progress? Forseeable bugs
-            dist_remain -= avg_pos.getApproxDistance(prev_pos);
+            double dist_from_waypoint = path.getDistanceFrom(waypoint);
+            int dist_to_target_pos = avg_pos.getApproxDistance(target_pos);
+            dist_remain = dist_from_waypoint + dist_to_target_pos;
             prev_pos = avg_pos;
-            /*
-            if (waypoint_check_timer.is_stopped()) {
-                check_waypoint_path.createUnitPath(nearest_valid_pos(avg_pos), target_pos);
-                if (!check_waypoint_path.isReachable()) {
-					DBGMSG("unreachable waypoint\n");
-                    status = UNREACHABLE_WAYPOINT;
-                    return;
-                }
-                waypoint_check_timer.start(0, WAYPOINT_REACHABLE_CHECK_INTERVAL);
-            }
-            */
+            const Basic::UnitArray &units_just_destroyed = Basic::Units::self_just_destroyed();
 
-            int distance_to_target = avg_tilepos.getApproxDistance(target_tilepos);
-            if (distance_to_target <= tile_radius) {
+            if (dist_to_target_pos <= tile_radius) {
                 bool wait_for_cohesion = false;
-                for (auto unit_it = group.begin(); unit_it != group.end(); ++unit_it) {
+                for (auto unit_it = group.begin(); unit_it < group.end(); ++unit_it) {
                     auto &unit = *unit_it;
-                    if (!unit->exists()) {
-                        unit_it = group.erase(unit_it);
-                        if (unit_it == group.end()) {break;}
-                        else                        {continue;}
-                    }
-                    float distance_outside_radius = 
-                        Utility::FrogMath::get_distance(avg_pos, unit->getPosition()) - radius;
+                    REMOVE_IF_DESTROYED(unit, unit_it, group, units_just_destroyed);
+                    double distance_outside_radius = 
+                        avg_pos.getApproxDistance(unit->getPosition()) - radius;
                     if (distance_outside_radius > 0) {
                         wait_for_cohesion = true;
                     }
@@ -240,13 +238,9 @@ namespace Movement::Move {
                     else if (wait_frames_left == 0) {wait_timer.start(0, COHESION_WAIT_MAX_FRAMES);}
                 }
             }
-            else for (auto unit_it = group.begin(); unit_it != group.end(); ++unit_it) {
+            else for (auto unit_it = group.begin(); unit_it < group.end(); ++unit_it) {
                 auto &unit = *unit_it;
-                // TODO: probably have to use unit just removed registry
-                if (!unit->exists()) {
-                    unit_it = group.erase(unit_it);
-                    continue;
-                }
+                REMOVE_IF_DESTROYED(unit, unit_it, group, units_just_destroyed);
                 auto &unit_data = Basic::Units::data(unit);
                 if (unit_data.cmd_ready) {move_unit(unit, target_pos, status);}
             }
@@ -259,7 +253,7 @@ namespace Movement::Move {
         BWAPI::TilePosition dest,
         bool attack,
         bool wait,
-        float cohesion_factor
+        double cohesion_factor
     ) {
         dest = nearest_valid_tilepos(dest);
         if (dest == BWAPI::TilePositions::None) {

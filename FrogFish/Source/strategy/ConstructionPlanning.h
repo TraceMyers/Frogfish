@@ -1,4 +1,5 @@
 #pragma once
+#pragma message("including ConstructionPlanning")
 
 #include "../production/BuildOrder.h"
 #include "../basic/Bases.h"

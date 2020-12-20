@@ -48,6 +48,17 @@ namespace BWEB
             target = BWAPI::TilePositions::Invalid;
         }
 
+        /// added by Trace Myers without permission of the creator of BWEB
+        double getDistanceFrom(int waypoint) { 
+            double dist = 0.0;
+            for (auto tile_it = tiles.begin() + waypoint; tile_it < tiles.end() - 1; ++tile_it) {
+                const BWAPI::TilePosition &a = *tile_it;
+                const BWAPI::TilePosition &b = *(tile_it + 1);
+                dist += a.getApproxDistance(b);
+            }
+            return dist;
+        }
+
         ///
         BWAPI::TilePosition getSource() { return source; }
         BWAPI::TilePosition getTarget() { return target; }
