@@ -39,7 +39,7 @@ void FrogFish::onStart() {
     Production::BuildGraph::init();
     Production::Economy::init();
     Production::Construction::init();
-    Production::BuildOrder::load("protoss", "12_hatch");
+    Production::BuildOrder::load("terran", "test_overlord_make_ban");
     Production::BuildOrder::print();
     Production::MakeUnits::init();
     Test::Message::init(15);
@@ -57,9 +57,9 @@ void FrogFish::onFrame() {
 
     // 2. update production data
     Production::BuildGraph::on_frame_update();
-    //Production::Economy::on_frame_update();
-    //Production::MakeUnits::on_frame_update();
-    //Production::Construction::on_frame_update();
+    Production::Economy::on_frame_update();
+    Production::MakeUnits::on_frame_update();
+    Production::Construction::on_frame_update();
     //Production::GetTech::on_frame_update();
 
 	Movement::Move::on_frame_update();
@@ -80,7 +80,7 @@ void FrogFish::onFrame() {
     if (timer.is_stopped()) {
         // timer.restart();
         timer.start(1,0);
-        Test::Move::move_group_around_the_map();
+        //Test::Move::move_group_around_the_map();
     }
 }
 

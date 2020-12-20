@@ -6,7 +6,13 @@
 #include <thread>
 
 namespace Production::BuildOrder {
-    
+
+    enum OVERLORD_INSERT_BAN {
+        NONE,
+        START,
+        END
+    };
+
     struct Item {
 
         /* PUBLIC */
@@ -19,8 +25,6 @@ namespace Production::BuildOrder {
             TECH, 
             UPGRADE, 
             CANCEL, 
-            OVERLORD_MAKE_BLOCK_ON, 
-            OVERLORD_MAKE_BLOCK_OFF, 
             NONE
         };
 
@@ -29,7 +33,8 @@ namespace Production::BuildOrder {
             BWAPI::UnitType u_type,
             BWAPI::TechType tch_type,
             BWAPI::UpgradeType up_type,
-            int cancel_i
+            int cancel_i,
+            OVERLORD_INSERT_BAN ovie_ban
         );
 
         ACTION action() const {
@@ -46,6 +51,10 @@ namespace Production::BuildOrder {
 
         BWAPI::UpgradeType upgrade_type() const {
             return _upgrade_type;
+        }
+
+        OVERLORD_INSERT_BAN overlord_insert_ban() const {
+            return _overlord_insert_ban;
         }
 
         int cancel_index() const {
@@ -81,6 +90,7 @@ namespace Production::BuildOrder {
         BWAPI::UnitType _unit_type;
         BWAPI::TechType _tech_type;
         BWAPI::UpgradeType _upgrade_type;
+        OVERLORD_INSERT_BAN _overlord_insert_ban = OVERLORD_INSERT_BAN::NONE;
         int _cancel_index;
         int _mineral_cost = 0;
         int _gas_cost = 0;
@@ -95,7 +105,8 @@ namespace Production::BuildOrder {
                         BWAPI::UnitType _unit_type,
                         BWAPI::TechType _tech_type,
                         BWAPI::UpgradeType _upgrade_type,
-                        int _cancel_index
+                        int _cancel_index,
+                        OVERLORD_INSERT_BAN ban=OVERLORD_INSERT_BAN::NONE
                     );
     void            insert(
                         Item::ACTION _action,
@@ -103,21 +114,23 @@ namespace Production::BuildOrder {
                         BWAPI::TechType _tech_type,
                         BWAPI::UpgradeType _upgrade_type,
                         int _cancel_index,
-                        int insert_index
+                        int insert_index,
+                        OVERLORD_INSERT_BAN ban=OVERLORD_INSERT_BAN::NONE
                     );
     void            insert_next(
                         Item::ACTION _action,
                         BWAPI::UnitType _unit_type,
                         BWAPI::TechType _tech_type,
                         BWAPI::UpgradeType _upgrade_type,
-                        int _cancel_index
+                        int _cancel_index,
+                        OVERLORD_INSERT_BAN ban=OVERLORD_INSERT_BAN::NONE
                     );
     int             current_index();
     const Item &    current_item();
     void            next();
     const Item &    get(int i);
     void            move(int from, int to);
-    bool            overlord_make_block();
+    bool            can_insert_overlords();
     unsigned        size();
     bool            finished();
     void            print(unsigned int start=0);

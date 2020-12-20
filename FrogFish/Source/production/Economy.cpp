@@ -71,7 +71,7 @@ namespace Production::Economy {
         int
             sim_supply_used,
             sim_supply_total;
-        float
+        double
             sim_larva,
             sim_minerals,
             sim_gas,
@@ -189,7 +189,6 @@ namespace Production::Economy {
         }
 
         bool sim_can_make_item(const BuildOrder::Item& item) {
-            const BuildOrder::Item::ACTION &action = item.action();
             int 
                 min_cost = item.mineral_cost(),
                 gas_cost = item.gas_cost(),
@@ -222,9 +221,7 @@ namespace Production::Economy {
             return remove_success;
         }
 
-        void sim_add_item(int index, int seconds_passed) {
-            auto &item = BuildOrder::get(index);
-            auto &type = item.unit_type();
+        void sim_add_item(int index, const BuildOrder::Item &item, BWAPI::UnitType type) {
             sim_making_indices.push_back(index);
             sim_making_types.push_back(type);
             if (type == BWAPI::UnitTypes::Zerg_Drone) {
@@ -238,10 +235,10 @@ namespace Production::Economy {
         // TODO: subtract mps when make building
         void sim_make_item(const BuildOrder::Item& item, int index, int seconds_passed) {
             sim_data.push_back(std::pair<int, int>(item.ID(), seconds_passed));
-            const auto &action = item.action();
-            auto &type = item.unit_type();
+            auto action = item.action();
+            auto type = item.unit_type();
             if (item.supply_cost() != 0) {
-                sim_add_item(index, seconds_passed);
+                sim_add_item(index, item,  type);
                 int provided_supply = type.supplyProvided();
                 if (provided_supply > 0) {
                     sim_incoming_supply += provided_supply;
@@ -273,9 +270,9 @@ namespace Production::Economy {
         }
 
         void sim_advance_making_items() {
-            auto &frames_left_it = sim_making_frames_left.begin();
-            auto &IDs_it = sim_making_indices.begin();
-            auto &types_it = sim_making_types.begin();
+            auto frames_left_it = sim_making_frames_left.begin();
+            auto IDs_it = sim_making_indices.begin();
+            auto types_it = sim_making_types.begin();
             while (frames_left_it < sim_making_frames_left.end()) {
                 (*frames_left_it) -= 24;
                 int making_frames_left = *frames_left_it;

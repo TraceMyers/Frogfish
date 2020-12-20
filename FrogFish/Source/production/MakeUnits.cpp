@@ -22,9 +22,9 @@ namespace Production::MakeUnits {
             int supply_block_seconds = Economy::seconds_until_supply_blocked();
             if (0 <= supply_block_seconds && supply_block_seconds < 100) { // < 0 means no block over sim duration
                 int supply_block_index = Economy::build_order_index_at_supply_block();
-                bool overlord_make_block = BuildOrder::overlord_make_block();
+                bool can_insert_overlord = BuildOrder::can_insert_overlords();
                 int cur_index = BuildOrder::current_index();
-                int last_index_can_insert = (overlord_make_block ? -1 : cur_index);
+                int last_index_can_insert = (can_insert_overlord ? -1 : cur_index);
                 int supply_block_sim_index = econ_sim_data.size() - 1;
                 int target_time = supply_block_seconds - OVERLORD_MAKE_SECONDS;
 
@@ -34,14 +34,14 @@ namespace Production::MakeUnits {
                     ++BO_index, ++sim_index
                 ) {
                     const BuildOrder::Item &item = BuildOrder::get(BO_index);
-                    if (item.action() == BuildOrder::Item::OVERLORD_MAKE_BLOCK_ON) {
-                        overlord_make_block = true;
+                    if (item.overlord_insert_ban() == BuildOrder::OVERLORD_INSERT_BAN::START) {
+                        can_insert_overlord = true;
                     }
-                    else if (item.action() == BuildOrder::Item::OVERLORD_MAKE_BLOCK_OFF) {
-                        overlord_make_block = false;
+                    else if (item.overlord_insert_ban() == BuildOrder::OVERLORD_INSERT_BAN::END) {
+                        can_insert_overlord = false;
                     }
-                    if (!overlord_make_block) {
-                        last_index_can_insert = BO_index + 1;
+                    if (!can_insert_overlord) {
+                        last_index_can_insert = BO_index;
                     }
                    
                     int time_until_make = econ_sim_data[sim_index].second;

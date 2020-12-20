@@ -14,7 +14,7 @@ using namespace Basic;
 // a frame to check whether or not an item is being removed
 // TODO: put econ sim data in build order items
 
-// TODO: add overlord make block flag to build item
+// TODO: add overlord insert ban flag to build item
 
 namespace Production::BuildOrder { 
 
@@ -23,14 +23,15 @@ namespace Production::BuildOrder {
         BWAPI::UnitType u_type,
         BWAPI::TechType tch_type,
         BWAPI::UpgradeType up_type,
-        int cancel_i
-
+        int cancel_i,
+        OVERLORD_INSERT_BAN ovie_ban
     ) :
         _action(act),
         _unit_type(u_type),
         _tech_type(tch_type),
         _upgrade_type(up_type),
-        _cancel_index(cancel_i)
+        _cancel_index(cancel_i),
+        _overlord_insert_ban(ovie_ban)
     {}
 
     namespace {
@@ -44,9 +45,10 @@ namespace Production::BuildOrder {
                 BWAPI::UnitType u_type,
                 BWAPI::TechType tch_type,
                 BWAPI::UpgradeType up_type,
-                int cancel_i
+                int cancel_i,
+                OVERLORD_INSERT_BAN ovie_ban
             ) : 
-                Item (act, u_type, tch_type, up_type, cancel_i)
+                Item (act, u_type, tch_type, up_type, cancel_i, ovie_ban)
             {
                 set_mineral_cost();
                 set_gas_cost();
@@ -79,10 +81,6 @@ namespace Production::BuildOrder {
                             _mineral_cost = -_upgrade_type.mineralPrice();
                         }
                         break;
-                    case Item::ACTION::OVERLORD_MAKE_BLOCK_OFF:
-                    case Item::ACTION::OVERLORD_MAKE_BLOCK_ON:
-                        _mineral_cost = 0;
-                        break;
                     default:
                         _mineral_cost = _unit_type.mineralPrice();
                 }
@@ -111,10 +109,6 @@ namespace Production::BuildOrder {
                         else {
                             _gas_cost = -_upgrade_type.gasPrice();
                         }
-                        break;
-                    case Item::ACTION::OVERLORD_MAKE_BLOCK_OFF:
-                    case Item::ACTION::OVERLORD_MAKE_BLOCK_ON:
-                        _gas_cost = 0;
                         break;
                     default:
                         _gas_cost = _unit_type.gasPrice();
@@ -157,15 +151,16 @@ namespace Production::BuildOrder {
         std::string                 race;
         std::string                 name;
         std::vector<InternalItem>   items;
-        int                         cur_index;
+        unsigned                    cur_index;
         Item                        end_item(
                                         Item::ACTION::NONE, 
                                         BWAPI::UnitTypes::None,
                                         BWAPI::TechTypes::None,
                                         BWAPI::UpgradeTypes::None,
-                                        -1
+                                        -1,
+                                        OVERLORD_INSERT_BAN::NONE
                                     );
-        bool                        overlord_make_block_on;
+        bool                        overlord_insert_ban_on;
 
         void _push(InternalItem item) {
             items.push_back(item);
@@ -182,7 +177,7 @@ namespace Production::BuildOrder {
     }
 
     void load(const char *_race, const char *build_name) {
-        overlord_make_block_on = false;
+        overlord_insert_ban_on = false;
         cur_index = 0;
         items.clear();
         race = _race;
@@ -206,6 +201,7 @@ namespace Production::BuildOrder {
                             BWAPI::UpgradeType _upgrade_type = BWAPI::UpgradeTypes::None;
                             int _count = 1;
                             int _cancel_index = -1;
+                            OVERLORD_INSERT_BAN ban;
 
                             in_file >> word;
                             word.pop_back();
@@ -214,12 +210,6 @@ namespace Production::BuildOrder {
                             }
                             else if (word == "make") {
                                 _action = Item::MAKE;
-                            }
-                            else if (word == "makeblockon") {
-                                _action = Item::OVERLORD_MAKE_BLOCK_ON;
-                            }
-                            else if (word == "makeblockoff") {
-                                _action = Item::OVERLORD_MAKE_BLOCK_OFF;
                             }
                             else if (word == "morph") {
                                 _action = Item::MORPH;
@@ -271,8 +261,20 @@ namespace Production::BuildOrder {
                             }
 
                             in_file >> word;
+                            word.pop_back();
                             if (word != "null") {
                                 _cancel_index = std::stoi(word);
+                            }
+
+                            in_file >> word;
+                            if (word == "null") {
+                                ban = OVERLORD_INSERT_BAN::NONE;
+                            }
+                            else if (word  == "on") {
+                                ban = OVERLORD_INSERT_BAN::START;
+                            }
+                            else {
+                                ban = OVERLORD_INSERT_BAN::END;
                             }
 
                             for (int i = 0; i < _count; ++i) {
@@ -281,10 +283,10 @@ namespace Production::BuildOrder {
                                     _unit_type,
                                     _tech_type,
                                     _upgrade_type,
-                                    _cancel_index
+                                    _cancel_index,
+                                    ban
                                 );
                             }
-                            
                         }
                         else {
                             loaded = true;
@@ -294,9 +296,8 @@ namespace Production::BuildOrder {
                 }
             }
         }
-        if (items.size() > 0 && items[0].action() == Item::ACTION::OVERLORD_MAKE_BLOCK_ON) {
-            overlord_make_block_on = true;
-            next();
+        if (items.size() > 0 && items[0].overlord_insert_ban() == OVERLORD_INSERT_BAN::START) {
+            overlord_insert_ban_on = true;
         }
         in_file.close();
     }
@@ -306,14 +307,16 @@ namespace Production::BuildOrder {
         BWAPI::UnitType u_type,
         BWAPI::TechType tch_type,
         BWAPI::UpgradeType up_type,
-        int cancel_i
+        int cancel_i,
+        OVERLORD_INSERT_BAN ban
     ) {
         InternalItem item(
             act,
             u_type,
             tch_type,
             up_type,
-            cancel_i
+            cancel_i,
+            ban
         );
         _push(item);
     }
@@ -324,14 +327,16 @@ namespace Production::BuildOrder {
         BWAPI::TechType tch_type,
         BWAPI::UpgradeType up_type,
         int cancel_i,
-        int insert_index
+        int insert_index,
+        OVERLORD_INSERT_BAN ban
     ) {
         InternalItem item(
             act,
             u_type,
             tch_type,
             up_type,
-            cancel_i
+            cancel_i,
+            ban
         );
         _insert(item, insert_index);
     }
@@ -341,14 +346,16 @@ namespace Production::BuildOrder {
         BWAPI::UnitType u_type,
         BWAPI::TechType tch_type,
         BWAPI::UpgradeType up_type,
-        int cancel_i
+        int cancel_i,
+        OVERLORD_INSERT_BAN ban
     ) {
         InternalItem item(
             act,
             u_type,
             tch_type,
             up_type,
-            cancel_i
+            cancel_i,
+            ban
         );
         _insert_next(item);
     }
@@ -363,19 +370,20 @@ namespace Production::BuildOrder {
     }
 
     void next() {
-        ++cur_index;
-        if (cur_index < items.size()) {
+        int items_size = items.size();
+        if (cur_index < items_size) {
+            ++cur_index;
+        }
+        if (cur_index < items_size) {
             auto& cur_item = items[cur_index];
-            const Item::ACTION& action = cur_item.action();
-            if (action == Item::OVERLORD_MAKE_BLOCK_ON) {
-                overlord_make_block_on = true;
-                DBGMSG("BuildOrder::next(): Overlord make block *ON*\n");
-                next();
+            OVERLORD_INSERT_BAN ban = cur_item.overlord_insert_ban();
+            if (ban == OVERLORD_INSERT_BAN::START) {
+                overlord_insert_ban_on = true;
+                DBGMSG("BuildOrder::next(): Overlord insert ban *ON*\n");
             }
-            else if (action == Item::OVERLORD_MAKE_BLOCK_OFF) {
-                overlord_make_block_on = false;
-                DBGMSG("BuildOrder::next(): Overlord make block *OFF*\n");
-                next();
+            else if (ban == OVERLORD_INSERT_BAN::END) {
+                overlord_insert_ban_on = false;
+                DBGMSG("BuildOrder::next(): Overlord insert ban *OFF*\n");
             }
             DBGMSG("BuildOrder::next(): advancing to %d\n", cur_index);
             return;
@@ -394,8 +402,8 @@ namespace Production::BuildOrder {
         items.insert(items.begin() + to, item);
     }
 
-    bool overlord_make_block() {
-        return overlord_make_block_on;
+    bool can_insert_overlords() {
+        return overlord_insert_ban_on;
     }
 
     unsigned size() {
@@ -413,17 +421,12 @@ namespace Production::BuildOrder {
     }
     
     void print_item(unsigned int i) {
+        bool ovie_ban_on = false;
         const Item &item = items[i];
         std::cout << "[" << i << "]: \n\t";
         switch(item.action()) {
             case Item::MAKE:
                 std::cout << "Make    " << item.unit_type().c_str();
-                break;
-            case Item::OVERLORD_MAKE_BLOCK_OFF:
-                std::cout << "Overlord make block *OFF* ";
-                break;
-            case Item::OVERLORD_MAKE_BLOCK_ON:
-                std::cout << "Overlord make block *ON*  ";
                 break;
             case Item::MORPH:
                 std::cout << "Morph   " << item.unit_type().c_str();
@@ -454,5 +457,25 @@ namespace Production::BuildOrder {
         std::cout << "\n\tGas Cost:     " << item.gas_cost();
         std::cout << "\n\tLarva Cost:   " << item.larva_cost();
         std::cout << "\n\tSupply Cost:  " << item.supply_cost() << std::endl;
+
+        char* ban_types[] = {"START/ON", "END/OFF", "ON", "OFF"};
+        int j;
+        if (item.overlord_insert_ban() == OVERLORD_INSERT_BAN::START) {
+            ovie_ban_on = true;
+            j = 0;
+        }
+        else if (item.overlord_insert_ban() == OVERLORD_INSERT_BAN::END) {
+            ovie_ban_on = false;
+            j = 1;
+        }
+        else {
+            if (ovie_ban_on) {
+                j = 2;
+            }
+            else {
+                j = 3;
+            }
+        }
+        std::cout << "\n\tOverlord Ban: " << ban_types[j] << std::endl;
     }
 }
