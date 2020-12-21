@@ -29,7 +29,8 @@ namespace Production::Economy {
         const int
             SUPPLY_FRAME_SECONDS = 8,
             SUPPLY_FRAME_CT = 3,
-            USABLE_BUFFER = 48;
+            USABLE_BUFFER = 48,
+            FRAMES_PER_SEC = 24;
         int
             reserved_minerals = 0,
             reserved_gas = 0,
@@ -96,8 +97,6 @@ namespace Production::Economy {
 
                 int mineral_worker_ct = 0;
                 for (auto &worker : Basic::Bases::workers(base)) {
-                    /*
-                    // TODO: Use this
                     Basic::Units::UnitData unit_data = Basic::Units::data(worker);
                     if (unit_data.u_task == Basic::Refs::UTASK::MINERALS) {
                         ++mineral_worker_ct;
@@ -105,8 +104,6 @@ namespace Production::Economy {
                     else if (unit_data.u_task == Basic::Refs::UTASK::GAS) {
                         gas_per_frame += GPF_CONST;
                     }
-                    */
-                   ++mineral_worker_ct;
                 }
                 int mineral_ct = minerals.size(); 
 
@@ -125,6 +122,7 @@ namespace Production::Economy {
                     )
                     * mineral_worker_ct;
                 DBGMSG("Economy::estimate_income(): minerals per frame: %.2f", minerals_per_frame);
+                DBGMSG("Economy::estimate_income(): gas per frame: %.2f", gas_per_frame);
             }
         }
 
@@ -141,7 +139,7 @@ namespace Production::Economy {
                 }
                 supply_per_frame_period += supply_frames[i] * SUPPLY_FRAME_POLY_FACT;
             } 
-            supply_per_frame = supply_per_frame_period / (SUPPLY_FRAME_SECONDS * 24);
+            supply_per_frame = supply_per_frame_period / (SUPPLY_FRAME_SECONDS * FRAMES_PER_SEC);
         }
 
         // TODO: magic numbers in sim functions
@@ -158,9 +156,9 @@ namespace Production::Economy {
             sim_larva = (larva_ct == 0 ? 0.5 : larva_ct);
             sim_supply_used = self->supplyUsed();
             sim_supply_total = self->supplyTotal();
-            sim_mps = minerals_per_frame * 24;
-            sim_gps = gas_per_frame * 24;
-            sim_lps = larva_per_frame * 24;
+            sim_mps = minerals_per_frame * FRAMES_PER_SEC;
+            sim_gps = gas_per_frame * FRAMES_PER_SEC;
+            sim_lps = larva_per_frame * FRAMES_PER_SEC;
             sim_incoming_supply = 0;
 
             for (int i = 0; i < self_units.size(); ++i) {
@@ -170,7 +168,7 @@ namespace Production::Economy {
                     sim_making_indices.push_back(NON_SIM_MAKING_ID);
                     const BWAPI::UnitType &build_type = u->getBuildType();
                     if (build_type == BWAPI::UnitTypes::Zerg_Overlord) {
-                        sim_incoming_supply += 16;
+                        sim_incoming_supply += BWAPI::UnitTypes::Zerg_Overlord.supplyProvided();
                     }
                     sim_making_types.push_back(build_type);
                     sim_making_frames_left.push_back(remaining_time);
@@ -277,7 +275,7 @@ namespace Production::Economy {
             auto IDs_it = sim_making_indices.begin();
             auto types_it = sim_making_types.begin();
             while (frames_left_it < sim_making_frames_left.end()) {
-                (*frames_left_it) -= 24;
+                (*frames_left_it) -= FRAMES_PER_SEC;
                 int making_frames_left = *frames_left_it;
                 if (making_frames_left <= 0) {
                     auto& type = *types_it;
@@ -287,11 +285,14 @@ namespace Production::Economy {
                         sim_incoming_supply -= supply_provided;
                     }
                     if (type == BWAPI::UnitTypes::Zerg_Drone) {
-                        // TODO: extractor sink
                         sim_mps += sim_add_drone_mps;
                     }
                     else if (type == BWAPI::UnitTypes::Zerg_Hatchery) {
                         sim_lps += sim_add_hatch_lps;
+                    }
+                    else if (type == BWAPI::UnitTypes::Zerg_Extractor) {
+                        sim_gps += sim_add_drone_gps * 3;
+                        sim_mps -= sim_add_drone_mps * 3;
                     }
                     frames_left_it = sim_making_frames_left.erase(frames_left_it);
                     IDs_it = sim_making_indices.erase(IDs_it);
@@ -309,15 +310,15 @@ namespace Production::Economy {
             const int 
                 OVERLORD_MINERAL_COST = 100,
                 OVERLORD_SUPPLY_PROVIDED = 16,
-                OVERLORD_BUILD_TIME = 600 / 24,
+                OVERLORD_BUILD_TIME = 600 / FRAMES_PER_SEC,
                 SUPPLY_MAX = 400;
             int seconds_passed = 0;
             unsigned sim_index = (unsigned)BuildOrder::current_index();
             sim_seconds_until_supply_block = -1;
             sim_index_at_supply_block = -1;
-            sim_add_drone_mps = MPF_SIMPLE_CONST * 24;
-            sim_add_drone_gps = GPF_CONST * 24;
-            sim_add_hatch_lps = LPF_CONST * 24;
+            sim_add_drone_mps = MPF_SIMPLE_CONST * FRAMES_PER_SEC;
+            sim_add_drone_gps = GPF_CONST * FRAMES_PER_SEC;
+            sim_add_hatch_lps = LPF_CONST * FRAMES_PER_SEC;
 
             sim_init();
             
@@ -388,13 +389,13 @@ namespace Production::Economy {
 
     double get_supply_per_frame() {return supply_per_frame;}
 
-    double get_minerals_per_sec() {return minerals_per_frame * 24;}
+    double get_minerals_per_sec() {return minerals_per_frame * FRAMES_PER_SEC;}
 
-    double get_gas_per_sec() {return gas_per_frame * 24;}
+    double get_gas_per_sec() {return gas_per_frame * FRAMES_PER_SEC;}
 
-    double get_larva_per_sec() {return larva_per_frame * 24;}
+    double get_larva_per_sec() {return larva_per_frame * FRAMES_PER_SEC;}
 
-    double get_supply_per_sec() {return supply_per_frame * 24;}
+    double get_supply_per_sec() {return supply_per_frame * FRAMES_PER_SEC;}
 
     int get_free_minerals() {return self->minerals() - reserved_minerals;}
 

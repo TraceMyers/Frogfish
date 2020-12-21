@@ -67,9 +67,11 @@ namespace Test::Move {
             oh_the_places[1] = BWAPI::TilePosition(10, 10);
             oh_the_places[2] = BWAPI::TilePosition(size.x - 10, size.y - 10); 
             
+            // TODO: grabbing units by u_type not working here... why?
             for (int i = 0; i < self_units.size(); ++i) {
                 const BWAPI::Unit& u = self_units[i];
-                if (u->getType() == BWAPI::UnitTypes::Zerg_Drone) {
+                //auto &data = Basic::Units::data(u);
+                if (u->getType() == BWAPI::UnitTypes::Zerg_Drone || u->getType() == BWAPI::UnitTypes::Zerg_Hydralisk) {
                     bool already_cached = false;
                     for (auto &cached_unit : moving_units) {
                         if (cached_unit == u) {

@@ -76,7 +76,7 @@ terran test_cancel_build
 ------------------------------------------------------
 terran test_make_then_move
 0:  make,   12,  drone,     null,   null
-1:  build,   2,  hatchery,     null,   null
+1:  build,   2,  hatchery,  null,   null
 2:  make,   20,  drone,     null,   null 
 
 ------------------------------------------------------
