@@ -11,7 +11,7 @@ using namespace Basic;
 // MAYBE: change Build Order to linked list implementation to work better with manipulation
 // TODO: add a removal scheduler, just like with units/bases, where all other dealies have
 //          a frame to check whether or not an item is being removed
-// TODO: put econ sim data in build order items
+
 
 namespace Production::BuildOrder { 
 
@@ -189,6 +189,8 @@ namespace Production::BuildOrder {
         race = _race;
         name = build_name;
         std::ifstream in_file;
+        // TODO: change this to relative path
+        // bot should be in bwapi-data/AI
         in_file.open("C:\\ProgramData\\bwapi\\starcraft\\bwapi-data\\read\\BuildOrders.txt");
         if (!in_file) {
             printf("not able to read build order file\n");
@@ -473,7 +475,8 @@ namespace Production::BuildOrder {
     void print_item(unsigned int i) {
         bool ovie_ban_on = false;
         const Item &item = items[i];
-        std::cout << "[" << i << "]: \n\t";
+        std::cout << "index [" << i << "] ";
+        std::cout << "\nID [" << item.ID() << "]: \n\t";
         switch(item.action()) {
             case Item::MAKE:
                 std::cout << "Make    " << item.unit_type().c_str();
@@ -502,11 +505,11 @@ namespace Production::BuildOrder {
                     std::cout << item.upgrade_type();
                 }
         }
-        std::cout << "\n\tCancel Index: " << item.cancel_ID();
+        std::cout << "\n\tCancel ID: " << item.cancel_ID();
         std::cout << "\n\tMineral Cost: " << item.mineral_cost();
         std::cout << "\n\tGas Cost:     " << item.gas_cost();
         std::cout << "\n\tLarva Cost:   " << item.larva_cost();
-        std::cout << "\n\tSupply Cost:  " << item.supply_cost() << std::endl;
+        std::cout << "\n\tSupply Cost:  " << item.supply_cost();
 
         char* ban_types[] = {"START/ON", "END/OFF", "ON", "OFF"};
         int j;

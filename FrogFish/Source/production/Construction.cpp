@@ -20,10 +20,15 @@ namespace Production::Construction {
         std::vector<int>                        move_IDs;
         std::vector<int>                        buildgraph_reservation_IDs;
         std::vector<BWAPI::Unit>                canceled_build_units;
+        std::vector<BWAPI::Unit>                just_completed_build_units;
+        std::vector<const BWEM::Base *>         just_completed_build_bases;
         const int                               FINISH_BUILD_FRAMES = 30;
         const int                               BUILD_CMD_DELAY = 6;
         const int                               NOT_FOUND = -1;
         BWTimer                                 shit_timer;
+
+        BWTimer                                 cancel_attempt_timer;
+        bool                                    started_cancel_attempts = false;
 
         void init_builds() {
             for (
@@ -87,32 +92,49 @@ namespace Production::Construction {
         // TODO: account for bad or messed up time predictions
         // TODO: account for deaths
         void advance_builds() {
+            DBGMSG("Construction::advance_builds(): plan IDs: %d, plans count: %d", 
+                (int)construction_plan_IDs.size(),
+                ConstructionPlanning::plans_count()
+            );
             auto &cur_build_item = BuildOrder::current_item();
             if (cur_build_item.action() == BuildOrder::Item::CANCEL) {
+                if (!started_cancel_attempts) {
+                    started_cancel_attempts = true;
+                    cancel_attempt_timer.start(20, 0);
+                }
                 int cancel_build_ID = cur_build_item.cancel_ID();
                 const auto &cancel_index = BuildOrder::find_by_ID(cancel_build_ID, false);
+                bool cancel_success = false;
                 if (cancel_index >= 0) {
-                    cancel_build(BuildOrder::get(cancel_index));
+                    cancel_success = cancel_build(BuildOrder::get(cancel_index));
                 }
                 else {
                     DBGMSG(
-                        "Construction::advance_builds(): bad cancel index %d from ID %d", 
-                        cancel_index, 
+                        "Construction::advance_builds(): bad cancel index %d, ID %d", 
+                        cancel_index,
                         cancel_build_ID
                     );
                 }
-                // Advance the build order even if cancel doesn't work
-                BuildOrder::next();
+                if (cancel_attempt_timer.is_stopped() || cancel_success) {
+                    // Advance the build order even if cancel doesn't work
+                    // TODO: resolve !cancel_success
+                    started_cancel_attempts = false;
+                    cancel_attempt_timer.start(0, 0);
+                    if (!cancel_success) {
+                        DBGMSG("Construction::advance_builds(): going to next item without cancel success");
+                    }
+                    BuildOrder::next();
+                }
             }
             auto construction_plan_IDs_it = construction_plan_IDs.begin();
             auto move_IDs_it = move_IDs.begin();
             auto buildgraph_reservation_IDs_it = buildgraph_reservation_IDs.begin();
-            DBGMSG("Construction::advance_builds(): plans size: %d", construction_plan_IDs.size());
+            
             while (construction_plan_IDs_it < construction_plan_IDs.end()) {
                 int plan_ID = *construction_plan_IDs_it;
                 auto& plan = ConstructionPlanning::get_plan(plan_ID);
-                // Drones are destroyed to make extractors; Only building that needs to be accounted
-                // for in this way
+                auto& build_item = plan.get_item();
+                // Drones are destroyed to make extractors -- special case
                 if (plan.extractor_transitioning()) {
                     auto& units = Basic::Units::self_just_stored();
                     bool replaced_null_builder = false;
@@ -123,6 +145,7 @@ namespace Production::Construction {
                         if (type == BWAPI::UnitTypes::Zerg_Extractor && tp == plan.get_tilepos()) {
                             ConstructionPlanning::replace_null_builder_with_extractor(plan_ID, unit);
                             ConstructionPlanning::set_extractor_flag(plan_ID, false);
+                            Basic::Units::set_build_status(unit, BUILD_STATUS::GIVEN_BUILD_CMD);
                             replaced_null_builder = true;
                             break;
                         }
@@ -139,7 +162,6 @@ namespace Production::Construction {
                 const Basic::Units::UnitData builder_data = Basic::Units::data(builder);
                 auto& build_status = builder_data.build_status;
                 if (build_status == BUILD_STATUS::RESERVED) {
-                    auto& build_item = plan.get_item();
                     int build_time = build_item.seconds_until_make();
                     if (build_time != NOT_FOUND) {
                         int move_ID = *move_IDs_it;
@@ -149,7 +171,7 @@ namespace Production::Construction {
                             Movement::Move::start(move_ID);
                             Basic::Units::set_utask(builder, UTASK::BUILD);
                             Basic::Units::set_build_status(builder, BUILD_STATUS::MOVING);
-                            DBGMSG("Construction::advance_builds(): moving");
+                            DBGMSG("Construction::advance_builds(): ID[%d] moving", build_item.ID());
                         }
                     }
                 }
@@ -161,11 +183,10 @@ namespace Production::Construction {
                         // Could result in errors where bad ID is used, since the 
                         // bad move ID is kept for vector concurrency; might move this to the end
                         Movement::Move::remove(move_ID);
-                        DBGMSG("Construction::advance_builds(): at site");
+                        DBGMSG("Construction::advance_builds(): ID[%d] at site", build_item.ID());
                     }
                 }
                 else if (build_status == BUILD_STATUS::AT_SITE) {
-                    auto& build_item = plan.get_item();
                     if (
                         BuildOrder::current_item() == build_item
                         && build_item.mineral_cost() <= Economy::get_free_minerals()
@@ -181,7 +202,7 @@ namespace Production::Construction {
                         if (build_type == BWAPI::UnitTypes::Zerg_Extractor) {
                             ConstructionPlanning::set_extractor_flag(plan_ID, true);
                         }
-                        DBGMSG("Construction::advance_builds(): given build cmd");
+                        DBGMSG("Construction::advance_builds(): ID[%d] given build cmd", build_item.ID());
                     }
                 }
                 else if(build_status == BUILD_STATUS::GIVEN_BUILD_CMD) {
@@ -191,11 +212,10 @@ namespace Production::Construction {
                         // TODO: remove buildgraph reservation
                         Basic::Units::set_build_status(builder, BUILD_STATUS::BUILDING);
                         Basic::Units::set_cmd_delay(builder, unit_type.buildTime() + FINISH_BUILD_FRAMES);
-                        DBGMSG("Construction::advance_builds(): building");
+                        DBGMSG("Construction::advance_builds(): ID[%d] building", build_item.ID());
                         BuildOrder::next();
                     }
                     else if (unit_data.cmd_ready) {
-                        auto& build_item = plan.get_item();
                         const BWAPI::UnitType &build_type = build_item.unit_type();
                         const BWAPI::TilePosition &build_loc = plan.get_tilepos();
                         builder->build(build_type, build_loc);
@@ -207,11 +227,13 @@ namespace Production::Construction {
                     auto &unit_data = Basic::Units::data(builder);
                     if (unit_data.cmd_ready) {
                         Basic::Units::set_build_status(builder, BUILD_STATUS::COMPLETED);
-                        DBGMSG("Construction::advance_builds(): finished building");
+                        DBGMSG("Construction::advance_builds(): ID[%d] completed building", build_item.ID());
                     }
                 }
                 else if (build_status == BUILD_STATUS::COMPLETED) {
                     // TODO: builds just compeleted registry
+                    just_completed_build_units.push_back(builder);
+                    just_completed_build_bases.push_back(plan.get_base());
                     ConstructionPlanning::destroy_plan(plan_ID);
                     buildgraph_reservation_IDs_it = buildgraph_reservation_IDs.erase(buildgraph_reservation_IDs_it);
                     construction_plan_IDs_it = construction_plan_IDs.erase(construction_plan_IDs_it);
@@ -221,7 +243,11 @@ namespace Production::Construction {
                     }
                 }
                 else {
-                    DBGMSG("Construction::advance_builds(): bad build_status: %d", build_status);
+                    DBGMSG(
+                        "Construction::advance_builds(): ID[%d] bad build_status: %d", 
+                        build_item.ID(), 
+                        (int)build_status
+                    );
                 }
                 ++buildgraph_reservation_IDs_it;
                 ++construction_plan_IDs_it;
@@ -236,6 +262,8 @@ namespace Production::Construction {
     }
 
     void on_frame_update() {
+        just_completed_build_units.clear();
+        just_completed_build_bases.clear();
         shit_timer.on_frame_update();
         if (shit_timer.is_stopped() && !BuildOrder::finished()) {
             init_builds();
@@ -244,11 +272,15 @@ namespace Production::Construction {
         // TODO: babysit canceled build units until they've definitely stopped building
     }
 
-    void cancel_build(const Production::BuildOrder::Item &item) {
+    bool cancel_build(const Production::BuildOrder::Item &item) {
         int plan_ID = ConstructionPlanning::find_plan(item);
         int move_ID;
         int buildgraph_ID;
         if (plan_ID >= 0) {
+            auto &plan = ConstructionPlanning::get_plan(plan_ID);
+            if (plan.extractor_transitioning()) {
+                return false;
+            }
             auto construction_plan_IDs_it = construction_plan_IDs.begin();
             auto move_IDs_it = move_IDs.begin();
             auto buildgraph_reservation_IDs_it = buildgraph_reservation_IDs.begin();
@@ -268,7 +300,6 @@ namespace Production::Construction {
                 ++move_IDs_it;
             }
             if (removed) {
-                auto& plan = ConstructionPlanning::get_plan(plan_ID);
                 auto& builder = plan.get_builder();
                 auto& builder_data = Basic::Units::data(builder);
                 if (builder_data.build_status == BUILD_STATUS::BUILDING) {
@@ -287,6 +318,8 @@ namespace Production::Construction {
                 Movement::Move::remove(move_ID);
                 ConstructionPlanning::destroy_plan(plan_ID);
                 // TODO: unreserve spot in buildgraph
+
+                return true;
             }
             else {
                 DBGMSG("Construction::cancel_build() unsuccessful removal");
@@ -295,5 +328,14 @@ namespace Production::Construction {
         else {
             DBGMSG("Construction::cancel_build() can't find item.");
         }
+        return false;
+    }
+
+    const std::vector<BWAPI::Unit>& just_completed() {
+        return just_completed_build_units;
+    }
+
+    const std::vector<const BWEM::Base *>& just_completed_from_bases() {
+        return just_completed_build_bases;
     }
 }

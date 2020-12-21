@@ -13,7 +13,7 @@
 #include "test/TestMove.h"
 #include "test/TestMessage.h"
 #include "control/Workers.h"
-//#include "production/GetTech.h"
+#include "production/GetTech.h"
 #include <BWAPI.h>
 #include <iostream>
 #include <string>
@@ -43,7 +43,7 @@ void FrogFish::onStart() {
     Production::BuildGraph::init();
     Production::Economy::init();
     Production::Construction::init();
-    Production::BuildOrder::load("terran", "9_pool");
+    Production::BuildOrder::load("protoss", "2_hatch_hydra");
     Production::BuildOrder::print();
     Production::MakeUnits::init();
     Test::Message::init(15);
@@ -64,12 +64,13 @@ void FrogFish::onFrame() {
     Production::Economy::on_frame_update();
     Production::MakeUnits::on_frame_update();
     Production::Construction::on_frame_update();
-    //Production::GetTech::on_frame_update();
+    Production::GetTech::on_frame_update();
 
 	Movement::Move::on_frame_update();
 
     // 3. issue commands that require newly assigned lists
-    // send mineral workers to gas
+    Control::Workers::send_idle_workers_to_mine();
+    Control::Workers::send_mineral_workers_to_gas();
 
     Utility::DebugDraw::draw_units();
     Utility::DebugDraw::draw_bases();
@@ -77,8 +78,6 @@ void FrogFish::onFrame() {
     Utility::DebugDraw::draw_all_movement_paths();
 
     Test::Message::on_frame_update();
-    // send idle workers to mine minerals (needs to move up)
-    Control::Workers::send_idle_workers_to_mine();
 
     // if a module is going to check whether or not an item has been removed this frame
     // it needs to check before this update

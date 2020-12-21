@@ -96,7 +96,6 @@ namespace Utility::FrogMath{
     }
 
     float average_speed(std::vector<BWAPI::Unit> units) {
-        // TODO: move speed + upgrade reference elsewhere, don't have to check everywhere every time
         bool zergling_speed = Basic::Tech::self_upgrade_level(BWAPI::UpgradeTypes::Metabolic_Boost) > 0;
         bool hydralisk_speed = Basic::Tech::self_upgrade_level(BWAPI::UpgradeTypes::Muscular_Augments) > 0;
         bool ultralisk_speed = Basic::Tech::self_upgrade_level(BWAPI::UpgradeTypes::Anabolic_Synthesis) > 0;

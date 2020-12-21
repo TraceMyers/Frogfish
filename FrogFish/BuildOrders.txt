@@ -5,7 +5,7 @@ terran 9_pool
 2:  make,   1,  drone,         null,   null
 3:  build,  1,  extractor,     null,   null
 4:  make,   1,  drone,         null,   null
-5:  cancel, 1,  extractor,        3,   null
+5:  cancel, 1,  extractor,        7,   null
 6:  make,   1,  overlord,      null,   null
 7:  make,   3,  zergling,      null,   off
 -------------------------------------------------
@@ -57,11 +57,21 @@ terran test_overlord_make_ban
 ------------------------------------------------------
 
 terran test_cancel_build
-0:  make,   5,  drone,          null,   null
+0:  make,   5,  drone,          null,   on
 1:  build,  1,  hatchery,       null,   null  
 2:  cancel, 1,  hatchery,       5,      null
 3:  build,  1,  spawning_pool,  null,   null
 4:  cancel, 1,  spawning_pool,  7,      null
+5:  build,  1,  extractor,      null,   null
+6:  make,   2,  drone,          null,   null
+7:  cancel, 1,  extractor,      9,      null
+8:  build,  1,  extractor,      null,   null
+9:  cancel, 1,  extractor,      13,     null
+10: build,  1,  extractor,      null,   null
+11: make,   1,  overlord,       null,   null
+11: make,   10, drone,          null,   null
+12: cancel, 1,  extractor,      15,     null
+13: make,   1,  drone,          null,   off
 
 ------------------------------------------------------
 terran test_make_then_move

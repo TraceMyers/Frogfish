@@ -69,4 +69,6 @@ namespace Strategy::ConstructionPlanning {
     void                    set_extractor_flag(int ID, bool value);
 
     void                    replace_null_builder_with_extractor(int ID, BWAPI::Unit extractor);
+
+    int                     plans_count();
 }

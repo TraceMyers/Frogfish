@@ -14,6 +14,7 @@ namespace Strategy::ConstructionPlanning {
 
         ConstructionPlan plans[64];
         uint64_t used_plans_field = 0;
+        int _plans_count = 0;
 
         int get_free_plans_index() {
             uint64_t bit_checker = 1;
@@ -87,6 +88,7 @@ namespace Strategy::ConstructionPlanning {
         plans[plan_ID].set_item(item);
         plans[plan_ID].set_tilepos(build_tp);
 
+        ++_plans_count;
         return plan_ID;
     }
 
@@ -110,12 +112,13 @@ namespace Strategy::ConstructionPlanning {
     }
 
     void destroy_plan(int ID) {
-        int ID_field_num = 1 << ID;
+        uint64_t ID_field_num = 1 << ID;
 
         #ifdef _DEBUG
         assert(ID >= 0 && ID < 64 && (ID_field_num & used_plans_field));
         #endif
 
+        --_plans_count;
         used_plans_field ^= ID_field_num;
     }
 
@@ -125,5 +128,9 @@ namespace Strategy::ConstructionPlanning {
 
     void replace_null_builder_with_extractor(int ID, BWAPI::Unit extractor) {
         plans[ID].set_builder(extractor);
+    }
+
+    int plans_count() {
+        return _plans_count;
     }
 }
