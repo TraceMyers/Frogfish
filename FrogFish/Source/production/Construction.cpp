@@ -39,7 +39,7 @@ namespace Production::Construction {
                     int plan_ID = ConstructionPlanning::make_construction_plan(build_item);
                     if (plan_ID < 0) {
                         DBGMSG(
-                            "Construction::init_builds(): build order item ID %d Error %d\n",
+                            "Construction::init_builds(): build order item ID %d Error %d",
                             build_item.ID(),
                             plan_ID
                         );
@@ -51,7 +51,7 @@ namespace Production::Construction {
                     int move_ID = Movement::Move::move(builder, tp, false, true);
                     if (move_ID < 0) {
                         // TODO: pathing error! need to deal with this somehow
-                        DBGMSG("Construction::init_builds(): pathing error to (%d, %d)\n", tp.x, tp.y);
+                        DBGMSG("Construction::init_builds(): pathing error to (%d, %d)", tp.x, tp.y);
                         ConstructionPlanning::destroy_plan(plan_ID);
                         continue;
                     }
@@ -67,7 +67,7 @@ namespace Production::Construction {
                             type.tileHeight()
                         );
                         if (buildgraph_res_ID < 0) {
-                            DBGMSG("Construction::init_builds(): buildgraph res error to (%d, %d)\n", tp.x, tp.y);
+                            DBGMSG("Construction::init_builds(): buildgraph res error to (%d, %d)", tp.x, tp.y);
                             ConstructionPlanning::destroy_plan(plan_ID);
                             Movement::Move::remove(move_ID);
                             continue;
@@ -96,7 +96,7 @@ namespace Production::Construction {
                 }
                 else {
                     DBGMSG(
-                        "Construction::advance_builds(): bad cancel index %d from ID %d\n", 
+                        "Construction::advance_builds(): bad cancel index %d from ID %d", 
                         cancel_index, 
                         cancel_build_ID
                     );
@@ -107,7 +107,7 @@ namespace Production::Construction {
             auto construction_plan_IDs_it = construction_plan_IDs.begin();
             auto move_IDs_it = move_IDs.begin();
             auto buildgraph_reservation_IDs_it = buildgraph_reservation_IDs.begin();
-            DBGMSG("Construction::advance_builds(): plans size: %d\n", construction_plan_IDs.size());
+            DBGMSG("Construction::advance_builds(): plans size: %d", construction_plan_IDs.size());
             while (construction_plan_IDs_it < construction_plan_IDs.end()) {
                 int plan_ID = *construction_plan_IDs_it;
                 auto& plan = ConstructionPlanning::get_plan(plan_ID);
@@ -149,7 +149,7 @@ namespace Production::Construction {
                             Movement::Move::start(move_ID);
                             Basic::Units::set_utask(builder, UTASK::BUILD);
                             Basic::Units::set_build_status(builder, BUILD_STATUS::MOVING);
-                            DBGMSG("Construction::advance_builds(): moving\n");
+                            DBGMSG("Construction::advance_builds(): moving");
                         }
                     }
                 }
@@ -161,7 +161,7 @@ namespace Production::Construction {
                         // Could result in errors where bad ID is used, since the 
                         // bad move ID is kept for vector concurrency; might move this to the end
                         Movement::Move::remove(move_ID);
-                        DBGMSG("Construction::advance_builds(): at site\n");
+                        DBGMSG("Construction::advance_builds(): at site");
                     }
                 }
                 else if (build_status == BUILD_STATUS::AT_SITE) {
@@ -181,7 +181,7 @@ namespace Production::Construction {
                         if (build_type == BWAPI::UnitTypes::Zerg_Extractor) {
                             ConstructionPlanning::set_extractor_flag(plan_ID, true);
                         }
-                        DBGMSG("Construction::advance_builds(): given build cmd\n");
+                        DBGMSG("Construction::advance_builds(): given build cmd");
                     }
                 }
                 else if(build_status == BUILD_STATUS::GIVEN_BUILD_CMD) {
@@ -191,7 +191,7 @@ namespace Production::Construction {
                         // TODO: remove buildgraph reservation
                         Basic::Units::set_build_status(builder, BUILD_STATUS::BUILDING);
                         Basic::Units::set_cmd_delay(builder, unit_type.buildTime() + FINISH_BUILD_FRAMES);
-                        DBGMSG("Construction::advance_builds(): building\n");
+                        DBGMSG("Construction::advance_builds(): building");
                         BuildOrder::next();
                     }
                     else if (unit_data.cmd_ready) {
@@ -207,7 +207,7 @@ namespace Production::Construction {
                     auto &unit_data = Basic::Units::data(builder);
                     if (unit_data.cmd_ready) {
                         Basic::Units::set_build_status(builder, BUILD_STATUS::COMPLETED);
-                        DBGMSG("Construction::advance_builds(): finished building\n");
+                        DBGMSG("Construction::advance_builds(): finished building");
                     }
                 }
                 else if (build_status == BUILD_STATUS::COMPLETED) {
@@ -221,7 +221,7 @@ namespace Production::Construction {
                     }
                 }
                 else {
-                    DBGMSG("Construction::advance_builds(): bad build_status: %d\n", build_status);
+                    DBGMSG("Construction::advance_builds(): bad build_status: %d", build_status);
                 }
                 ++buildgraph_reservation_IDs_it;
                 ++construction_plan_IDs_it;
@@ -289,11 +289,11 @@ namespace Production::Construction {
                 // TODO: unreserve spot in buildgraph
             }
             else {
-                DBGMSG("Construction::cancel_build() unsuccessful removal\n");
+                DBGMSG("Construction::cancel_build() unsuccessful removal");
             }
         }
         else {
-            DBGMSG("Construction::cancel_build() can't find item.\n");
+            DBGMSG("Construction::cancel_build() can't find item.");
         }
     }
 }

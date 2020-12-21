@@ -77,7 +77,7 @@ namespace Production::MakeUnits {
                         return;
                     }
                 }
-                DBGMSG("auto_insert_overlords(): unsolvable block!\n");
+                DBGMSG("MakeUnits::auto_insert_overlords(): unsolvable block!");
             }
         }
 
@@ -87,7 +87,7 @@ namespace Production::MakeUnits {
             for (auto &base : Basic::Bases::self_bases()) {
                 for (auto &larva : Basic::Bases::larva(base)) {
                     if (BuildOrder::finished()) {
-                        DBGMSG("MakeUnits::spend_down(): Build order finished\n");
+                        DBGMSG("MakeUnits::spend_down(): Build order finished");
                         still_spending = false;
                         break;
                     }

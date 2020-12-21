@@ -59,11 +59,11 @@ namespace Strategy::ConstructionPlanning {
             }
         }
         if (construction_base == nullptr) {
-            DBGMSG("Couldn't find base for construction! Building type: %s", type.c_str());
+            DBGMSG("ConstructionPlanning::make_construction_plan(): Couldn't find base for construction! Building type: %s", type.c_str());
             return NO_BASE;
         }
         else if (builder == nullptr) {
-            DBGMSG("Couldn't find builder for construction! Building type: %s", type.c_str());
+            DBGMSG("ConstructionPlanning::make_construction_plan(): Couldn't find builder for construction! Building type: %s", type.c_str());
             return NO_BUILDER;
         }
         if (type == BWAPI::UnitTypes::Zerg_Extractor) {
@@ -77,7 +77,7 @@ namespace Strategy::ConstructionPlanning {
             );
         }
         if (!build_tp) {
-            DBGMSG("Couldn't find builder for construction! Building type: %s", type.c_str());
+            DBGMSG("ConstructionPlanning::make_construction_plan(): Couldn't find builder for construction! Building type: %s", type.c_str());
             return NO_LOCATION;
         }
 

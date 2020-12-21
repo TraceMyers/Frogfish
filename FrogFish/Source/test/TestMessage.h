@@ -4,7 +4,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#define DBGMSG Test::Message::unique_buffered_messages_add
+#define DBGMSG Test::Message::print_interval_message
 
 namespace Test::Message {
 
@@ -14,19 +14,19 @@ namespace Test::Message {
 
     void on_frame_update(); 
 
-    void unique_buffered_messages_add(const char* msg);
+    void print_interval_message(const char* msg);
 
     template <typename T>
-    void unique_buffered_messages_add(const char* msg, T item) {
+    void print_interval_message(const char* msg, T item) {
         char buff[MAX_MESSAGE_LEN];
         sprintf(buff, msg, item);
-        unique_buffered_messages_add(buff);
+        print_interval_message(buff);
     }
 
     template <typename T>
-    void unique_buffered_messages_add(const char* msg, T item1, T item2) {
+    void print_interval_message(const char* msg, T item1, T item2) {
         char buff[MAX_MESSAGE_LEN];
         sprintf(buff, msg, item1, item2);
-        unique_buffered_messages_add(buff);
+        print_interval_message(buff);
     }
 }

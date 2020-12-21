@@ -225,7 +225,7 @@ namespace Movement::Move {
                     }
                 }
                 else {
-                    DBGMSG("Waiting for cohesion\n");
+                    DBGMSG("Move::move_group(): Waiting for cohesion");
                     int wait_frames_left = wait_timer.get_frames_left();
                     if (wait_frames_left == 1)      {status = COHESION_WAIT_TIMEOUT;}
                     else if (wait_frames_left == 0) {wait_timer.start(0, COHESION_WAIT_MAX_FRAMES);}

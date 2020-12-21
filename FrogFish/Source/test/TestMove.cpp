@@ -92,7 +92,7 @@ namespace Test::Move {
             if (reached_dest) {
                 bool remove_success = Movement::Move::remove(moved_group_ID);
                 if (remove_success) {
-                    DBGMSG("SUCCESS: Successfully removed move group!\n");
+                    DBGMSG("TestMove::move_group_around_the_map(): SUCCESS: Successfully removed move group!");
                     destination_index++;
                     if (destination_index >= 3) {
                         move_group_around_complete = true;
@@ -101,7 +101,7 @@ namespace Test::Move {
                     moved_group_ID = Movement::Move::move(moving_units, oh_the_places[destination_index]);
                 }
                 else {
-                    DBGMSG("ERROR: Did not successfully remove move group!\n");
+                    DBGMSG("TestMove::move_group_around_the_map(): ERROR: Did not successfully remove move group!");
                     move_group_around_complete = true;
                 }
             }

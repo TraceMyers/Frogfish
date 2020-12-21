@@ -124,7 +124,7 @@ namespace Production::Economy {
                         + min_sat_cu_fact * MPF_SATURATION_CU_COEF
                     )
                     * mineral_worker_ct;
-                DBGMSG("minerals per frame: %.2f\n", minerals_per_frame);
+                DBGMSG("Economy::estimate_income(): minerals per frame: %.2f", minerals_per_frame);
             }
         }
 
@@ -263,7 +263,7 @@ namespace Production::Economy {
                 }
                 if (!successful_cancel) {
                     // TODO: investigate why canceling irl triggers this
-                    DBGMSG("econ sim - unsuccessful cancel of item, ID %d\n", cancel_ID);
+                    DBGMSG("Economy::sim_make_item(): unsuccessful cancel of item, ID %d", cancel_ID);
                     return;
                 }
             }

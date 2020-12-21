@@ -386,16 +386,16 @@ namespace Production::BuildOrder {
             OVERLORD_INSERT_BAN ban = cur_item.overlord_insert_ban();
             if (ban == OVERLORD_INSERT_BAN::START) {
                 overlord_insert_ban_on = true;
-                DBGMSG("BuildOrder::next(): Overlord insert ban *ON*\n");
+                DBGMSG("BuildOrder::next(): Overlord insert ban *ON*");
             }
             else if (ban == OVERLORD_INSERT_BAN::END) {
                 overlord_insert_ban_on = false;
-                DBGMSG("BuildOrder::next(): Overlord insert ban *OFF*\n");
+                DBGMSG("BuildOrder::next(): Overlord insert ban *OFF*");
             }
-            DBGMSG("BuildOrder::next(): advancing to %d\n", cur_index);
+            DBGMSG("BuildOrder::next(): advancing to %d", cur_index);
             return;
         }
-        DBGMSG("BuildOrder::next(): Build order reached the end.\n");
+        DBGMSG("BuildOrder::next(): Build order reached the end.");
     }
 
     // unsafe - can cause read access error
