@@ -82,9 +82,9 @@ namespace Test::Move {
                     }
                 }
             }
-            if (moving_units.size() == 4) {
+            if (moving_units.size() > 4) {
                 gathered_group = true;
-                moved_group_ID = Movement::Move::move(moving_units, oh_the_places[0], false, false, Movement::Move::C_MED);
+                moved_group_ID = Movement::Move::move(moving_units, oh_the_places[0]);
             }
         }
         else if (!move_group_around_complete) {
@@ -98,7 +98,7 @@ namespace Test::Move {
                         move_group_around_complete = true;
                         return;
                     }
-                    moved_group_ID = Movement::Move::move(moving_units, oh_the_places[destination_index], false, false, Movement::Move::C_MED);
+                    moved_group_ID = Movement::Move::move(moving_units, oh_the_places[destination_index]);
                 }
                 else {
                     DBGMSG("ERROR: Did not successfully remove move group!\n");

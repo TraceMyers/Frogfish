@@ -118,4 +118,12 @@ namespace Strategy::ConstructionPlanning {
 
         used_plans_field ^= ID_field_num;
     }
+
+    void set_extractor_flag(int ID, bool value) {
+        plans[ID].set_extractor_transition(value);
+    }
+
+    void replace_null_builder_with_extractor(int ID, BWAPI::Unit extractor) {
+        plans[ID].set_builder(extractor);
+    }
 }

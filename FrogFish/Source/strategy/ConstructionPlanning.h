@@ -17,6 +17,7 @@ namespace Strategy::ConstructionPlanning {
         BWAPI::Unit builder;
         const BWEM::Base *build_base;
         const Production::BuildOrder::Item *_item_ptr;
+        bool extractor_flag = false;
 
     public:
 
@@ -28,6 +29,8 @@ namespace Strategy::ConstructionPlanning {
 
         void set_builder(const BWAPI::Unit &u) {builder = u;}
 
+        void set_extractor_transition(bool value) { extractor_flag = value; }
+        
         const BWEM::Base *get_base() const {return build_base;}
 
         const Production::BuildOrder::Item& get_item() const {return *_item_ptr;}
@@ -35,6 +38,8 @@ namespace Strategy::ConstructionPlanning {
         const BWAPI::TilePosition &get_tilepos() const {return build_tp;}
 
         const BWAPI::Unit& get_builder() const {return builder;}
+
+        bool extractor_transitioning() const { return extractor_flag; }
 
         /*
         TODO:
@@ -60,4 +65,8 @@ namespace Strategy::ConstructionPlanning {
     int                     find_plan(const Production::BuildOrder::Item &item);
 
     void                    destroy_plan(int ID);
+
+    void                    set_extractor_flag(int ID, bool value);
+
+    void                    replace_null_builder_with_extractor(int ID, BWAPI::Unit extractor);
 }

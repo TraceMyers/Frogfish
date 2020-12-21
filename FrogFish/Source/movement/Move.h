@@ -34,11 +34,11 @@ namespace Movement::Move {
     };
 
     const int COHENSION_NUM_VALS = 5;
-    const double C_MIN = 13.0,
-                 C_LOW = 8.2,
-                 C_MED = 4.8,
-                 C_HIGH = 3.0,
-                 C_MAX = 2.5;
+    const double C_MIN = 5.0,
+                 C_LOW = 4.0,
+                 C_MED = 3.3,
+                 C_HIGH = 2.0,
+                 C_MAX = 1.0;
     const double COHESION_SCALE[] {C_MIN, C_LOW, C_MED, C_HIGH, C_MAX};
 
     // Moves a group of units along a path to the nearest valid tileposition to the given 

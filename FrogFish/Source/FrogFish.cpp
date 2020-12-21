@@ -21,6 +21,8 @@
 
 using namespace Filter;
 // TODO:
+//  - using terran test_make_then_move build order causes bug where too many construction plans
+//      are added
 //  - unsupervised learning of build order types
 //  - fish puns 
 //  - Arty the FrogFish animation in upper left corner
@@ -41,11 +43,11 @@ void FrogFish::onStart() {
     Production::BuildGraph::init();
     Production::Economy::init();
     Production::Construction::init();
-    Production::BuildOrder::load("terran", "test_cancel_build");
+    Production::BuildOrder::load("terran", "9_pool");
     Production::BuildOrder::print();
     Production::MakeUnits::init();
     Test::Message::init(15);
-    timer.start(5,0);
+    timer.start(100,0);
 }
 
 void FrogFish::onFrame() {
@@ -81,11 +83,13 @@ void FrogFish::onFrame() {
     // if a module is going to check whether or not an item has been removed this frame
     // it needs to check before this update
     Production::BuildOrder::on_frame_update();
+    if (Production::BuildOrder::finished()) {
+        Test::Move::move_group_around_the_map();
+    }
     timer.on_frame_update();
     if (timer.is_stopped()) {
         // timer.restart();
         //timer.start(0,1);
-        //Test::Move::move_group_around_the_map();
     }
 }
 

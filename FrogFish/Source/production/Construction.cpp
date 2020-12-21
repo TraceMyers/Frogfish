@@ -21,7 +21,7 @@ namespace Production::Construction {
         std::vector<int>                        buildgraph_reservation_IDs;
         std::vector<BWAPI::Unit>                canceled_build_units;
         const int                               FINISH_BUILD_FRAMES = 30;
-        const int                               BUILD_CMD_DELAY = 2;
+        const int                               BUILD_CMD_DELAY = 6;
         const int                               NOT_FOUND = -1;
         BWTimer                                 shit_timer;
 
@@ -58,17 +58,20 @@ namespace Production::Construction {
 
                     // reserve build space
                     const BWAPI::UnitType &type = build_item.unit_type();
-                    int buildgraph_res_ID = BuildGraph::make_reservation(
-                        plan.get_base(),
-                        tp,
-                        type.tileWidth(),
-                        type.tileHeight()
-                    );
-                    if (buildgraph_res_ID < 0) {
-                        DBGMSG("Construction::init_builds(): buildgraph res error to (%d, %d)\n", tp.x, tp.y);
-                        ConstructionPlanning::destroy_plan(plan_ID);
-                        Movement::Move::remove(move_ID);
-                        continue;
+                    int buildgraph_res_ID = -1;
+                    if (type != BWAPI::UnitTypes::Zerg_Extractor) {
+                        int buildgraph_res_ID = BuildGraph::make_reservation(
+                            plan.get_base(),
+                            tp,
+                            type.tileWidth(),
+                            type.tileHeight()
+                        );
+                        if (buildgraph_res_ID < 0) {
+                            DBGMSG("Construction::init_builds(): buildgraph res error to (%d, %d)\n", tp.x, tp.y);
+                            ConstructionPlanning::destroy_plan(plan_ID);
+                            Movement::Move::remove(move_ID);
+                            continue;
+                        }
                     }
                     // reserve builder drone
                     auto& unit_data = Basic::Units::data(builder);
@@ -108,6 +111,30 @@ namespace Production::Construction {
             while (construction_plan_IDs_it < construction_plan_IDs.end()) {
                 int plan_ID = *construction_plan_IDs_it;
                 auto& plan = ConstructionPlanning::get_plan(plan_ID);
+                // Drones are destroyed to make extractors; Only building that needs to be accounted
+                // for in this way
+                if (plan.extractor_transitioning()) {
+                    auto& units = Basic::Units::self_just_stored();
+                    bool replaced_null_builder = false;
+                    for (int i = 0; i < units.size(); ++i) {
+                        BWAPI::Unit unit = units[i];
+                        BWAPI::UnitType type = unit->getType();
+                        BWAPI::TilePosition tp = unit->getTilePosition();
+                        if (type == BWAPI::UnitTypes::Zerg_Extractor && tp == plan.get_tilepos()) {
+                            ConstructionPlanning::replace_null_builder_with_extractor(plan_ID, unit);
+                            ConstructionPlanning::set_extractor_flag(plan_ID, false);
+                            replaced_null_builder = true;
+                            break;
+                        }
+                    }
+                    // TODO: flag if it takes too long
+                    if (!replaced_null_builder) { 
+                        ++buildgraph_reservation_IDs_it;
+                        ++construction_plan_IDs_it;
+                        ++move_IDs_it;
+                        continue; 
+                    }
+                }
                 const BWAPI::Unit& builder = plan.get_builder();
                 const Basic::Units::UnitData builder_data = Basic::Units::data(builder);
                 auto& build_status = builder_data.build_status;
@@ -149,15 +176,18 @@ namespace Production::Construction {
                         builder->build(build_type, build_loc);
                         Basic::Units::set_build_status(builder, BUILD_STATUS::GIVEN_BUILD_CMD);
                         Basic::Units::set_cmd_delay(builder, BUILD_CMD_DELAY);
+                        // Starts the process of checking whether the drone has yet been destroyed.
+                        // Only a concern with making extractors
+                        if (build_type == BWAPI::UnitTypes::Zerg_Extractor) {
+                            ConstructionPlanning::set_extractor_flag(plan_ID, true);
+                        }
                         DBGMSG("Construction::advance_builds(): given build cmd\n");
                     }
                 }
                 else if(build_status == BUILD_STATUS::GIVEN_BUILD_CMD) {
-                    DBGMSG("**1\n");
                     const BWAPI::UnitType unit_type = builder->getType();
                     auto &unit_data = Basic::Units::data(builder);
                     if (unit_type.isBuilding()) {
-                        DBGMSG("**2\n");
                         // TODO: remove buildgraph reservation
                         Basic::Units::set_build_status(builder, BUILD_STATUS::BUILDING);
                         Basic::Units::set_cmd_delay(builder, unit_type.buildTime() + FINISH_BUILD_FRAMES);
@@ -165,7 +195,6 @@ namespace Production::Construction {
                         BuildOrder::next();
                     }
                     else if (unit_data.cmd_ready) {
-                        DBGMSG("**3\n");
                         auto& build_item = plan.get_item();
                         const BWAPI::UnitType &build_type = build_item.unit_type();
                         const BWAPI::TilePosition &build_loc = plan.get_tilepos();

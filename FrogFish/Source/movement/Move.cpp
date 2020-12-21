@@ -37,7 +37,7 @@ namespace Movement::Move {
         std::vector<int>                        unused_group_IDs;
         BWEB::Path                              check_waypoint_path;
 
-        const int MOVE_CMD_DELAY_FRAMES = 2,
+        const int MOVE_CMD_DELAY_FRAMES = 4,
                   COHESION_WAIT_MAX_FRAMES = 48, // wait frames before timeout = this - 1
                   WAYPOINT_REACHABLE_CHECK_INTERVAL = 5;
 
@@ -146,14 +146,10 @@ namespace Movement::Move {
                 group_width += unit->getRight() - unit->getLeft();
                 group_height += unit->getBottom() - unit->getTop();
             }
-            int units_size = units.size();
-            double average_width = (double)group_width / units_size,
-                  average_height = (double)group_height / units_size,
-                  max_avg_dim = (average_width > average_height ? average_width : average_height),
-                  space_buffer_factor = 1.2f,
-                  radius = 
-                    (ceil(sqrt(units_size)) * sqrt(2 * max_avg_dim * max_avg_dim * space_buffer_factor)) 
-                    / 1.5f;
+            int n = units.size();
+            double avg_width = (double)group_width / n,
+                  avg_height = (double)group_height / n,
+                  radius = 2.0 * sqrt((n * avg_height * avg_width) / Utility::FrogMath::PI);
             return radius * cohesion_factor;
         }
 
@@ -316,7 +312,7 @@ namespace Movement::Move {
     }
 
     int move(const BWAPI::Unit u, BWAPI::TilePosition dest, bool attack, bool wait) {
-        return move(std::vector<BWAPI::Unit> {u}, dest, attack, wait, C_MAX);
+        return move(std::vector<BWAPI::Unit> {u}, dest, attack, wait, C_MED);
     }
 
     STATUS get_status(int group_ID) {
