@@ -65,18 +65,21 @@ namespace Production::Construction {
                     const BWAPI::UnitType &type = build_item.unit_type();
                     int buildgraph_res_ID = -1;
                     if (type != BWAPI::UnitTypes::Zerg_Extractor) {
-                        int buildgraph_res_ID = BuildGraph::make_reservation(
+                        buildgraph_res_ID = BuildGraph::make_reservation(
                             plan.get_base(),
                             tp,
                             type.tileWidth(),
                             type.tileHeight()
                         );
-                        if (buildgraph_res_ID < 0) {
-                            DBGMSG("Construction::init_builds(): buildgraph res error to (%d, %d)", tp.x, tp.y);
-                            ConstructionPlanning::destroy_plan(plan_ID);
-                            Movement::Move::remove(move_ID);
-                            continue;
-                        }
+                    }
+                    else {
+                        buildgraph_res_ID = BuildGraph::make_geyser_reservation(tp);
+                    }
+                    if (buildgraph_res_ID < 0) {
+                        DBGMSG("Construction::init_builds(): buildgraph res error to (%d, %d)", tp.x, tp.y);
+                        ConstructionPlanning::destroy_plan(plan_ID);
+                        Movement::Move::remove(move_ID);
+                        continue;
                     }
                     // reserve builder drone
                     auto& unit_data = Basic::Units::data(builder);
@@ -209,7 +212,7 @@ namespace Production::Construction {
                     const BWAPI::UnitType unit_type = builder->getType();
                     auto &unit_data = Basic::Units::data(builder);
                     if (unit_type.isBuilding()) {
-                        // TODO: remove buildgraph reservation
+                        Production::BuildGraph::end_reservation(*buildgraph_reservation_IDs_it);
                         Basic::Units::set_build_status(builder, BUILD_STATUS::BUILDING);
                         Basic::Units::set_cmd_delay(builder, unit_type.buildTime() + FINISH_BUILD_FRAMES);
                         DBGMSG("Construction::advance_builds(): ID[%d] building", build_item.ID());
@@ -317,7 +320,9 @@ namespace Production::Construction {
 
                 Movement::Move::remove(move_ID);
                 ConstructionPlanning::destroy_plan(plan_ID);
-                // TODO: unreserve spot in buildgraph
+                if (Production::BuildGraph::reservation_exists(buildgraph_ID)) {
+                    Production::BuildGraph::end_reservation(buildgraph_ID);
+                }
 
                 return true;
             }

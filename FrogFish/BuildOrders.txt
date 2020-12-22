@@ -82,3 +82,5 @@ terran test_make_then_move
 ------------------------------------------------------
 terran test_make_extractor
 0:  build,  1,  extractor,  null,   null
+1:  cancel, 1,  extractor,  0,      null
+2:  build,  1,  extractor,  null,   null

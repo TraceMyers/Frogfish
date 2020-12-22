@@ -48,7 +48,7 @@ void FrogFish::onStart() {
     Production::BuildGraph::init();
     Production::Economy::init();
     Production::Construction::init();
-    Production::BuildOrder::load("protoss", "2_hatch_hydra");
+    Production::BuildOrder::load("terran", "test_make_extractor");
     Production::BuildOrder::print();
     Production::MakeUnits::init();
     Test::Message::init(15);
@@ -88,7 +88,7 @@ void FrogFish::onFrame() {
     // it needs to check before this update
     Production::BuildOrder::on_frame_update();
     if (Production::BuildOrder::finished()) {
-        Test::Move::move_group_around_the_map();
+        //Test::Move::move_group_around_the_map();
     }
     timer.on_frame_update();
     if (timer.is_stopped()) {

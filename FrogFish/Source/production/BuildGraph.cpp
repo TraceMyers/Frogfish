@@ -3,7 +3,9 @@
 #include "../utility/FrogMath.h"
 #include "../basic/Bases.h"
 #include "../basic/Units.h"
+#include "../test/TestMessage.h"
 #include <cmath>
+#include <algorithm>
 
 using namespace Basic;
 
@@ -18,6 +20,16 @@ namespace Production::BuildGraph {
 // TODO: unreserve site function
 
     namespace {
+
+        struct Reservation {
+            Reservation (int _width, int _height, const BWAPI::TilePosition &_upper_left) :
+                width(_width), height(_height), upper_left(_upper_left)
+            {}
+            int width;
+            int height;
+            BWAPI::TilePosition upper_left;
+        };
+
         static const int    MAX_BASES = 30;
         std::vector<BNode>  _build_nodes[MAX_BASES];
         std::vector<BNode>  geyser_nodes[MAX_BASES];
@@ -33,6 +45,7 @@ namespace Production::BuildGraph {
         int                 start_chunk[MAX_BASES] {0};
         int                 end_chunk[MAX_BASES] {CHUNK_SIZE};
 
+        std::map<int, Reservation> tile_reservations;
         int                 reservation_ID_counter = 0;
 
         void set_resource_blocking_vectors(int base_index) {
@@ -50,8 +63,8 @@ namespace Production::BuildGraph {
             if (geysers.size() > 0) {
                 for (auto & geyser : geysers) {
                     BWAPI::Position geyser_pos = geyser->Pos();
-                    geyser_pos.x += 16;
-                    geyser_pos.y += 16;
+                    geyser_pos.x += 80;
+                    geyser_pos.y += 32;
                     if (geyser_pos.getApproxDistance(hatch_center) < 400) {
                         std::pair<double, double> geyser_vec = 
                             Utility::FrogMath::unit_vector(hatch_center, geyser_pos);
@@ -61,7 +74,7 @@ namespace Production::BuildGraph {
             }
             for (auto &mineral : minerals) {
                 BWAPI::Position mineral_pos = mineral->Pos();
-                mineral_pos.x += 16;
+                mineral_pos.x += 32;
                 mineral_pos.y += 16;
                 if (mineral_pos.getApproxDistance(hatch_center) < 300) {
                     std::pair<double, double> mineral_vec = 
@@ -417,15 +430,25 @@ namespace Production::BuildGraph {
                 }
             }
         }
-        return BWAPI::TilePosition(-1, -1);
+        return BWAPI::TilePositions::None;
     }
 
     BWAPI::TilePosition get_geyser_tilepos(const BWEM::Base *base) {
         auto &geysers = base->Geysers();
-        if (geysers.size() > 0) {
-            return geysers[0]->TopLeft();
+        for (auto geyser : geysers) {
+            auto &tp = geyser->TopLeft();
+            bool reserved = false;
+            for (auto &iter = tile_reservations.begin(); iter != tile_reservations.end(); ++iter) {
+                const Reservation &res = iter->second;
+                if (res.upper_left == tp) {
+                    reserved = true;
+                }
+            }
+            if (!reserved) {
+                return tp;
+            }
         }
-        return BWAPI::TilePosition(-1, -1);
+        return BWAPI::TilePositions::None;
     }
 
     int make_reservation(
@@ -434,12 +457,16 @@ namespace Production::BuildGraph {
         int width, 
         int height
     ) {
-        bool valid_reservation = false;
         auto &bases = Bases::all_bases();
         for (auto &base = bases.begin(); base != bases.end(); ++base) {
             if (*base == b) {
                 BNode upper_left = valid_build_path(std::distance(bases.begin(), base), tilepos, width, height);
                 if (upper_left != nullptr) {
+                    tile_reservations.insert(
+                        std::pair<int, Reservation> (
+                            reservation_ID_counter,
+                            Reservation(width, height, tilepos)
+                    ));
                     set_build_path_reserved_status(upper_left, width, height, true);
                     return reservation_ID_counter++;
                 }
@@ -447,6 +474,29 @@ namespace Production::BuildGraph {
             }
         }
         return -1;
+    }
+
+    int make_geyser_reservation(const BWAPI::TilePosition &tilepos) {
+        tile_reservations.insert(
+            std::pair<int, Reservation> (
+                reservation_ID_counter,
+                Reservation(1, 1, tilepos)
+        ));
+        return reservation_ID_counter++;
+    }
+
+    void end_reservation(int ID) {
+        tile_reservations.erase(ID);
+    }
+
+    bool reservation_exists(int ID) {
+        for (auto &iter = tile_reservations.begin(); iter != tile_reservations.end(); ++iter) {
+            int res_ID = iter->first;
+            if (res_ID == ID) {
+                return true;
+            }
+        }
+        return false;
     }
 
     void free_data() {

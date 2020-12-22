@@ -53,5 +53,8 @@ namespace Production::BuildGraph {
                                     int width, 
                                     int height
                                 );
+    int                         make_geyser_reservation(const BWAPI::TilePosition &tilepos);
+    void                        end_reservation(int ID);
+    bool                        reservation_exists(int ID);
     void                        free_data();
 }

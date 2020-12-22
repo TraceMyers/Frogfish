@@ -91,6 +91,18 @@ namespace Test::Move {
         }
         else if (!move_group_around_complete) {
             bool reached_dest = (Movement::Move::get_status(moved_group_ID) == Movement::Move::DESTINATION);
+            auto& just_destroyed = Basic::Units::self_just_destroyed();
+            for (auto unit_it = moving_units.begin(); unit_it < moving_units.end(); ++unit_it) {
+                for (int i = 0; i < just_destroyed.size(); ++i) {
+                    if (*unit_it == just_destroyed[i]) {
+                        unit_it = moving_units.erase(unit_it);
+                        break;
+                    }
+                }
+                if (unit_it >= moving_units.end()) {
+                    break;
+                }
+            }
             if (reached_dest) {
                 bool remove_success = Movement::Move::remove(moved_group_ID);
                 if (remove_success) {

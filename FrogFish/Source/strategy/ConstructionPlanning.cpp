@@ -77,7 +77,7 @@ namespace Strategy::ConstructionPlanning {
                 type.tileHeight()
             );
         }
-        if (!build_tp) {
+        if (build_tp == BWAPI::TilePositions::None) {
             DBGMSG("ConstructionPlanning::make_construction_plan(): Couldn't find builder for construction! Building type: %s", type.c_str());
             return NO_LOCATION;
         }
