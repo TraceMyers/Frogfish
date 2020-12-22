@@ -20,6 +20,11 @@
 #include <vector>
 
 using namespace Filter;
+/*
+Name ideas:
+Frankie Fishface
+
+*/
 // TODO:
 //  - using terran test_make_then_move build order causes bug where too many construction plans
 //      are added

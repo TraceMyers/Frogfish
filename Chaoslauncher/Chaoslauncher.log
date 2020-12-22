@@ -211,3 +211,33 @@
 12/21/2020 10:44:45 PM 19544 ApplyPatch for BWAPI 4.4.0 Injector [DEBUG]
 12/21/2020 10:44:45 PM 19544 ApplyPatch for W-MODE 1.02
 12/21/2020 10:44:45 PM 19544 Starting Starcraft completed
+12/21/2020 10:47:59 PM 19544 Startbutton
+12/21/2020 10:47:59 PM 19544 Starting Game Starcraft 1.16.1 C:\ProgramData\bwapi\starcraft\StarCraft.exe
+12/21/2020 10:47:59 PM 19544 BWAPI 4.4.0 Injector [DEBUG] Version  Compatible
+12/21/2020 10:47:59 PM 19544 W-MODE 1.02 Version 1.0.2 Compatible
+12/21/2020 10:47:59 PM 19544 Obtained DebugPrivilege
+12/21/2020 10:47:59 PM 19544 CreateProcess
+12/21/2020 10:47:59 PM 19544 Call ScSuspended for all active Plugins
+12/21/2020 10:47:59 PM 19544 ApplyPatchSuspended for BWAPI 4.4.0 Injector [DEBUG]
+12/21/2020 10:48:00 PM 19544 ApplyPatchSuspended for W-MODE 1.02
+12/21/2020 10:48:00 PM 19544 ResumeThread
+12/21/2020 10:48:00 PM 19544 WaitForInputIdle
+12/21/2020 10:48:00 PM 19544 Call ScWindowCreated for all active Plugins
+12/21/2020 10:48:00 PM 19544 ApplyPatch for BWAPI 4.4.0 Injector [DEBUG]
+12/21/2020 10:48:00 PM 19544 ApplyPatch for W-MODE 1.02
+12/21/2020 10:48:00 PM 19544 Starting Starcraft completed
+12/21/2020 10:54:42 PM 19544 Startbutton
+12/21/2020 10:54:42 PM 19544 Starting Game Starcraft 1.16.1 C:\ProgramData\bwapi\starcraft\StarCraft.exe
+12/21/2020 10:54:42 PM 19544 BWAPI 4.4.0 Injector [DEBUG] Version  Compatible
+12/21/2020 10:54:42 PM 19544 W-MODE 1.02 Version 1.0.2 Compatible
+12/21/2020 10:54:42 PM 19544 Obtained DebugPrivilege
+12/21/2020 10:54:42 PM 19544 CreateProcess
+12/21/2020 10:54:42 PM 19544 Call ScSuspended for all active Plugins
+12/21/2020 10:54:42 PM 19544 ApplyPatchSuspended for BWAPI 4.4.0 Injector [DEBUG]
+12/21/2020 10:54:43 PM 19544 ApplyPatchSuspended for W-MODE 1.02
+12/21/2020 10:54:43 PM 19544 ResumeThread
+12/21/2020 10:54:43 PM 19544 WaitForInputIdle
+12/21/2020 10:54:44 PM 19544 Call ScWindowCreated for all active Plugins
+12/21/2020 10:54:44 PM 19544 ApplyPatch for BWAPI 4.4.0 Injector [DEBUG]
+12/21/2020 10:54:44 PM 19544 ApplyPatch for W-MODE 1.02
+12/21/2020 10:54:44 PM 19544 Starting Starcraft completed

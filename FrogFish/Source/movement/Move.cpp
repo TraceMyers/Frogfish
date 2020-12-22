@@ -168,10 +168,8 @@ namespace Movement::Move {
                 if (
                     type == BWAPI::UnitTypes::Zerg_Lurker
                     || type == BWAPI::UnitTypes::Zerg_Defiler
-                    /* if used for air 
                     || type == BWAPI::UnitTypes::Zerg_Overlord
                     || type == BWAPI::UnitTypes::Zerg_Queen
-                    */
                 ) {
                     unit->move(target_pos);
                 }
@@ -218,7 +216,6 @@ namespace Movement::Move {
                 if (!wait_for_cohesion) {
                     wait_timer.start(0, 0);
                     ++waypoint;
-                    // The last waypoint is the origin for some reason. Ask McRave
                     if (waypoint == path_tiles.size() - 1) {
                         if (status == ATTACK_MOVING) {end_attack_move(group, target_pos);}
                         status = DESTINATION;
