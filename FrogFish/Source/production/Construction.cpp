@@ -270,8 +270,8 @@ namespace Production::Construction {
         shit_timer.on_frame_update();
         if (shit_timer.is_stopped() && !BuildOrder::finished()) {
             init_builds();
-            advance_builds();
         }
+        advance_builds();
         // TODO: babysit canceled build units until they've definitely stopped building
     }
 

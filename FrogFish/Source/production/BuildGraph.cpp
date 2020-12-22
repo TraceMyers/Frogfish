@@ -110,7 +110,7 @@ namespace Production::BuildGraph {
                 Utility::FrogMath::unit_vector(base_center, node->pos);
             node->blocks_mining = false;
             for (auto& resource_vec : blocking_vectors) {
-                if (Utility::FrogMath::unit_vector_angle(resource_vec, node_vec) < 0.8) {
+                if (Utility::FrogMath::unit_vector_angle(resource_vec, node_vec) < 0.4) {
                     node->blocks_mining = true;
                     return;
                 }
@@ -436,6 +436,9 @@ namespace Production::BuildGraph {
     BWAPI::TilePosition get_geyser_tilepos(const BWEM::Base *base) {
         auto &geysers = base->Geysers();
         for (auto geyser : geysers) {
+            if (geyser->Unit()->getType() == BWAPI::UnitTypes::Zerg_Extractor) {
+                continue;
+            }
             auto &tp = geyser->TopLeft();
             bool reserved = false;
             for (auto &iter = tile_reservations.begin(); iter != tile_reservations.end(); ++iter) {

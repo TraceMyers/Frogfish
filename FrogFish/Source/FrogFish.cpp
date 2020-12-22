@@ -48,7 +48,7 @@ void FrogFish::onStart() {
     Production::BuildGraph::init();
     Production::Economy::init();
     Production::Construction::init();
-    Production::BuildOrder::load("terran", "test_make_extractor");
+    Production::BuildOrder::load("terran", "9_pool");
     Production::BuildOrder::print();
     Production::MakeUnits::init();
     Test::Message::init(15);
