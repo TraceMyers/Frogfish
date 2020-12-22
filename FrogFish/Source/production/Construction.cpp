@@ -61,7 +61,7 @@ namespace Production::Construction {
                         continue;
                     }
 
-                    // reserve build space
+                    // make reservations
                     const BWAPI::UnitType &type = build_item.unit_type();
                     int buildgraph_res_ID = -1;
                     if (type != BWAPI::UnitTypes::Zerg_Extractor) {
@@ -81,8 +81,6 @@ namespace Production::Construction {
                         Movement::Move::remove(move_ID);
                         continue;
                     }
-                    // reserve builder drone
-                    auto& unit_data = Basic::Units::data(builder);
                     Basic::Units::set_build_status(builder, Basic::Refs::BUILD_STATUS::RESERVED);
 
                     move_IDs.push_back(move_ID);
@@ -92,7 +90,9 @@ namespace Production::Construction {
             }
         }
 
-        // TODO: account for bad or messed up time predictions
+        // TODO: account for time predictions that lengthen en route
+        // TODO: (later on, in another module) use plan/buildgraph info to keep units
+        //       from blocking construction
         // TODO: account for deaths
         void advance_builds() {
             DBGMSG("Construction::advance_builds(): plan IDs: %d, plans count: %d", 
@@ -223,6 +223,7 @@ namespace Production::Construction {
                         const BWAPI::TilePosition &build_loc = plan.get_tilepos();
                         builder->build(build_type, build_loc);
                         Basic::Units::set_cmd_delay(builder, BUILD_CMD_DELAY);
+                        DBGMSG("Construction::advance_builds(): ID[%d] given build cmd again", build_item.ID());
                     }
                     // TODO: deal with not advancing to 'BUILDING' status after some time
                 }

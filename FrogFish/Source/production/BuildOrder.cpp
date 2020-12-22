@@ -9,8 +9,7 @@
 using namespace Basic;
 
 // MAYBE: change Build Order to linked list implementation to work better with manipulation
-// TODO: add a removal scheduler, just like with units/bases, where all other dealies have
-//          a frame to check whether or not an item is being removed
+// TODO: overlord ban turning off @ first ovie on 2_hatch_hydra
 
 
 namespace Production::BuildOrder { 

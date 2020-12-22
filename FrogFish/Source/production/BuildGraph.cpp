@@ -110,7 +110,7 @@ namespace Production::BuildGraph {
                 Utility::FrogMath::unit_vector(base_center, node->pos);
             node->blocks_mining = false;
             for (auto& resource_vec : blocking_vectors) {
-                if (Utility::FrogMath::unit_vector_angle(resource_vec, node_vec) < 0.4) {
+                if (Utility::FrogMath::unit_vector_angle(resource_vec, node_vec) < 0.6) {
                     node->blocks_mining = true;
                     return;
                 }
