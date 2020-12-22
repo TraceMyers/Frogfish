@@ -3,6 +3,7 @@
 #include "../utility/FrogMath.h"
 #include "../basic/Bases.h"
 #include "../basic/Units.h"
+#include <cmath>
 
 using namespace Basic;
 
@@ -25,7 +26,7 @@ namespace Production::BuildGraph {
         int                 node_ID_counter = 0;
         std::vector<std::pair<BNode,int>>  remove_queue;
 
-        std::vector<double> resource_blocking_angles[MAX_BASES];
+        std::vector<std::pair<double, double>> resource_blocking_vectors[MAX_BASES];
         enum                DIRECTIONS {RIGHT, UP, LEFT, DOWN};
 
         const int           CHUNK_SIZE = 30;
@@ -34,7 +35,8 @@ namespace Production::BuildGraph {
 
         int                 reservation_ID_counter = 0;
 
-        void set_resource_blocking_angles(int base_index) {
+        void set_resource_blocking_vectors(int base_index) {
+            resource_blocking_vectors[base_index].clear();
             const BWEM::Base *base = Bases::all_bases()[base_index];
             auto &minerals = base->Minerals();
             if (minerals.size() <= 1 || Bases::depots(base).size() == 0) {
@@ -43,70 +45,30 @@ namespace Production::BuildGraph {
             BWAPI::Position hatch_center = base->Center();
             hatch_center.x += 64;
             hatch_center.y += 48;
-            std::vector<double> angles;
 
             auto &geysers = base->Geysers();
             if (geysers.size() > 0) {
                 for (auto & geyser : geysers) {
-                    if (geyser->Pos().getApproxDistance(hatch_center) < 400) {
-                        double geyser_angle = Utility::FrogMath::get_angle(hatch_center, geyser->Pos());
-                        angles.push_back(geyser_angle);
+                    BWAPI::Position geyser_pos = geyser->Pos();
+                    geyser_pos.x += 16;
+                    geyser_pos.y += 16;
+                    if (geyser_pos.getApproxDistance(hatch_center) < 400) {
+                        std::pair<double, double> geyser_vec = 
+                            Utility::FrogMath::unit_vector(hatch_center, geyser_pos);
+                        resource_blocking_vectors[base_index].push_back(geyser_vec);
                     } 
                 }
             }
             for (auto &mineral : minerals) {
-                if (mineral->Pos().getApproxDistance(hatch_center) < 300) {
-                    angles.push_back(Utility::FrogMath::get_angle(hatch_center, mineral->Pos()));
+                BWAPI::Position mineral_pos = mineral->Pos();
+                mineral_pos.x += 16;
+                mineral_pos.y += 16;
+                if (mineral_pos.getApproxDistance(hatch_center) < 300) {
+                    std::pair<double, double> mineral_vec = 
+                        Utility::FrogMath::unit_vector(hatch_center, mineral_pos);
+                    resource_blocking_vectors[base_index].push_back(mineral_vec);
                 }
             }
-            for (unsigned int i = 0; i < angles.size() - 1; ++i) {
-                for (unsigned int j = i + 1; j < angles.size(); ++j) {
-                    if (angles[j] < angles[i]) {
-                        double temp = angles[i];
-                        angles[i] = angles[j];
-                        angles[j] = temp;
-                    }
-                }
-            }
-
-            double sub_value = 0.0;
-            std::vector<double> saved_angles;
-            for (double element : angles) {
-                saved_angles.push_back(element);
-            }
-            bool found_gap = false;
-            for (unsigned int i = 1; i < angles.size(); ++i) {
-                if (!found_gap && angles[i] - angles[i - 1] > 2.8) {
-                    sub_value = angles[i];
-                    found_gap = true;
-                    for (unsigned int j = 0; j < i; ++j) {
-                        angles[j] += 2 * Utility::FrogMath::PI - sub_value;
-                    }
-                }
-                if (found_gap) {
-                    angles[i] -= sub_value;
-                }
-            }
-
-            int max_i = std::distance(angles.begin(), std::max_element(angles.begin(), angles.end()));
-            int min_i = std::distance(angles.begin(), std::min_element(angles.begin(), angles.end()));
-            int inside_i = 0;
-            for (unsigned i = 0; i < angles.size(); ++i) {
-                if (i != (unsigned)max_i && i != (unsigned)min_i) {
-                    inside_i = i;
-                    break;
-                }
-            }
-            resource_blocking_angles[base_index][0] = saved_angles[min_i] - 0.4;
-            if (resource_blocking_angles[base_index][0] < 0) {
-                resource_blocking_angles[base_index][0] += 2 * Utility::FrogMath::PI;
-            }
-            resource_blocking_angles[base_index][1] = saved_angles[max_i] + 0.4;
-            if (resource_blocking_angles[base_index][1] > 2 * Utility::FrogMath::PI) {
-                resource_blocking_angles[base_index][1] -= 2 * Utility::FrogMath::PI;
-            }
-            resource_blocking_angles[base_index][2] = saved_angles[inside_i];
-            
         }
 
         BNode find_node_at(int base_index, const BWAPI::TilePosition &tilepos) {
@@ -125,22 +87,20 @@ namespace Production::BuildGraph {
             return nullptr;
         }
 
+        // center of tilepos?
         void flag_resource_blocking_node(
             BNode node, 
             BWAPI::Position base_center,
-            std::vector<double> &blocking_angles
+            const std::vector<std::pair<double, double>> &blocking_vectors
         ) {
-            double angle_to_node = Utility::FrogMath::get_angle(base_center, node->pos);
-            if (Utility::FrogMath::angle_is_between(
-                angle_to_node,
-                blocking_angles[0],
-                blocking_angles[1],
-                blocking_angles[2]
-            )) {
-                node->blocks_mining = true;
-            }
-            else {
-                node->blocks_mining = false;
+            std::pair<double, double> node_vec = 
+                Utility::FrogMath::unit_vector(base_center, node->pos);
+            node->blocks_mining = false;
+            for (auto& resource_vec : blocking_vectors) {
+                if (Utility::FrogMath::unit_vector_angle(resource_vec, node_vec) < 0.8) {
+                    node->blocks_mining = true;
+                    return;
+                }
             }
         }
 
@@ -156,7 +116,7 @@ namespace Production::BuildGraph {
                 flag_resource_blocking_node(
                     new_node, 
                     Bases::all_bases()[base_index]->Center(),
-                    resource_blocking_angles[base_index]
+                    resource_blocking_vectors[base_index]
                 );
                 _build_nodes[base_index].push_back(new_node);
                 ++node_ID_counter;
@@ -275,7 +235,7 @@ namespace Production::BuildGraph {
                                     flag_resource_blocking_node(
                                         check_node, 
                                         Bases::all_bases()[base_index]->Center(),
-                                        resource_blocking_angles[base_index]
+                                        resource_blocking_vectors[base_index]
                                     );
                                     _build_nodes[base_index].push_back(check_node);
                                     ++node_ID_counter;
@@ -379,7 +339,7 @@ namespace Production::BuildGraph {
         base_ct = Bases::all_bases().size();
         for (int i = 0; i < base_ct; ++i) {
             for (int j = 0; j < 3; ++j) {
-                resource_blocking_angles[i].push_back(-1);
+                resource_blocking_vectors[i].push_back(std::pair<double, double>(-1, -1));
             }
         }
     }
@@ -410,13 +370,13 @@ namespace Production::BuildGraph {
                 }
                 try_expand(i);
                 update_chunk(i);
-                if (resource_blocking_angles[i][0] < 0) {
+                if (resource_blocking_vectors[i][0].first < 0) {
                     // TODO: change out with version that updates over the game,
                     // and change func so it doesn't group minerals and gas together,
                     // in case they're - for instance - on opposite sides
                     // Also, resource blocking nodes extend past resources,
                     // when they shouldn't
-                    set_resource_blocking_angles(i);
+                    set_resource_blocking_vectors(i);
                 }
                 start_chunk[i] += CHUNK_SIZE;
                 end_chunk[i] += CHUNK_SIZE;

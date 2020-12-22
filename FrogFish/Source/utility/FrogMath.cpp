@@ -8,10 +8,7 @@ namespace Utility::FrogMath{
 
     // 'a' = from, 'b' = to. Returns angle in radians.
     double get_angle(BWAPI::Position a, BWAPI::Position b) {
-        double angle = atan2(a.y - b.y, b.x - a.x); 
-        if (angle < 0) {
-            angle = 2 * PI + angle;
-        }
+        double angle = atan2(b.y - a.y, b.x - a.x); 
         return angle;
     }
 
@@ -37,6 +34,29 @@ namespace Utility::FrogMath{
         }
     }
 
+    // expensive?
+    double vector_angle(double vec1_x, double vec1_y, double vec2_x, double vec2_y) {
+        return acos(
+            (vec1_x*vec2_x + vec1_y*vec2_y) 
+            / (sqrt(vec1_x*vec1_x + vec1_y*vec1_y) * sqrt(vec2_x*vec2_x + vec2_y*vec2_y))
+        );
+    }
+
+    double vector_angle(const std::pair<double, double>& a, const std::pair<double, double> &b) {
+        return acos(
+            (a.first*b.first + a.second*b.second) 
+            / (sqrt(a.first*a.first + a.second*a.second) * sqrt(b.first*b.first + b.second*b.second))
+        );
+    }
+
+    double unit_vector_angle(double vec1_x, double vec1_y, double vec2_x, double vec2_y) {
+        return acos(vec1_x*vec2_x + vec1_y*vec2_y);
+    }
+
+    double unit_vector_angle(const std::pair<double, double>& a, const std::pair<double, double> &b) {
+        return acos(a.first*b.first + a.second*b.second);
+    }
+
     // Requires a reference angle for what constitutes "inside", or in-between
     // a and b. This allows it to work with angles > 180 degrees
     // always returns true if 'check' == a or b
@@ -53,16 +73,16 @@ namespace Utility::FrogMath{
     }
 
     // 'a' = from, 'b' = to.
-    std::vector<double> unit_vector(BWAPI::Position a, BWAPI::Position b) {
+    std::pair<double, double> unit_vector(BWAPI::Position a, BWAPI::Position b) {
         b.x -= a.x;
         b.y -= a.y;
         double 
             one_over_hyp = 1.0 / sqrt((double)b.x * b.x + (double)b.y * b.y),
             x = (double)b.x * one_over_hyp,
             y = (double)b.y * one_over_hyp;
-        std::vector<double> unit_vec;
-        unit_vec.push_back(x);
-        unit_vec.push_back(y);
+        std::pair<double, double> unit_vec;
+        unit_vec.first = x;
+        unit_vec.second = y;
         return unit_vec;
     }
 
