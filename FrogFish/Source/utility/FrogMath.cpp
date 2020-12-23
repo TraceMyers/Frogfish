@@ -86,6 +86,17 @@ namespace Utility::FrogMath{
         return unit_vec;
     }
 
+    std::pair<double, double> full_vector(BWAPI::Position a, BWAPI::Position b) {
+        std::pair<double, double> full_vec;
+        full_vec.first = b.x - a.x;
+        full_vec.second = b.y - a.y;
+        return full_vec;
+    }
+
+    double magnitude(const std::pair<double, double> &vec) {
+        return sqrt(vec.first * vec.first + vec.second * vec.second);
+    }
+
     BWAPI::TilePosition average_tileposition(std::vector<BWAPI::Unit> units) {
         BWAPI::TilePosition avg_tilepos;
         avg_tilepos.x = 0;

@@ -38,7 +38,8 @@ namespace Production::BuildGraph {
         int                 node_ID_counter = 0;
         std::vector<std::pair<BNode,int>>  remove_queue;
 
-        std::vector<std::pair<double, double>> resource_blocking_vectors[MAX_BASES];
+        std::vector<std::pair<double, double>>  resource_blocking_vectors[MAX_BASES];
+        std::vector<double>                     blocking_vector_magnitudes[MAX_BASES];
         enum                DIRECTIONS {RIGHT, UP, LEFT, DOWN};
 
         const int           CHUNK_SIZE = 30;
@@ -63,11 +64,11 @@ namespace Production::BuildGraph {
             if (geysers.size() > 0) {
                 for (auto & geyser : geysers) {
                     BWAPI::Position geyser_pos = geyser->Pos();
-                    geyser_pos.x += 80;
+                    geyser_pos.x += 48;
                     geyser_pos.y += 32;
                     if (geyser_pos.getApproxDistance(hatch_center) < 400) {
                         std::pair<double, double> geyser_vec = 
-                            Utility::FrogMath::unit_vector(hatch_center, geyser_pos);
+                            Utility::FrogMath::full_vector(hatch_center, geyser_pos);
                         resource_blocking_vectors[base_index].push_back(geyser_vec);
                     } 
                 }
@@ -78,8 +79,10 @@ namespace Production::BuildGraph {
                 mineral_pos.y += 16;
                 if (mineral_pos.getApproxDistance(hatch_center) < 300) {
                     std::pair<double, double> mineral_vec = 
-                        Utility::FrogMath::unit_vector(hatch_center, mineral_pos);
+                        Utility::FrogMath::full_vector(hatch_center, mineral_pos);
                     resource_blocking_vectors[base_index].push_back(mineral_vec);
+                    double mineral_dist = Utility::FrogMath::magnitude(mineral_vec);
+                    blocking_vector_magnitudes[base_index].push_back(mineral_dist);
                 }
             }
         }
@@ -104,15 +107,27 @@ namespace Production::BuildGraph {
         void flag_resource_blocking_node(
             BNode node, 
             BWAPI::Position base_center,
-            const std::vector<std::pair<double, double>> &blocking_vectors
+            const std::vector<std::pair<double, double>> &blocking_vectors,
+            const std::vector<double> &vector_magnitudes
         ) {
             std::pair<double, double> node_vec = 
-                Utility::FrogMath::unit_vector(base_center, node->pos);
+                Utility::FrogMath::full_vector(base_center, node->pos);
             node->blocks_mining = false;
+            bool close_angle = false;
             for (auto& resource_vec : blocking_vectors) {
-                if (Utility::FrogMath::unit_vector_angle(resource_vec, node_vec) < 0.6) {
-                    node->blocks_mining = true;
-                    return;
+                if (Utility::FrogMath::vector_angle(resource_vec, node_vec) < 0.6) {
+                    close_angle = true;
+                    break;
+                    
+                }
+            }
+            if (close_angle) {
+                double node_dist = Utility::FrogMath::magnitude(node_vec); 
+                for (double mineral_dist : vector_magnitudes) {
+                    if (node_dist <= mineral_dist) {
+                        node->blocks_mining = true;
+                        return;
+                    }
                 }
             }
         }
@@ -129,7 +144,8 @@ namespace Production::BuildGraph {
                 flag_resource_blocking_node(
                     new_node, 
                     Bases::all_bases()[base_index]->Center(),
-                    resource_blocking_vectors[base_index]
+                    resource_blocking_vectors[base_index],
+                    blocking_vector_magnitudes[base_index]
                 );
                 _build_nodes[base_index].push_back(new_node);
                 ++node_ID_counter;
@@ -248,7 +264,8 @@ namespace Production::BuildGraph {
                                     flag_resource_blocking_node(
                                         check_node, 
                                         Bases::all_bases()[base_index]->Center(),
-                                        resource_blocking_vectors[base_index]
+                                        resource_blocking_vectors[base_index],
+                                        blocking_vector_magnitudes[base_index]
                                     );
                                     _build_nodes[base_index].push_back(check_node);
                                     ++node_ID_counter;

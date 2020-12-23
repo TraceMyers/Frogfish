@@ -21,6 +21,8 @@ namespace Utility::FrogMath {
         double inside_angle
     );
     std::pair<double, double> unit_vector(BWAPI::Position a, BWAPI::Position b);
+    std::pair<double, double> full_vector(BWAPI::Position a, BWAPI::Position b);
+    double magnitude(const std::pair<double, double> &vec);
     BWAPI::TilePosition average_tileposition(std::vector<BWAPI::Unit> units);
     BWAPI::Position average_position(std::vector<BWAPI::Unit> units);
     float average_speed(std::vector<BWAPI::Unit> units);
