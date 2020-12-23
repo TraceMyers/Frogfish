@@ -29,9 +29,11 @@ Frankie Fishface
 //  - using terran test_make_then_move build order causes bug where too many construction plans
 //      are added
 //  - unsupervised learning of build order types
+//  - NLP of build order?
 //  - fish puns 
 //  - Arty the FrogFish animation in upper left corner
 //  - Commander pipeline
+//  
 
 BWTimer timer;
 

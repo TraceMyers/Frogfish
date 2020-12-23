@@ -58,7 +58,7 @@ terran test_overlord_make_ban
 
 terran test_cancel_build
 0:  make,   5,  drone,          null,   on
-1:  build,  1,  hatchery,       null,   null  
+1:  build,  1,  hatchery,       null,   null
 2:  cancel, 1,  hatchery,       5,      null
 3:  build,  1,  spawning_pool,  null,   null
 4:  cancel, 1,  spawning_pool,  7,      null
@@ -77,7 +77,7 @@ terran test_cancel_build
 terran test_make_then_move
 0:  make,   12,  drone,     null,   null
 1:  build,   2,  hatchery,  null,   null
-2:  make,   20,  drone,     null,   null 
+2:  make,   20,  drone,     null,   null
 
 ------------------------------------------------------
 terran test_make_extractor

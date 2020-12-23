@@ -27,11 +27,6 @@ namespace Strategy::ConstructionPlanning {
                 bit_checker <<= 1;
                 i += 1;
             }
-
-            #ifdef _DEBUG
-            assert(i < 64);
-            #endif
-
             return i;
         }
     }
@@ -113,10 +108,6 @@ namespace Strategy::ConstructionPlanning {
 
     void destroy_plan(int ID) {
         uint64_t ID_field_num = 1 << ID;
-
-        #ifdef _DEBUG
-        assert(ID >= 0 && ID < 64 && (ID_field_num & used_plans_field));
-        #endif
 
         --_plans_count;
         used_plans_field ^= ID_field_num;
