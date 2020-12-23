@@ -1,0 +1,64 @@
+﻿  AIModule.cpp
+c:\users\trace\bwapi\bwapilib\source\aimodule.cpp(1): fatal error C1083: Cannot open include file: 'BWAPI/AIModule.h': No such file or directory
+  BroodwarOutputDevice.cpp
+  BulletType.cpp
+c:\users\trace\bwapi\bwapilib\source\bullettype.cpp(2): fatal error C1083: Cannot open include file: 'BWAPI/BulletType.h': No such file or directory
+  BWAPI.cpp
+c:\users\trace\bwapi\bwapilib\source\bwapi.cpp(1): fatal error C1083: Cannot open include file: 'BWAPI.h': No such file or directory
+  Color.cpp
+c:\users\trace\bwapi\bwapilib\source\color.cpp(1): fatal error C1083: Cannot open include file: 'BWAPI/Color.h': No such file or directory
+  DamageType.cpp
+c:\users\trace\bwapi\bwapilib\source\damagetype.cpp(2): fatal error C1083: Cannot open include file: 'BWAPI/DamageType.h': No such file or directory
+  Error.cpp
+c:\users\trace\bwapi\bwapilib\source\error.cpp(2): fatal error C1083: Cannot open include file: 'BWAPI/Error.h': No such file or directory
+  Event.cpp
+c:\users\trace\bwapi\bwapilib\source\event.cpp(1): fatal error C1083: Cannot open include file: 'BWAPI/Event.h': No such file or directory
+  ExplosionType.cpp
+c:\users\trace\bwapi\bwapilib\source\explosiontype.cpp(2): fatal error C1083: Cannot open include file: 'BWAPI/ExplosionType.h': No such file or directory
+  Filters.cpp
+c:\users\trace\bwapi\bwapilib\source\filters.cpp(1): fatal error C1083: Cannot open include file: 'BWAPI/Filters.h': No such file or directory
+  Forceset.cpp
+c:\users\trace\bwapi\bwapilib\source\forceset.cpp(1): fatal error C1083: Cannot open include file: 'BWAPI/Forceset.h': No such file or directory
+  Game.cpp
+c:\users\trace\bwapi\bwapilib\source\game.cpp(1): fatal error C1083: Cannot open include file: 'BWAPI/Game.h': No such file or directory
+  GameType.cpp
+c:\users\trace\bwapi\bwapilib\source\gametype.cpp(2): fatal error C1083: Cannot open include file: 'BWAPI/GameType.h': No such file or directory
+  Order.cpp
+c:\users\trace\bwapi\bwapilib\source\order.cpp(2): fatal error C1083: Cannot open include file: 'BWAPI/Order.h': No such file or directory
+  Player.cpp
+c:\users\trace\bwapi\bwapilib\source\player.cpp(1): fatal error C1083: Cannot open include file: 'BWAPI/Player.h': No such file or directory
+  Playerset.cpp
+c:\users\trace\bwapi\bwapilib\source\playerset.cpp(1): fatal error C1083: Cannot open include file: 'BWAPI/Playerset.h': No such file or directory
+  PlayerType.cpp
+c:\users\trace\bwapi\bwapilib\source\playertype.cpp(2): fatal error C1083: Cannot open include file: 'BWAPI/PlayerType.h': No such file or directory
+  Position.cpp
+c:\users\trace\bwapi\bwapilib\source\position.cpp(1): fatal error C1083: Cannot open include file: 'BWAPI/Position.h': No such file or directory
+  Race.cpp
+c:\users\trace\bwapi\bwapilib\source\race.cpp(2): fatal error C1083: Cannot open include file: 'BWAPI/Race.h': No such file or directory
+  Region.cpp
+c:\users\trace\bwapi\bwapilib\source\region.cpp(1): fatal error C1083: Cannot open include file: 'BWAPI/Region.h': No such file or directory
+  Generating Code...
+  Compiling...
+  Regionset.cpp
+c:\users\trace\bwapi\bwapilib\source\regionset.cpp(1): fatal error C1083: Cannot open include file: 'BWAPI/Regionset.h': No such file or directory
+  Streams.cpp
+c:\users\trace\bwapi\bwapilib\source\streams.cpp(1): fatal error C1083: Cannot open include file: 'BWAPI/Streams.h': No such file or directory
+  TechType.cpp
+c:\users\trace\bwapi\bwapilib\source\techtype.cpp(2): fatal error C1083: Cannot open include file: 'BWAPI/TechType.h': No such file or directory
+  Unit.cpp
+c:\users\trace\bwapi\bwapilib\source\unit.cpp(1): fatal error C1083: Cannot open include file: 'BWAPI/Unit.h': No such file or directory
+  Unitset.cpp
+c:\users\trace\bwapi\bwapilib\source\unitset.cpp(1): fatal error C1083: Cannot open include file: 'BWAPI/Unitset.h': No such file or directory
+  UnitCommand.cpp
+c:\users\trace\bwapi\bwapilib\unitcommand.cpp(1): fatal error C1083: Cannot open include file: 'BWAPI/UnitCommand.h': No such file or directory
+  UnitCommandType.cpp
+c:\users\trace\bwapi\bwapilib\source\unitcommandtype.cpp(2): fatal error C1083: Cannot open include file: 'BWAPI/UnitCommandType.h': No such file or directory
+  UnitSizeType.cpp
+c:\users\trace\bwapi\bwapilib\source\unitsizetype.cpp(2): fatal error C1083: Cannot open include file: 'BWAPI/UnitSizeType.h': No such file or directory
+  UnitType.cpp
+c:\users\trace\bwapi\bwapilib\source\unittype.cpp(6): fatal error C1083: Cannot open include file: 'BWAPI/UnitType.h': No such file or directory
+  UpgradeType.cpp
+c:\users\trace\bwapi\bwapilib\source\upgradetype.cpp(2): fatal error C1083: Cannot open include file: 'BWAPI/UpgradeType.h': No such file or directory
+  WeaponType.cpp
+c:\users\trace\bwapi\bwapilib\source\weapontype.cpp(2): fatal error C1083: Cannot open include file: 'BWAPI/UnitType.h': No such file or directory
+  Generating Code...

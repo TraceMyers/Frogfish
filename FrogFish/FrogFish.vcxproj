@@ -101,7 +101,7 @@
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/Zc:threadSafeInit- %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/Zc:threadSafeInit- /std:c++17 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <PreLinkEvent />
     <Link>
@@ -146,6 +146,28 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\include\BWEB\Block.cpp" />
+    <ClCompile Include="..\include\BWEB\BWEB.cpp" />
+    <ClCompile Include="..\include\BWEB\PathFind.cpp" />
+    <ClCompile Include="..\include\BWEB\Station.cpp" />
+    <ClCompile Include="..\include\BWEB\Wall.cpp" />
+    <ClCompile Include="..\include\BWEM\area.cpp" />
+    <ClCompile Include="..\include\BWEM\base.cpp" />
+    <ClCompile Include="..\include\BWEM\bwapiExt.cpp" />
+    <ClCompile Include="..\include\BWEM\bwem.cpp" />
+    <ClCompile Include="..\include\BWEM\cp.cpp" />
+    <ClCompile Include="..\include\BWEM\examples.cpp" />
+    <ClCompile Include="..\include\BWEM\exampleWall.cpp" />
+    <ClCompile Include="..\include\BWEM\graph.cpp" />
+    <ClCompile Include="..\include\BWEM\gridMap.cpp" />
+    <ClCompile Include="..\include\BWEM\map.cpp" />
+    <ClCompile Include="..\include\BWEM\mapDrawer.cpp" />
+    <ClCompile Include="..\include\BWEM\mapImpl.cpp" />
+    <ClCompile Include="..\include\BWEM\mapPrinter.cpp" />
+    <ClCompile Include="..\include\BWEM\neutral.cpp" />
+    <ClCompile Include="..\include\BWEM\tiles.cpp" />
+    <ClCompile Include="..\include\BWEM\utils.cpp" />
+    <ClCompile Include="..\include\BWEM\winutils.cpp" />
     <ClCompile Include="Source\basic\Bases.cpp" />
     <ClCompile Include="Source\basic\References.cpp" />
     <ClCompile Include="Source\basic\Tech.cpp" />
@@ -170,6 +192,30 @@
     <ClCompile Include="Source\utility\FrogMath.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\include\BWEB\Block.h" />
+    <ClInclude Include="..\include\BWEB\BWEB.h" />
+    <ClInclude Include="..\include\BWEB\JPS.h" />
+    <ClInclude Include="..\include\BWEB\PathFind.h" />
+    <ClInclude Include="..\include\BWEB\Station.h" />
+    <ClInclude Include="..\include\BWEB\Wall.h" />
+    <ClInclude Include="..\include\BWEM\area.h" />
+    <ClInclude Include="..\include\BWEM\base.h" />
+    <ClInclude Include="..\include\BWEM\bwapiExt.h" />
+    <ClInclude Include="..\include\BWEM\bwem.h" />
+    <ClInclude Include="..\include\BWEM\cp.h" />
+    <ClInclude Include="..\include\BWEM\defs.h" />
+    <ClInclude Include="..\include\BWEM\examples.h" />
+    <ClInclude Include="..\include\BWEM\exampleWall.h" />
+    <ClInclude Include="..\include\BWEM\graph.h" />
+    <ClInclude Include="..\include\BWEM\gridMap.h" />
+    <ClInclude Include="..\include\BWEM\map.h" />
+    <ClInclude Include="..\include\BWEM\mapDrawer.h" />
+    <ClInclude Include="..\include\BWEM\mapImpl.h" />
+    <ClInclude Include="..\include\BWEM\mapPrinter.h" />
+    <ClInclude Include="..\include\BWEM\neutral.h" />
+    <ClInclude Include="..\include\BWEM\tiles.h" />
+    <ClInclude Include="..\include\BWEM\utils.h" />
+    <ClInclude Include="..\include\BWEM\winutils.h" />
     <ClInclude Include="Source\basic\Bases.h" />
     <ClInclude Include="Source\basic\References.h" />
     <ClInclude Include="Source\basic\Tech.h" />

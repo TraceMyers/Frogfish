@@ -1,0 +1,121 @@
+﻿  Block.cpp
+c:\users\trace\bwapi\include\bweb\bweb.h(2): fatal error C1083: Cannot open include file: 'BWAPI.h': No such file or directory
+  BWEB.cpp
+c:\users\trace\bwapi\include\bweb\bweb.h(2): fatal error C1083: Cannot open include file: 'BWAPI.h': No such file or directory
+  PathFind.cpp
+c:\users\trace\bwapi\include\bweb\pathfind.h(2): fatal error C1083: Cannot open include file: 'BWAPI.h': No such file or directory
+  Station.cpp
+c:\users\trace\bwapi\include\bweb\bweb.h(2): fatal error C1083: Cannot open include file: 'BWAPI.h': No such file or directory
+  Wall.cpp
+c:\users\trace\bwapi\include\bweb\bweb.h(2): fatal error C1083: Cannot open include file: 'BWAPI.h': No such file or directory
+  area.cpp
+c:\users\trace\bwapi\include\bwem\area.h(14): fatal error C1083: Cannot open include file: 'BWAPI.h': No such file or directory
+  base.cpp
+c:\users\trace\bwapi\include\bwem\base.h(14): fatal error C1083: Cannot open include file: 'BWAPI.h': No such file or directory
+  bwapiExt.cpp
+c:\users\trace\bwapi\include\bwem\bwapiext.h(14): fatal error C1083: Cannot open include file: 'BWAPI.h': No such file or directory
+  bwem.cpp
+c:\users\trace\bwapi\include\bwem\map.h(14): fatal error C1083: Cannot open include file: 'BWAPI.h': No such file or directory
+  cp.cpp
+c:\users\trace\bwapi\include\bwem\cp.h(14): fatal error C1083: Cannot open include file: 'BWAPI.h': No such file or directory
+  examples.cpp
+c:\users\trace\bwapi\include\bwem\examples.h(14): fatal error C1083: Cannot open include file: 'BWAPI.h': No such file or directory
+  exampleWall.cpp
+c:\users\trace\bwapi\include\bwem\examplewall.h(14): fatal error C1083: Cannot open include file: 'BWAPI.h': No such file or directory
+  graph.cpp
+c:\users\trace\bwapi\include\bwem\graph.h(14): fatal error C1083: Cannot open include file: 'BWAPI.h': No such file or directory
+  gridMap.cpp
+c:\users\trace\bwapi\include\bwem\gridmap.h(14): fatal error C1083: Cannot open include file: 'BWAPI.h': No such file or directory
+  map.cpp
+c:\users\trace\bwapi\include\bwem\map.h(14): fatal error C1083: Cannot open include file: 'BWAPI.h': No such file or directory
+  mapDrawer.cpp
+c:\users\trace\bwapi\include\bwem\mapdrawer.h(14): fatal error C1083: Cannot open include file: 'BWAPI.h': No such file or directory
+  mapImpl.cpp
+c:\users\trace\bwapi\include\bwem\mapimpl.h(14): fatal error C1083: Cannot open include file: 'BWAPI.h': No such file or directory
+  mapPrinter.cpp
+c:\users\trace\bwapi\include\bwem\mapprinter.h(14): fatal error C1083: Cannot open include file: 'BWAPI.h': No such file or directory
+  neutral.cpp
+c:\users\trace\bwapi\include\bwem\neutral.h(14): fatal error C1083: Cannot open include file: 'BWAPI.h': No such file or directory
+  tiles.cpp
+c:\users\trace\bwapi\include\bwem\tiles.h(14): fatal error C1083: Cannot open include file: 'BWAPI.h': No such file or directory
+  Generating Code...
+  Compiling...
+  utils.cpp
+  Bases.cpp
+  including Bases
+c:\users\trace\bwapi\frogfish\source\frogfish.h(3): fatal error C1083: Cannot open include file: 'BWAPI.h': No such file or directory
+  References.cpp
+  including References
+c:\users\trace\bwapi\frogfish\source\basic\references.h(4): fatal error C1083: Cannot open include file: 'BWAPI.h': No such file or directory
+  Tech.cpp
+  including Tech
+  including Bases
+c:\users\trace\bwapi\frogfish\source\frogfish.h(3): fatal error C1083: Cannot open include file: 'BWAPI.h': No such file or directory
+  UnitArray.cpp
+  including UnitArray
+c:\users\trace\bwapi\frogfish\source\basic\unitarray.h(4): fatal error C1083: Cannot open include file: 'BWAPI.h': No such file or directory
+  UnitData.cpp
+  including UnitData
+  including BWTimer
+  including References
+c:\users\trace\bwapi\frogfish\source\basic\references.h(4): fatal error C1083: Cannot open include file: 'BWAPI.h': No such file or directory
+  Units.cpp
+  including Units
+  including UnitArray
+c:\users\trace\bwapi\frogfish\source\basic\unitarray.h(4): fatal error C1083: Cannot open include file: 'BWAPI.h': No such file or directory
+  Workers.cpp
+  including Workers
+c:\users\trace\bwapi\frogfish\source\control\workers.h(5): error C2429: language feature 'nested-namespace-definition' requires compiler flag '/std:c++17'
+  including Bases
+c:\users\trace\bwapi\frogfish\source\frogfish.h(3): fatal error C1083: Cannot open include file: 'BWAPI.h': No such file or directory
+  Dll.cpp
+c:\users\trace\bwapi\frogfish\source\dll.cpp(1): fatal error C1083: Cannot open include file: 'BWAPI.h': No such file or directory
+  FrogFish.cpp
+c:\users\trace\bwapi\frogfish\source\frogfish.h(3): fatal error C1083: Cannot open include file: 'BWAPI.h': No such file or directory
+  Move.cpp
+  including Move
+c:\users\trace\bwapi\frogfish\source\movement\move.h(4): fatal error C1083: Cannot open include file: 'BWAPI.h': No such file or directory
+  BuildGraph.cpp
+  including BuildGraph
+c:\users\trace\bwapi\frogfish\source\production\buildgraph.h(4): fatal error C1083: Cannot open include file: 'BWEM/bwem.h': No such file or directory
+  BuildOrder.cpp
+  including BuildOrder
+c:\users\trace\bwapi\frogfish\source\production\buildorder.h(4): fatal error C1083: Cannot open include file: 'BWAPI.h': No such file or directory
+  Construction.cpp
+  including Construction
+  including BuildOrder
+c:\users\trace\bwapi\frogfish\source\production\buildorder.h(4): fatal error C1083: Cannot open include file: 'BWAPI.h': No such file or directory
+  Economy.cpp
+c:\users\trace\bwapi\frogfish\source\frogfish.h(3): fatal error C1083: Cannot open include file: 'BWAPI.h': No such file or directory
+  GetTech.cpp
+  including GetTech
+c:\users\trace\bwapi\frogfish\source\production\gettech.h(4): fatal error C1083: Cannot open include file: 'BWAPI.h': No such file or directory
+  MakeUnits.cpp
+  including UnitMaker
+  including Economy
+  including BuildOrder
+c:\users\trace\bwapi\frogfish\source\production\buildorder.h(4): fatal error C1083: Cannot open include file: 'BWAPI.h': No such file or directory
+  ConstructionPlanning.cpp
+  including ConstructionPlanning
+  including BuildOrder
+c:\users\trace\bwapi\frogfish\source\production\buildorder.h(4): fatal error C1083: Cannot open include file: 'BWAPI.h': No such file or directory
+  TestMessage.cpp
+  including TestMessage
+c:\users\trace\bwapi\frogfish\source\test\testmessage.h(9): error C2429: language feature 'nested-namespace-definition' requires compiler flag '/std:c++17'
+  including BWTimer
+c:\users\trace\bwapi\frogfish\source\test\testmessage.cpp(7): error C2429: language feature 'nested-namespace-definition' requires compiler flag '/std:c++17'
+  TestMove.cpp
+  including TestMove
+c:\users\trace\bwapi\frogfish\source\test\testmove.h(4): error C2429: language feature 'nested-namespace-definition' requires compiler flag '/std:c++17'
+  including Units
+  including UnitArray
+c:\users\trace\bwapi\frogfish\source\basic\unitarray.h(4): fatal error C1083: Cannot open include file: 'BWAPI.h': No such file or directory
+  Generating Code...
+  Compiling...
+  DebugDraw.cpp
+  including DebugDraw
+c:\users\trace\bwapi\frogfish\source\frogfish.h(3): fatal error C1083: Cannot open include file: 'BWAPI.h': No such file or directory
+  FrogMath.cpp
+  including FrogMath
+c:\users\trace\bwapi\frogfish\source\utility\frogmath.h(4): fatal error C1083: Cannot open include file: 'BWAPI.h': No such file or directory
+  Generating Code...

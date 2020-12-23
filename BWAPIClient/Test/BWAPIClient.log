@@ -1,0 +1,27 @@
+﻿  BulletImpl.cpp
+c:\users\trace\bwapi\bwapiclient\source\bulletimpl.cpp(1): fatal error C1083: Cannot open include file: 'BWAPI.h': No such file or directory
+  BulletShared.cpp
+c:\users\trace\bwapi\shared\bulletshared.cpp(1): fatal error C1083: Cannot open include file: 'BWAPI.h': No such file or directory
+  Client.cpp
+c:\users\trace\bwapi\bwapiclient\source\client.cpp(1): fatal error C1083: Cannot open include file: 'BWAPI/Client/Client.h': No such file or directory
+  ForceImpl.cpp
+c:\users\trace\bwapi\bwapiclient\source\forceimpl.cpp(1): fatal error C1083: Cannot open include file: 'BWAPI.h': No such file or directory
+  ForceShared.cpp
+c:\users\trace\bwapi\shared\forceshared.cpp(1): fatal error C1083: Cannot open include file: 'BWAPI.h': No such file or directory
+  GameImpl.cpp
+c:\users\trace\bwapi\bwapiclient\source\gameimpl.cpp(1): fatal error C1083: Cannot open include file: 'BWAPI.h': No such file or directory
+  GameShared.cpp
+c:\users\trace\bwapi\shared\gameshared.cpp(1): fatal error C1083: Cannot open include file: 'BWAPI.h': No such file or directory
+  PlayerImpl.cpp
+c:\users\trace\bwapi\bwapiclient\source\playerimpl.cpp(1): fatal error C1083: Cannot open include file: 'BWAPI.h': No such file or directory
+  PlayerShared.cpp
+c:\users\trace\bwapi\shared\playershared.cpp(1): fatal error C1083: Cannot open include file: 'PlayerImpl.h': No such file or directory
+  RegionImpl.cpp
+c:\users\trace\bwapi\bwapiclient\source\regionimpl.cpp(1): fatal error C1083: Cannot open include file: 'BWAPI/Client/Client.h': No such file or directory
+  RegionShared.cpp
+c:\users\trace\bwapi\shared\regionshared.cpp(1): fatal error C1083: Cannot open include file: 'RegionImpl.h': No such file or directory
+  UnitImpl.cpp
+c:\users\trace\bwapi\bwapiclient\source\unitimpl.cpp(1): fatal error C1083: Cannot open include file: 'BWAPI.h': No such file or directory
+  UnitShared.cpp
+c:\users\trace\bwapi\shared\unitshared.cpp(1): fatal error C1083: Cannot open include file: 'BWAPI.h': No such file or directory
+  Generating Code...
