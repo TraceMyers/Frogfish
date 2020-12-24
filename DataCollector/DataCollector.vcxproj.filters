@@ -68,6 +68,9 @@
       <Filter>BWEB</Filter>
     </ClCompile>
     <ClCompile Include="Source\DataCollector.cpp" />
+    <ClCompile Include="Source\Dll.cpp" />
+    <ClCompile Include="Source\utility\BWTimer.cpp" />
+    <ClCompile Include="Source\Income.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\BWEM\area.h">
@@ -143,6 +146,12 @@
       <Filter>BWEB</Filter>
     </ClInclude>
     <ClInclude Include="Source\DataCollector.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\utility\BWTimer.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Income.h">
       <Filter>headers</Filter>
     </ClInclude>
   </ItemGroup>

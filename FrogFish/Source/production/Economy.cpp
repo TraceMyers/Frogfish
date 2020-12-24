@@ -82,6 +82,7 @@ namespace Production::Economy {
             sim_add_drone_gps,
             sim_add_hatch_lps;
 
+        // TODO: when using data to drive decisions, make sure income is estimated the same way
         void estimate_income() {
             larva_ct = 0;
             minerals_per_frame = 0.0;

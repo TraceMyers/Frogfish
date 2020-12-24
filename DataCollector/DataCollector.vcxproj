@@ -85,7 +85,7 @@
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/Zc:threadSafeInit- %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/Zc:threadSafeInit- /std:c++17 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <PreLinkEvent />
     <Link>
@@ -127,6 +127,9 @@
     <ClCompile Include="..\include\BWEM\utils.cpp" />
     <ClCompile Include="..\include\BWEM\winutils.cpp" />
     <ClCompile Include="Source\DataCollector.cpp" />
+    <ClCompile Include="Source\Dll.cpp" />
+    <ClCompile Include="Source\Income.cpp" />
+    <ClCompile Include="Source\utility\BWTimer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\BWEB\Block.h" />
@@ -154,6 +157,8 @@
     <ClInclude Include="..\include\BWEM\utils.h" />
     <ClInclude Include="..\include\BWEM\winutils.h" />
     <ClInclude Include="Source\DataCollector.h" />
+    <ClInclude Include="Source\Income.h" />
+    <ClInclude Include="Source\utility\BWTimer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
