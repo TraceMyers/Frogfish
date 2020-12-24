@@ -1,6 +1,7 @@
 #include "DataCollector.h"
 #include "utility/BWTimer.h"
 #include "Income.h"
+#include "Units.h"
 #include <iostream>
 #include <string>
 #include <vector>
@@ -11,6 +12,15 @@ BWTimer timer;
 BWAPI::Player first = nullptr;
 BWAPI::Player second = nullptr;
 BWAPI::Player players[2];
+BWAPI::Race   races[2];
+
+// NLP model rough idea:
+    // every unit type + upgrade + tech set is a unique word
+    // existence of tech requirements constantly held in model memory
+    // when units are made by self, their words get added to the text in order
+    // when unique enemy units are seen, their words get added as soon as seen
+    // output limited to those unique zerg words (only moving units + hatcheries)
+    // uses last word + memory
 
 void DataCollector::set_players() {
     auto player_set = Broodwar->getPlayers();
@@ -21,10 +31,12 @@ void DataCollector::set_players() {
                 if (first == nullptr) {
                     first = player;
                     players[0] = first;
+                    races[0] = first->getRace();
                 }
                 else if (second == nullptr) {
                     second = player;
                     players[1] = second;
+                    races[1] = second->getRace();
                 }
             }
         }
@@ -39,7 +51,8 @@ void DataCollector::onStart() {
     onStart_alloc_debug_console();
     set_players();
     Income::init();
-    timer.start(16, 0);
+    Units::init(players);
+    timer.start(30, 0);
 }
 
 void DataCollector::onFrame() {
@@ -48,6 +61,7 @@ void DataCollector::onFrame() {
     timer.on_frame_update();
 
     Income::on_frame_update(players); 
+    Units::on_frame_update(players);
 
     // test
     if (Income::ready() && timer.is_stopped()) {
@@ -57,6 +71,31 @@ void DataCollector::onFrame() {
         for (int i = 0; i < 2; ++i) {
             Broodwar->sendText("Player[%d] / mps: %.2lf / gps: %.2lf", i, mps[i], gps[i]);
         }
+        for (int i = 0; i < 2; ++i) {
+            printf("player [%s] counts: \n", players[i]->getName().c_str());
+            int* counts = Units::get_unit_type_counts(i);
+            int type_ct;
+            const BWAPI::UnitType *types;
+            if (races[i] == BWAPI::Races::Zerg) { 
+                type_ct = Units::ZERG_TYPE_CT; 
+                types = Units::ZERG_TYPES;
+            }
+            else if (races[i] == BWAPI::Races::Terran) { 
+                type_ct = Units::TERRAN_TYPE_CT; 
+                types = Units::TERRAN_TYPES;
+            }
+            else { 
+                type_ct = Units::PROTOSS_TYPE_CT; 
+                types = Units::PROTOSS_TYPES;
+            }
+            for (int j = 0; j < type_ct; ++j) {
+                const BWAPI::UnitType &type = types[j];
+                if (!type.isBuilding()) {
+                    printf("\t %s: %d\n", type.c_str(), counts[j]);
+                }
+            }
+        }
+        printf("\n");
     }
 }
 

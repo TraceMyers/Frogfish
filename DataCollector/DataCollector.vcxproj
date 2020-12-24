@@ -129,6 +129,7 @@
     <ClCompile Include="Source\DataCollector.cpp" />
     <ClCompile Include="Source\Dll.cpp" />
     <ClCompile Include="Source\Income.cpp" />
+    <ClCompile Include="Source\Units.cpp" />
     <ClCompile Include="Source\utility\BWTimer.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -158,6 +159,7 @@
     <ClInclude Include="..\include\BWEM\winutils.h" />
     <ClInclude Include="Source\DataCollector.h" />
     <ClInclude Include="Source\Income.h" />
+    <ClInclude Include="Source\Units.h" />
     <ClInclude Include="Source\utility\BWTimer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

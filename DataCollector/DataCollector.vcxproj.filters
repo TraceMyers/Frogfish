@@ -71,6 +71,7 @@
     <ClCompile Include="Source\Dll.cpp" />
     <ClCompile Include="Source\utility\BWTimer.cpp" />
     <ClCompile Include="Source\Income.cpp" />
+    <ClCompile Include="Source\Units.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\BWEM\area.h">
@@ -152,6 +153,9 @@
       <Filter>headers</Filter>
     </ClInclude>
     <ClInclude Include="Source\Income.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Units.h">
       <Filter>headers</Filter>
     </ClInclude>
   </ItemGroup>
