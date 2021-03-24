@@ -24,6 +24,7 @@ namespace Production::BuildOrder {
             MAKE, 
             MORPH, 
             BUILD, 
+            EXPAND,
             TECH, 
             UPGRADE, 
             CANCEL, 

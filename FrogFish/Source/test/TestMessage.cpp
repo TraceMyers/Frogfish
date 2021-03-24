@@ -6,6 +6,7 @@
 
 namespace Test::Message {
 
+
     namespace {
         std::vector<std::string> unique_interval_messages;
         BWTimer unique_interval_message_timer;
@@ -38,4 +39,5 @@ namespace Test::Message {
             printf("%s\n", msg);
         }
     }
+
 }

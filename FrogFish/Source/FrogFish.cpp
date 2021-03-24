@@ -43,7 +43,7 @@ void FrogFish::onStart() {
     Broodwar->setLocalSpeed(10);
     Broodwar->setCommandOptimizationLevel(2);
     onStart_alloc_debug_console();
-    onStart_send_workers_to_mine();
+    //onStart_send_workers_to_mine();
     onStart_init_bwem_and_bweb();
     Basic::Units::init();
     Basic::Bases::init();

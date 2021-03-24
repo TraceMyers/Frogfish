@@ -19,6 +19,7 @@ BWAPI::Race   races[2];
     // existence of tech requirements constantly held in model memory
     // when units are made by self, their words get added to the text in order
     // when unique enemy units are seen, their words get added as soon as seen
+    // unit deaths also each a word, but don't care about upgrades
     // output limited to those unique zerg words (only moving units + hatcheries)
     // uses last word + memory
 

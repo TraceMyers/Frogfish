@@ -37,11 +37,17 @@ namespace Production::Construction {
                 ++build_index
             ) {
                 const BuildOrder::Item &build_item = BuildOrder::get(build_index);
-                if (
-                    build_item.action() == BuildOrder::Item::BUILD 
-                    && ConstructionPlanning::find_plan(build_item) < 0
-                ) {
-                    int plan_ID = ConstructionPlanning::make_construction_plan(build_item);
+                if (ConstructionPlanning::find_plan(build_item) < 0) {
+                    int plan_ID;
+                    if (build_item.action() == BuildOrder::Item::EXPAND) {
+                        plan_ID = ConstructionPlanning::make_expansion_plan();
+                    }
+                    else if (build_item.action() == BuildOrder::Item::BUILD) {
+                        plan_ID = ConstructionPlanning::make_construction_plan(build_item);
+                    }
+                    else {
+                        continue;
+                    }
                     if (plan_ID < 0) {
                         DBGMSG(
                             "Construction::init_builds(): build order item ID %d Error %d",

@@ -60,6 +60,8 @@ namespace Strategy::ConstructionPlanning {
 
     int                     make_construction_plan(const Production::BuildOrder::Item& item);
 
+    int                     make_expansion_plan();
+
     const ConstructionPlan& get_plan(int ID);
 
     int                     find_plan(const Production::BuildOrder::Item &item);

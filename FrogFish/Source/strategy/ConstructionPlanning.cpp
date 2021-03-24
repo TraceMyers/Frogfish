@@ -32,7 +32,7 @@ namespace Strategy::ConstructionPlanning {
     }
 
     // TODO: use logic to make decisions
-    int Strategy::ConstructionPlanning::make_construction_plan(const Production::BuildOrder::Item& item) {
+    int make_construction_plan(const Production::BuildOrder::Item& item) {
         const std::vector<const BWEM::Base *> &bases = Basic::Bases::self_bases();
         const BWEM::Base *construction_base = nullptr;
         BWAPI::Unit builder = nullptr;
@@ -85,6 +85,32 @@ namespace Strategy::ConstructionPlanning {
 
         ++_plans_count;
         return plan_ID;
+    }
+
+    int make_expansion_plan() {
+        // rather than per-map, do generalized model so it can stay up without maintenance
+        // So, what features of a map are potentially deciding factors? (maybe run regression here
+        // to decide on the features)
+        // For each expansion from 2nd to 4th:
+        // - proximity by ground to main
+        // - proximity by ground to another base
+        // - proximity by air to main
+        // - proximity by air to average base position
+        // - proximity by air to average enemy base position
+        // - enemy race
+        // - enemy air attack happens within the next two minutes (on any friendly base)
+        // - enemy drop happens within the next two minutes (on any friendly base)
+        // - current average distance of enemy units to exp base
+        // - shares a choke with center of the map
+        // - shares a choke with another base
+        // 
+        // - create unsupervized learning set of match army composition classes
+        //      - for example, ZvP, (50% zergling, etc.) vs (30% zealot, etc.) may end up being one class
+        //      - use these for later deciding on army composition
+        //      - reduce classes to smaller number for use here (maybe 5 per matchup)
+        //      - each of these is tested for interaction with the above features, as well as each 
+        //          feature on its own
+        return 0;
     }
 
     const ConstructionPlan &get_plan(int ID) {

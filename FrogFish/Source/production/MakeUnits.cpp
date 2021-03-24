@@ -47,8 +47,9 @@ namespace Production::MakeUnits {
                     if (time_until_make >= target_time && insert_index > 0) {
                         bool moved_late_overlord_sooner = false;
                         for (int i = insert_index; i < BuildOrder::size(); ++i) {
-                            auto &item = BuildOrder::get(i);
-                            if (item.unit_type() == BWAPI::UnitTypes::Zerg_Overlord) {
+                            // Changed from item to search_item on 3/24/2021
+                            auto &search_item = BuildOrder::get(i);
+                            if (search_item.unit_type() == BWAPI::UnitTypes::Zerg_Overlord) {
                                 BuildOrder::move(i, insert_index);
                                 moved_late_overlord_sooner = true;
                                 break;
